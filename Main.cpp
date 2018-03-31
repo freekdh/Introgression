@@ -16,7 +16,7 @@ boost::dynamic_bitset<> m_global;
 class Individual
 {
   public:
-    Individual(const std::vector<boost::dynamic_bitset<>> &INITGENOME) : genome(INITGENOME) {}
+    Individual(const std::vector<boost::dynamic_bitset<>> &INITGENOME) : genome(INITGENOME) { ; }
 
     Individual(Individual parent[2])
     {
@@ -88,6 +88,7 @@ class Individual
     void Flipbit(const int &chromosome, const int &locus) { genome[chromosome][locus].flip(); }
 
     bool Genotype(const int &chromosome, const int &locus) { return genome[chromosome][locus]; }
+    
 
   private:
     void Make_localbit(boost::dynamic_bitset<> &local, const boost::dynamic_bitset<> &global)
@@ -103,10 +104,12 @@ class Individual
         {
             local[i] = global[start + i];
         }
-    }
+    };
 
     std::vector<boost::dynamic_bitset<>> genome; // circular genome of individual
 };
+
+std::vector<Individual*>::iterator it;
 
 struct Parameters
 {
@@ -130,24 +133,29 @@ struct Parameters
 
 struct DataSet
 {
-    DataSet(Parameters *parspointer) : pars(parspointer)
-    {
+    DataSet(Parameters *parspointer) : pars(parspointer) {
+        data.resize(pars->NPLOIDY, std::vector<int>(pars->NLOCI, 0));
     }
 
-    void AddCount()
-    {
+    void AddCount(std::vector<Individual*> &population, const int &gen) {
+        for(it = population.begin(); it != population.end(); ++it){
+            for(int k = 0; k < pars->NPLOIDY; ++k){
+                for (int i = 0; i < pars->NLOCI; ++i){
+                    data[gen][i] += (int)(*it)->Genotype(k,i);
+                }
+            }
+        }
     }
 
-    void Analysis()
-    {
+    void Analysis(std::ofstream &output){
+
     }
 
-  private:
+    private:
+    std::vector<std::vector<int>> data; // data[NGEN][NLOCI]
     const Parameters *pars;
     int counter = 0;
 };
-
-std::vector<Individual *>::iterator it;
 
 void ResetRGlobal(boost::dynamic_bitset<> &global, const int &GLOBALMAX, const double &RRATE)
 {
@@ -173,35 +181,37 @@ void ResetMGlobal(boost::dynamic_bitset<> &global, const int &GLOBALMAX, const d
     }
 }
 
-void ItteratePopulation(std::vector<Individual *> &population, const double &FERTILITY, const std::vector<double> &SC_GENOME)
+void ItteratePopulation(std::vector<Individual*> &population, const Parameters &pars)
 {
+    // Constant fertility 
     const int popsize = population.size();
-    assert(popsize > 0);
-    std::vector<Individual *> offspring;
-    offspring.resize((double)popsize * FERTILITY);
-    assert(offspring.size() > 0);
+    std::vector<Individual*> offspring(rnd::poisson((double)popsize * pars.FERTILITY));
 
+    // Mating + Create offspring
     for (it = offspring.begin(); it != offspring.end(); ++it)
     {
         Individual c[2] = {*population[rnd::integer(popsize)], *population[rnd::integer(popsize)]};
         *it = new Individual(c);
     }
 
+    // Parents die
     for (it = population.begin(); it != population.end(); ++it)
     {
         delete *it;
     }
     population.clear();
 
+    // Viability selection on offspring
     for (it = offspring.begin(); it != offspring.end(); ++it)
     {
-        if (rnd::uniform() < (*it)->MultiplicativeViability(SC_GENOME))
+        if (rnd::uniform() < (*it)->MultiplicativeViability(pars.SC_GENOME))
         {
             population.push_back(*it);
-        };
+        }
+        else {delete *it;} 
     }
-}
 
+}
 
 std::string ReturnTimeStamp(const std::string &CurrentDirectory)
 {
@@ -249,64 +259,36 @@ void OutputParameters(std::ofstream &ofstream, const Parameters &pars)
     ofstream << "FERTILITY" << ofstream.fill() << pars.FERTILITY << std::endl;
 }
 
-std::string CreateOutputStreams(std::ofstream &ParametersOfstream, std::vector<std::ofstream> &MetaOfstream, std::vector<std::vector<std::ofstream>> &SubOfStream)
+std::string CreateOutputStreams(std::ofstream &ParametersOfstream, std::ofstream &DataOfstream)
 {
-    std::string CurrentWorkingDirectory = "/home/freek/PopGenDensityDependence";
+    std::string CurrentWorkingDirectory = "/home/freek/Introgression";
     //std::string Current = boost::filesystem::current_path();
     std::string MainOutputFolder = ReturnTimeStamp(CurrentWorkingDirectory);
-    std::string returnmainfolder = MainOutputFolder;
-    std::string MetaOutputFolder = MainOutputFolder;
-    std::string SubOutputFolder = MainOutputFolder;
-    MetaOutputFolder.append("/MetaPopulation");
-    SubOutputFolder.append("/SubPopulations");
     boost::filesystem::create_directories(MainOutputFolder.c_str());
-    boost::filesystem::create_directories(MetaOutputFolder.c_str());
-    boost::filesystem::create_directories(SubOutputFolder.c_str());
 
-    ParametersOfstream.open(MainOutputFolder.append("/Parameters.csv"));
+    std::string ParameterOutput = MainOutputFolder.append("/Parameters.csv");
 
-    // MetaFiles:
+    ParametersOfstream.open(ParameterOutput);
+    ParametersOfstream.fill(',');
 
-    for (unsigned int i = 0; i < MetaOfstream.size(); ++i)
-    {
-        std::string focallocus = MetaOutputFolder;
-        focallocus.append("/Locus");
-        focallocus = focallocus + std::to_string(i);
-        focallocus = focallocus.append(".csv");
-        MetaOfstream[i].open(focallocus);
-        assert(MetaOfstream[i].is_open());
-        MetaOfstream[i].fill(',');
-    }
+    std::string DataOutput = MainOutputFolder.append("/Data.csv");
 
-    // SubFiles:
-    for (unsigned int sub = 0; sub < SubOfStream.size(); ++sub)
-    {
-        std::string focal = SubOutputFolder;
-        focal.append("/Sub");
-        focal = focal + std::to_string(sub);
-        boost::filesystem::create_directories(focal.c_str());
-        for (unsigned loc = 0; loc < SubOfStream[sub].size(); ++loc)
-        {
-            std::string temp = focal;
-            temp.append("/Locus");
-            temp = temp + std::to_string(loc);
-            temp = temp.append(".csv");
-            SubOfStream[sub][loc].open(temp);
-            assert(SubOfStream[sub][loc].is_open());
-            SubOfStream[sub][loc].fill(',');
-        }
-    }
-
-    return returnmainfolder;
+    DataOfstream.open(DataOutput);
+    DataOfstream.fill(',');
+    
+    return MainOutputFolder;
 }
 
 void RunSimulation(Parameters &pars, DataSet &data)
 {
-    // Decide on major rescue gene:
+    // Decide on major rescue locus (element 0) and element 1:n are locally favored loci
     std::vector<int> v(pars.NLOCI);
     std::iota(std::begin(v), std::end(v), 0);
     std::random_shuffle(v.begin(), v.end());
 
+    // Set SC_GENOME for this simulation
+    pars.SC_GENOME.clear();
+    pars.SC_GENOME.resize(pars.NLOCI, 0.0);
     pars.SC_GENOME[v[0]] = pars.SC_MAJOR;
     for (int i = 0; i < pars.NLOCAL_ADAPTED_LOCI; ++i)
     {
@@ -314,7 +296,7 @@ void RunSimulation(Parameters &pars, DataSet &data)
     }
 
     // Initialize population
-    std::vector<Individual *> population(pars.NINIT[0] + pars.NINIT[1]);
+    std::vector<Individual*> population(pars.NINIT[0] + pars.NINIT[1]);
     for (it = population.begin(); it != population.begin() + pars.NINIT[0]; ++it)
     {
         *it = new Individual(pars.INIT_GENOME[0]);
@@ -324,11 +306,35 @@ void RunSimulation(Parameters &pars, DataSet &data)
         *it = new Individual(pars.INIT_GENOME[1]);
     }
 
+    for (int i = 0; i < pars.NGEN; ++i)
+    {
+        data.AddCount(population,i);
+        ItteratePopulation(population, pars);
+    }
 
+    for (it = population.begin(); it != population.end(); ++it)
+    {
+        delete *it;
+    }
+}
+
+void AssertParameters(Parameters &pars){
+    // Make sure all parameters are there
+    assert(pars.NREP > 0);
+    assert(pars.NLOCI > 0);
+    assert(pars.NPLOIDY % 2 == 0 && pars.NPLOIDY > 0);
+    assert(pars.NINIT[0] > 0);
+    assert(pars.NINIT[1] > 0);
+    assert(pars.NGEN > 0);
+    assert(1.0 >= pars.SC_LOCAL >= 0.0);
+    assert(1.0 >= pars.SC_MAJOR >= 0.0);
+    assert(pars.NLOCAL_ADAPTED_LOCI >= 0);
+    assert(pars.NLOCAL_ADAPTED_LOCI + 1 < pars.NLOCI);
 }
 
 int main(int argc, char *argv[])
 {
+    if (argc != 10) {std::cout << "Argc != 10" << std::endl; return -1;}
 
     const int GLOBALMAX = 100000;
 
@@ -339,32 +345,23 @@ int main(int argc, char *argv[])
     pars.FERTILITY = 1.1;
 
     pars.NLOCI = atoi(argv[1]);
-    assert(pars.NLOCI > 0);
     pars.NPLOIDY = atoi(argv[2]);
-    assert(pars.NPLOIDY % 2 == 0 && pars.NPLOIDY > 0);
     pars.NINIT[0] = atoi(argv[3]);
-    assert(pars.NINIT[0] > 0);
     pars.NINIT[1] = atoi(argv[4]);
-    assert(pars.NINIT[1] > 0);
     pars.NLOCAL_ADAPTED_LOCI = atoi(argv[5]);
-    assert(pars.NLOCAL_ADAPTED_LOCI >= 0);
-    assert(pars.NLOCAL_ADAPTED_LOCI + 1 < pars.NLOCI);
     pars.SC_MAJOR = atof(argv[6]);
-    assert(1.0 >= pars.SC_MAJOR >= 0.0);
     pars.SC_LOCAL = atof(argv[7]);
-    assert(1.0 >= pars.SC_LOCAL >= 0.0);
     pars.NGEN = atoi(argv[8]);
-    assert(pars.NGEN > 0);
     pars.NREP = atoi(argv[9]);
-    assert(pars.NREP > 0);
 
     pars.SC_GENOME.clear();
     pars.SC_GENOME.resize(pars.NLOCI, 0.0);
-
     std::vector<boost::dynamic_bitset<>> INIT_GENOME0(pars.NPLOIDY, boost::dynamic_bitset<>(pars.NLOCI, false));
     std::vector<boost::dynamic_bitset<>> INIT_GENOME1(pars.NPLOIDY, boost::dynamic_bitset<>(pars.NLOCI, true));
     pars.INIT_GENOME[0] = INIT_GENOME0;
     pars.INIT_GENOME[1] = INIT_GENOME1;
+
+    AssertParameters(pars);
 
     // Initialize global variables
     rnd::set_seed();
@@ -379,45 +376,12 @@ int main(int argc, char *argv[])
     }
 
     // DATA OFFSTREAM
-    std::ofstream output("output.csv");
-    output.fill(',');
-    output << "gen" << output.fill() << "popsize" << output.fill();
-    for (int i = 0; i < pars.NLOCI; ++i)
-    {
-        output << "locus" << i << output.fill();
-    }
-    output << std::endl;
+    std::ofstream Parametersoff, Dataoff;
+    std::string MainFolder;
+    MainFolder = CreateOutputStreams(Parametersoff,Dataoff); 
+
+    OutputParameters(Parametersoff,pars);
+	data.Analysis(Dataoff);
 
     return 0;
 }
-
-/* 
-GRAVEYARD:
-
-void StationaryPopulation(std::vector<Individual *> &population, const double &FERTILITY, const std::vector<double> &SC_GENOME)
-{
-    const int popsize = population.size();
-    assert(popsize > 0);
-    std::vector<Individual *> offspring(popsize);
-
-    rnd::discrete_distribution viabilitydist(popsize);
-    for (int i = 0; i < popsize; ++i)
-    {
-        viabilitydist[i] = population[i]->MultiplicativeViability(SC_GENOME);
-    }
-
-    for (it = offspring.begin(); it != offspring.end(); ++it)
-    {
-        Individual c[2] = {*population[viabilitydist.sample()], *population[viabilitydist.sample()]};
-        *it = new Individual(c);
-    }
-
-    for (it = population.begin(); it != population.end(); ++it)
-    {
-        delete *it;
-    }
-    population.clear();
-
-    population = offspring;
-}
-*/

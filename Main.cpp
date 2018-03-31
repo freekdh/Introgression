@@ -9,6 +9,8 @@
 #include <iomanip>
 
 /// make genome circular
+// Can't average with changing SC_GENOME the whole time
+// Work on viability selection
 
 boost::dynamic_bitset<> r_global;
 boost::dynamic_bitset<> m_global;

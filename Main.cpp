@@ -9,11 +9,32 @@
 #include <iomanip>
 
 /// make genome circular
-// Can't average with changing SC_GENOME the whole time
 // Work on viability selection
 
 boost::dynamic_bitset<> r_global;
 boost::dynamic_bitset<> m_global;
+
+struct Parameters
+{
+    //default parameters
+    double RECOMBINATIONRATE;
+    double MUTATIONRATE;
+    double FERTILITY;
+    int NGEN;
+    int NLOCI;
+    int NPLOIDY;
+    int NREP;
+    int NINIT[2];
+    std::vector<double> SC_GENOME;
+    std::vector<int> v;
+
+    std::vector<boost::dynamic_bitset<>> INIT_GENOME[2];
+
+    double SC_MAJOR;
+    double SC_LOCAL;
+    int NLOCAL_ADAPTED_LOCI;
+};
+
 
 class Individual
 {
@@ -90,6 +111,19 @@ class Individual
     void Flipbit(const int &chromosome, const int &locus) { genome[chromosome][locus].flip(); }
 
     bool Genotype(const int &chromosome, const int &locus) { return genome[chromosome][locus]; }
+
+    int Neutralloci(const int &chromosome, const Parameters &pars){
+        // v[0] = location of major locus
+        // v[1:Nlocal] = location of local loci
+        // v[Nlocal+1 : v.end()] = location of neutral loci
+        int counter = 0;
+        counter += genome[chromosome].count();
+        for(int i = 0; i < pars.NLOCAL_ADAPTED_LOCI; ++i){
+            counter -= genome[chromosome][pars.v[i+1]];
+        }
+        assert(counter>=0);
+        return counter;
+    }
     
 
   private:
@@ -113,48 +147,35 @@ class Individual
 
 std::vector<Individual*>::iterator it;
 
-struct Parameters
-{
-    //default parameters
-    double RECOMBINATIONRATE;
-    double MUTATIONRATE;
-    double FERTILITY;
-    int NGEN;
-    int NLOCI;
-    int NPLOIDY;
-    int NREP;
-    int NINIT[2];
-    std::vector<double> SC_GENOME;
-
-    std::vector<boost::dynamic_bitset<>> INIT_GENOME[2];
-
-    double SC_MAJOR;
-    double SC_LOCAL;
-    int NLOCAL_ADAPTED_LOCI;
-};
-
 struct DataSet
 {
     DataSet(Parameters *parspointer) : pars(parspointer) {
         data.resize(pars->NPLOIDY, std::vector<int>(pars->NLOCI, 0));
+        NeutralCount[0].resize(pars->NGEN,0);
+        NeutralCount[1].resize(pars->NGEN,0);
     }
 
-    void AddCount(std::vector<Individual*> &population, const int &gen) {
-        for(it = population.begin(); it != population.end(); ++it){
-            for(int k = 0; k < pars->NPLOIDY; ++k){
-                for (int i = 0; i < pars->NLOCI; ++i){
-                    data[gen][i] += (int)(*it)->Genotype(k,i);
-                }
-            }
+    void AddCount(std::vector<int> data[2]) {
+       assert(data[0].size() == data[1].size());
+       assert(data[0].size() == NeutralCount[0].size());
+       for(int i = 0; i < pars->NGEN; ++i){
+           NeutralCount[0][i] += data[0][i];
+           NeutralCount[1][i] += data[1][i];
+       }
+    }
+
+    void WriteOutput(std::ofstream &output){
+        output << "Generation" << output.fill() << "NeutralCount0" << output.fill() << "NeutralCount1" << std::endl; 
+        for(int i = 0; i < pars->NGEN; ++i){
+            output << i << output.fill() << NeutralCount[0][i] << output.fill() << NeutralCount[1][i] << std::endl;
         }
-    }
 
-    void Analysis(std::ofstream &output){
-
+        output << "\n \n \n \n" << std::endl;
     }
 
     private:
     std::vector<std::vector<int>> data; // data[NGEN][NLOCI]
+    std::vector<int> NeutralCount[2];
     const Parameters *pars;
     int counter = 0;
 };
@@ -268,12 +289,14 @@ std::string CreateOutputStreams(std::ofstream &ParametersOfstream, std::ofstream
     std::string MainOutputFolder = ReturnTimeStamp(CurrentWorkingDirectory);
     boost::filesystem::create_directories(MainOutputFolder.c_str());
 
-    std::string ParameterOutput = MainOutputFolder.append("/Parameters.csv");
+    std::string ParameterOutput = MainOutputFolder;
+    ParameterOutput.append("/Parameters.csv");
 
     ParametersOfstream.open(ParameterOutput);
     ParametersOfstream.fill(',');
 
-    std::string DataOutput = MainOutputFolder.append("/Data.csv");
+    std::string DataOutput = MainOutputFolder;
+    DataOutput.append("/Data.csv");
 
     DataOfstream.open(DataOutput);
     DataOfstream.fill(',');
@@ -281,21 +304,36 @@ std::string CreateOutputStreams(std::ofstream &ParametersOfstream, std::ofstream
     return MainOutputFolder;
 }
 
+void ReturnRescue(std::vector<Individual*> population, std::vector<int> P[2], const int &gen, const Parameters &pars){
+    for(it = population.begin(); it != population.end(); ++it){
+        for(int i = 0; i < pars.NPLOIDY; ++i){
+            P[(*it)->Genotype(i,pars.v[0])][gen] += (*it)->Neutralloci(i,pars);
+        }
+    }
+}
+
 void RunSimulation(Parameters &pars, DataSet &data)
 {
     // Decide on major rescue locus (element 0) and element 1:n are locally favored loci
-    std::vector<int> v(pars.NLOCI);
-    std::iota(std::begin(v), std::end(v), 0);
-    std::random_shuffle(v.begin(), v.end());
+    pars.v.clear();
+    pars.v.resize(pars.NLOCI);
+    std::iota(std::begin(pars.v), std::end(pars.v), 0);
+    assert(pars.v[0]==0); assert(pars.v[1]==1);
+    std::random_shuffle(pars.v.begin(), pars.v.end());
 
     // Set SC_GENOME for this simulation
     pars.SC_GENOME.clear();
     pars.SC_GENOME.resize(pars.NLOCI, 0.0);
-    pars.SC_GENOME[v[0]] = pars.SC_MAJOR;
+    pars.SC_GENOME[pars.v[0]] = pars.SC_MAJOR;
     for (int i = 0; i < pars.NLOCAL_ADAPTED_LOCI; ++i)
     {
-        pars.SC_GENOME[v[i + 1]] = pars.SC_LOCAL;
+        pars.SC_GENOME[pars.v[i + 1]] = pars.SC_LOCAL;
     }
+
+    // Collect data
+    std::vector<int> P[2];
+    P[0].resize(pars.NGEN,0);
+    P[1].resize(pars.NGEN,0);
 
     // Initialize population
     std::vector<Individual*> population(pars.NINIT[0] + pars.NINIT[1]);
@@ -310,14 +348,16 @@ void RunSimulation(Parameters &pars, DataSet &data)
 
     for (int i = 0; i < pars.NGEN; ++i)
     {
-        data.AddCount(population,i);
         ItteratePopulation(population, pars);
     }
+
+    data.AddCount(P);
 
     for (it = population.begin(); it != population.end(); ++it)
     {
         delete *it;
     }
+
 }
 
 void AssertParameters(Parameters &pars){
@@ -382,8 +422,9 @@ int main(int argc, char *argv[])
     std::string MainFolder;
     MainFolder = CreateOutputStreams(Parametersoff,Dataoff); 
 
+
     OutputParameters(Parametersoff,pars);
-	data.Analysis(Dataoff);
+	data.WriteOutput(Dataoff);
 
     return 0;
 }

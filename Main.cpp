@@ -4,7 +4,7 @@
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/moment.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
 #include <assert.h>
 #include "random.h"
 #include <fstream>
@@ -12,7 +12,6 @@
 #include <ctime>
 #include <iomanip>
 #include <chrono>
-
 
 using namespace boost::accumulators;
 
@@ -96,12 +95,14 @@ class Individual
     double MultiplicativeViability(const Parameters &pars)
     {
         // Sally? what is going on here. Don't understand this multiplicative viability thing.
-        double viability = 1.0;
+        double viability = 0.0;
         for(int i = 0; i < pars.NPLOIDY; ++i){
             for(int j = 0; j < pars.NLOCAL_ADAPTED_LOCI+1; ++j){
                 if(genome[i][pars.index[j]] == true){viability *= pars.SC_GENOME[pars.index[j]];}
             }
         }
+
+        viability = 1.0-viability;
 
         assert(0.0 <= viability <= 1.0);
         return viability;
@@ -151,6 +152,8 @@ struct DataBlock{
     std::vector<double> SC_GENOME;
     std::vector<double> p;
     std::vector<double> q;
+    std::vector<int> popsize;
+    std::vector<int> rescue;
 };
 
 std::vector<DataBlock*> DataSet;    // Store replicates
@@ -161,17 +164,20 @@ void CalculateMCMC(std::vector<Individual*> &population, const Parameters &pars,
     n[1][0] = 0;
     n[0][1] = 0;
     n[1][1] = 0;
+    int nmajor = 0;
     for(it = population.begin(); it != population.end(); ++it)
-        for(int i = 0; i < pars.NPLOIDY; ++i)
+        for(int i = 0; i < pars.NPLOIDY; ++i){
+            nmajor += (*it)->Genotype(i,pars.index[0]);
             for(int j = 0; j < pars.NLOCI-1; ++j)
                 ++n[(*it)->Genotype(i,j)][(*it)->Genotype(i,j+1)];
-
+        }
+            
     double pmax = double(n[0][1]) / double(n[0][1]+n[0][0]);
     double qmax = double(n[1][0]) / double(n[1][0]+n[1][1]);
 
     SimData->p.push_back(pmax);
     SimData->q.push_back(qmax);
-
+    SimData->popsize.push_back(population.size());
 }
 
 void ResetRGlobal(boost::dynamic_bitset<> &global, const int &GLOBALMAX, const double &RRATE)
@@ -303,6 +309,16 @@ std::string CreateOutputStreams(std::ofstream &ParametersOfstream, std::ofstream
     return MainOutputFolder;
 }
 
+bool RescuePopulation(std::vector<Individual*> population, const Parameters &pars){
+    for(it = population.begin(); it != population.end(); ++it){
+        for(int i = 0; i < pars.NPLOIDY; ++i){
+            if((*it)->Genotype(i,pars.index[0])) return true;
+        }
+    }
+    
+    return false;
+}
+
 void RunSimulation(const Parameters &GlobalPars)
 {
     // Set local parameters
@@ -335,6 +351,7 @@ void RunSimulation(const Parameters &GlobalPars)
         *it = new Individual(SimPars.INIT_GENOME[1]);
     }
 
+    // Itterate population
     for (int i = 0; i < SimPars.NGEN; ++i)
     {
         CalculateMCMC(population, SimPars, SimData);
@@ -346,6 +363,7 @@ void RunSimulation(const Parameters &GlobalPars)
         delete *it;
     }
 
+    DataSet.push_back(SimData);
 }
 
 void AssertParameters(Parameters &pars){
@@ -368,24 +386,33 @@ void WriteOutput(std::ofstream &output, Parameters &pars){
     output 
     << "Generation" << output.fill() 
     << "AVG_p" << output.fill() 
-    << "AVG_q" << output.fill() 
     << "VAR_p" << output.fill() 
-    << "VAR_q" << output.fill() << std::endl; 
+    << "AVG_q" << output.fill() 
+    << "VAR_q" << output.fill() 
+    << "AVG_size" << output.fill()
+    << "VAR_size" << std::endl; 
     for(int i = 0; i < pars.NGEN; ++i){
 
         // Analysis
-        accumulator_set<double, stats<tag::mean, tag::moment<2> > > pGlobal;
-        accumulator_set<double, stats<tag::mean, tag::moment<2> > > qGlobal;
+        accumulator_set<double, stats<tag::mean, tag::variance > > pGlobal;
+        accumulator_set<double, stats<tag::mean, tag::variance > > qGlobal;
+        accumulator_set<int, stats<tag::mean, tag::variance > > popsize;
+
         for(int j = 0; j < pars.NREP; ++j){
             pGlobal(DataSet[j]->p[i]);
             qGlobal(DataSet[j]->q[i]);
+            popsize(DataSet[j]->popsize[i]);
         }
 
         output
-        << i << output.fill() << pGlobal.extract<tag::mean> << output.fill()
-        << pGlobal.extract<tag::moment<2>> << output.fill()
-        << qGLobal.extract<tag::mean> << output.fill() 
-        << qGlobal.extract<tag::moment<2> << std::endl;
+    
+        << i << output.fill() << mean(pGlobal) << output.fill()
+        << variance(pGlobal) << output.fill()
+        << mean(qGlobal) << output.fill() 
+        << variance(qGlobal) << output.fill()
+        << mean(popsize) << output.fill()
+        << variance(popsize) << std::endl;
+        
     }
 }
 
@@ -395,7 +422,7 @@ int main(int argc, char *argv[])
     srand(static_cast<unsigned>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
 
     // Parameters
-    if (argc != 12) {std::cout << "Argc != 10" << std::endl; return -1;}
+    if (argc != 12) {std::cout << "Argc != 12" << std::endl; return -1;}
     const int GLOBALMAX = 100000;
     Parameters GlobalPars;
     {
@@ -431,7 +458,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < GlobalPars.NREP; ++i)
     {
         std::cout << "Replicate: " << i << std::endl;
-        RunSimulation(GlobalPars); // input, output
+        RunSimulation(GlobalPars);
     }
    
     // Output
@@ -445,10 +472,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-
-
 /*
-
 struct DataSetje
 {
     DataSet(Parameters *parspointer) : pars(parspointer) {

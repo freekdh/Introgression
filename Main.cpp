@@ -25,6 +25,7 @@ struct Parameters{
     double INTRINSIC_GROWTHRATE;
     int NGEN;
     int NLOCI;
+    int DISTLOCAL;
     int NPLOIDY;
     int NREP;
     int NINIT[2];
@@ -143,17 +144,18 @@ std::vector<Individual*>::iterator it;
 
 struct DataBlock{
     public:
-
     std::vector<double> SC_GENOME;
     std::vector<double> p;
     std::vector<double> q;
     std::vector<int> popsize;
     std::vector<int> rescue[2];
+    std::vector<std::vector<double>> frac;
+    std::vector<double> totalintrogressed;
 };
 
 std::vector<DataBlock*> DataSet;    // Store replicates
 
-void DataAnalysis(std::vector<Individual*> &population, const Parameters &pars, DataBlock* &SimData){
+void DataCollect(std::vector<Individual*> &population, const Parameters &pars, DataBlock* &SimData){
     int n[2][2];
     n[0][0] = 0;
     n[1][0] = 0;
@@ -168,7 +170,7 @@ void DataAnalysis(std::vector<Individual*> &population, const Parameters &pars, 
             for(int j = 0; j < pars.NLOCI-1; ++j)
                 ++n[(*it)->Genotype(i,j)][(*it)->Genotype(i,j+1)];
         }
-            
+
     double pmax = double(n[0][1]) / double(n[0][1]+n[0][0]);
     double qmax = double(n[1][0]) / double(n[1][0]+n[1][1]);
 
@@ -177,7 +179,32 @@ void DataAnalysis(std::vector<Individual*> &population, const Parameters &pars, 
     SimData->popsize.push_back(population.size());
     SimData->rescue[0].push_back(nmajor[0]);
     SimData->rescue[1].push_back(nmajor[1]);
+    
+    // Allele frequency per site
+    std::vector<int> count[2];
+    count[0].resize(pars.NLOCI,0);
+    count[1].resize(pars.NLOCI,0);
+    for(it = population.begin(); it != population.end(); ++it){
+        for(int i = 0; i < pars.NPLOIDY; ++i){
+            for(int j = 0; j < pars.NLOCI; ++j){
+                ++count[(*it)->Genotype(i,j)][j];
+            }
+        }
+    }
+    std::vector<double> out(pars.NLOCI);
+    for(int i = 0; i < pars.NLOCI; ++i){
+        out[i] = (double)count[1][i] / ((double)count[1][i] + (double)count[0][i]);
+    }
+    SimData->frac.push_back(out);
 
+    // Load per generation;
+    double total = 0.0;
+    for(int i = 0; i < pars.NLOCI; ++i){
+        total+=out[i];
+    }
+    total -= out[pars.index[0]];
+    total -= out[pars.index[1]];
+    SimData->totalintrogressed.push_back(total);
 }
 
 void ResetRGlobal(boost::dynamic_bitset<> &global, const int &GLOBALMAX, const double &RRATE){
@@ -268,18 +295,25 @@ void OutputParameters(std::ofstream &ofstream, const Parameters &pars){
     ofstream << "RECOMBINATIONRATE" << ofstream.fill() << pars.RECOMBINATIONRATE << std::endl;
     ofstream << "INTRINSICGROWTHRATE" << ofstream.fill() << pars.INTRINSIC_GROWTHRATE << std::endl;
     ofstream << "CARRYINGCAPACITY" << ofstream.fill() << pars.K << std::endl;
+    ofstream << "DISTANCEFROMMAJOR" << ofstream.fill() << pars.DISTLOCAL << std::endl;
 
     ofstream << "SC_GENOME" << std::endl;
+    /*
     for (int i = 0; i < DataSet.size(); ++i){
         for (int j = 0; j < pars.NLOCI; ++j) {
             ofstream << DataSet[i]->SC_GENOME[j] << ofstream.fill();
         }
         ofstream << std::endl;
     }
+    */
+    for (int j = 0; j < pars.NLOCI; ++j) {
+            ofstream << DataSet[0]->SC_GENOME[j] << ofstream.fill();
+        }
+    
     ofstream << std::endl;
 }
 
-std::string CreateOutputStreams(std::ofstream &ParametersOfstream, std::ofstream &DataOfstream){
+std::string CreateOutputStreams(std::ofstream &ParametersOfstream, std::ofstream &DataOfstream, std::ofstream &AlleleFOfstream_mean, std::ofstream &AlleleFOfstream_var){
     std::string CurrentWorkingDirectory = "/home/freek/Introgression/Data";
     //std::string Current = boost::filesystem::current_path();
     std::string MainOutputFolder = ReturnTimeStamp(CurrentWorkingDirectory);
@@ -294,9 +328,19 @@ std::string CreateOutputStreams(std::ofstream &ParametersOfstream, std::ofstream
     std::string DataOutput = MainOutputFolder;
     DataOutput.append("/Data.csv");
 
+    std::string AlleleFOutput_mean = MainOutputFolder;
+    std::string AlleleFOutput_var = MainOutputFolder;
+
+    AlleleFOutput_mean.append("/AlleleF_mean.csv");
+    AlleleFOutput_var.append("/AlleleF_var.csv");
+
     DataOfstream.open(DataOutput);
+    AlleleFOfstream_mean.open(AlleleFOutput_mean);
+    AlleleFOfstream_var.open(AlleleFOutput_var);
     DataOfstream.fill(',');
-    
+    AlleleFOfstream_mean.fill(',');
+    AlleleFOfstream_var.fill(',');
+
     return MainOutputFolder;
 }
 
@@ -319,11 +363,7 @@ bool rescuepresent(std::vector<Individual*> &population, const Parameters &pars)
     return false;
 }
 
-bool RunSimulation(const Parameters &GlobalPars){
-    // Set local parameters
-    Parameters SimPars = GlobalPars;
-    DataBlock* SimData = new DataBlock;
-
+void SetSimParsRandom(Parameters &SimPars){
     SimPars.index.clear();
     SimPars.index.resize(SimPars.NLOCI);
     std::iota(std::begin(SimPars.index), std::end(SimPars.index), 0);
@@ -337,8 +377,17 @@ bool RunSimulation(const Parameters &GlobalPars){
         SimPars.SC_GENOME[SimPars.index[i + 1]] = SimPars.SC_LOCAL;  // Local adapted alleles index 1 - nlocaladaptedloci;
     }
 
+}
+
+bool RunSimulation(const Parameters &GlobalPars){
+    // Set local parameters
+    DataBlock* SimData = new DataBlock;
+    Parameters SimPars = GlobalPars;
+
+    // SetSimParsRandom(SimPars);
+
     SimData->SC_GENOME = SimPars.SC_GENOME;
-    
+
     // Initialize population
     std::vector<Individual*> population(SimPars.NINIT[0] + SimPars.NINIT[1]);
     for (it = population.begin(); it != population.begin() + SimPars.NINIT[0]; ++it)
@@ -352,7 +401,7 @@ bool RunSimulation(const Parameters &GlobalPars){
 
     // Itterate population
     for (int i = 0; i < SimPars.NGEN; ++i){
-        DataAnalysis(population, SimPars, SimData);
+        DataCollect(population, SimPars, SimData);
         ItteratePopulation(population, SimPars);
     }    
  
@@ -389,15 +438,16 @@ void AssertParameters(Parameters &pars){
     assert(pars.NLOCAL_ADAPTED_LOCI + 1 < pars.NLOCI);
 }
 
-void WriteOutput(std::ofstream &output, Parameters &pars){
+void WriteOutput(std::ofstream &output, std::ofstream &outputallelef_mean, std::ofstream &outputallelef_var, Parameters &pars){
 
     output 
     << "Generation" << output.fill() 
+    << "Introgressed" << output.fill()
     << "AVG_p" << output.fill() 
     << "AVG_q" << output.fill() 
     << "AVG_size" << output.fill()
     << "AVG_RESCUE0" << output.fill() 
-    << "AVG_RESCUE1" << output.fill() 
+    << "AVG_RESCUE1" << output.fill()
 
     << "VAR_p" << output.fill() 
     << "VAR_q" << output.fill()
@@ -407,13 +457,15 @@ void WriteOutput(std::ofstream &output, Parameters &pars){
     for(int i = 0; i < pars.NGEN; ++i){
 
         // Analysis
+        accumulator_set<double, stats<tag::mean, tag::variance > > introgressed;
         accumulator_set<double, stats<tag::mean, tag::variance > > pGlobal;
         accumulator_set<double, stats<tag::mean, tag::variance > > qGlobal;
         accumulator_set<int, stats<tag::mean, tag::variance > > popsize;
         accumulator_set<int, stats<tag::mean, tag::variance > > rescue0;
         accumulator_set<int, stats<tag::mean, tag::variance > > rescue1;
-
+        ///FINISH ANALYSIS OF THE GENOTYPE RESCUE PER LOCUS PART. 
         for(int j = 0; j < pars.NREP; ++j){
+            introgressed(DataSet[j]->totalintrogressed[i]);
             pGlobal(DataSet[j]->p[i]);
             qGlobal(DataSet[j]->q[i]);
             popsize(DataSet[j]->popsize[i]);
@@ -424,19 +476,40 @@ void WriteOutput(std::ofstream &output, Parameters &pars){
         output
     
         << i << output.fill() 
+        << mean(introgressed) << output.fill()
         << mean(pGlobal) << output.fill()
         << mean(qGlobal) << output.fill() 
         << mean(popsize) << output.fill()
         << mean(rescue0) << output.fill()
         << mean(rescue1) << output.fill()
 
+        << variance(introgressed) << output.fill()
         << variance(qGlobal) << output.fill()
         << variance(pGlobal) << output.fill()
         << variance(popsize) << output.fill()
         << variance(rescue0) << output.fill()
         << variance(rescue1) << std::endl;
-        
     }
+    
+
+    for(int i = 0; i < pars.NGEN; ++i)
+    {
+        outputallelef_mean << i << output.fill(); 
+        outputallelef_var << i << output.fill();
+        for(int l = 0; l < pars.NLOCI; ++l)
+        {
+            accumulator_set<double, stats<tag::mean, tag::variance > > locus;
+            for(int r = 0; r < pars.NREP; ++r)
+            {
+                locus(DataSet[r]->frac[i][l]);
+            }
+            outputallelef_mean << mean(locus) << output.fill();
+            outputallelef_var << variance(locus) << output.fill(); 
+        }
+        outputallelef_mean << std::endl;
+        outputallelef_var << std::endl;
+    }
+    
 }
 
 int main(int argc, char *argv[]){
@@ -455,7 +528,8 @@ int main(int argc, char *argv[]){
         GlobalPars.NPLOIDY = atoi(argv[2]);
         GlobalPars.NINIT[0] = atoi(argv[3]);
         GlobalPars.NINIT[1] = atoi(argv[4]);
-        GlobalPars.NLOCAL_ADAPTED_LOCI = atoi(argv[5]);
+        GlobalPars.NLOCAL_ADAPTED_LOCI = 1;
+        GlobalPars.DISTLOCAL = atoi(argv[5]);
         GlobalPars.SC_MAJOR = atof(argv[6]);
         GlobalPars.SC_LOCAL = atof(argv[7]);
         GlobalPars.NGEN = atoi(argv[8]);
@@ -475,6 +549,17 @@ int main(int argc, char *argv[]){
     ResetRGlobal(r_global, GLOBALMAX, GlobalPars.RECOMBINATIONRATE);
     ResetMGlobal(m_global, GLOBALMAX, GlobalPars.MUTATIONRATE);
 
+    GlobalPars.index.clear();
+    GlobalPars.index.resize(GlobalPars.NLOCI);
+    GlobalPars.index[0] = std::floor((double)GlobalPars.NLOCI/2.0);
+    assert((GlobalPars.DISTLOCAL+GlobalPars.index[0]) < GlobalPars.NLOCI);
+    GlobalPars.index[1] = GlobalPars.index[0]+GlobalPars.DISTLOCAL;
+
+    GlobalPars.SC_GENOME.clear();
+    GlobalPars.SC_GENOME.resize(GlobalPars.NLOCI, 1.0);
+    GlobalPars.SC_GENOME[GlobalPars.index[0]] = GlobalPars.SC_MAJOR;          // Major allele is index = 0;
+    GlobalPars.SC_GENOME[GlobalPars.index[1]] = GlobalPars.SC_LOCAL;     // Local adapted alleles index 1 - nlocaladaptedloci;
+
 
     // Simulations
     for (int i = 0; i < GlobalPars.NREP; ++i)
@@ -484,68 +569,12 @@ int main(int argc, char *argv[]){
     }
    
     // Output
-    std::ofstream Parametersoff, Dataoff;
+    std::ofstream Parametersoff, Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var;
     std::string MainFolder;
-    MainFolder = CreateOutputStreams(Parametersoff,Dataoff); 
+    MainFolder = CreateOutputStreams(Parametersoff,Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var); 
 
     OutputParameters(Parametersoff, GlobalPars);
-	WriteOutput(Dataoff, GlobalPars);
+	WriteOutput(Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var, GlobalPars);
 
     return 0;
 }
-
-/*
-struct DataSetje
-{
-    DataSet(Parameters *parspointer) : pars(parspointer) {
-        data.resize(pars->NPLOIDY, std::vector<int>(pars->NLOCI, 0));
-        NeutralCount[0].resize(pars->NGEN,0);
-        NeutralCount[1].resize(pars->NGEN,0);
-        TotalPopulationSizeData[0].resize(pars->NGEN,0);
-        TotalPopulationSizeData[1].resize(pars->NGEN,0);
-    }
-
-    void AddCount(const std::vector<int> data[2], const std::vector<int> popsize[2]) {
-        assert(data[0].size() == data[1].size());
-        assert(data[0].size() == NeutralCount[0].size());
-        for(int i = 0; i < pars->NGEN; ++i){
-            NeutralCount[0][i] += data[0][i];
-            NeutralCount[1][i] += data[1][i];
-            TotalPopulationSizeData[0][i] += popsize[0][i];
-            TotalPopulationSizeData[1][i] += popsize[1][i];
-       }
-    }
-
-    void AddSC_GENOME(const std::vector<double> SC_GENOME){
-        SC_GENOME_data.push_back(SC_GENOME);
-    }
-
-    void WriteOutput(std::ofstream &output){
-        output 
-        << "Generation" << output.fill() 
-        << "NeutralCount0" << output.fill() 
-        << "NeutralCount1" << output.fill() 
-        << "PopSize0" << output.fill() 
-        << "PopSize1" << output.fill() << std::endl; 
-        for(int i = 0; i < pars->NGEN; ++i){
-            output
-            << i << output.fill() 
-            << NeutralCount[0][i] / ((double)pars->NREP * (double)pars->NPLOIDY * (double)(pars->NLOCI - pars->NLOCAL_ADAPTED_LOCI-1)) << output.fill() 
-            << NeutralCount[1][i] / ((double)pars->NREP * (double)pars->NPLOIDY * (double)(pars->NLOCI - pars->NLOCAL_ADAPTED_LOCI-1)) << output.fill()
-            << (double)TotalPopulationSizeData[0][i] / (double)(pars->NREP) << output.fill()
-            << (double)TotalPopulationSizeData[1][i] / (double)(pars->NREP) << output.fill() << std::endl;
-        }
-
-        output << "\n \n \n \n" << std::endl;
-    }
-
-    std::vector<std::vector<double>> SC_GENOME_data;
-
-    private:
-    std::vector<std::vector<int>> data; // data[NGEN][NLOCI]
-    std::vector<int> NeutralCount[2];
-    std::vector<int> TotalPopulationSizeData[2];
-    const Parameters *pars;
-    int counter = 0;
-};
-*/

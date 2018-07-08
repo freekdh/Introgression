@@ -13,6 +13,9 @@
 #include <iomanip>
 #include <chrono>
 
+//look at this again. You need to know how much introgression has occurred.. Or do you know this? Think about it.
+// It's in "Writetodatablock()"
+
 using namespace boost::accumulators;
 enum nameofstream {Parametersoff, Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var};
 
@@ -139,6 +142,7 @@ struct DataBlock{
 std::vector<DataBlock*> DataSet; 
 
 void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pars, DataBlock* &SimData){
+
 
     std::vector<int> count[2];
     count[0].resize(pars.NLOCI,0);

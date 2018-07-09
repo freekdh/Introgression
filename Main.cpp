@@ -13,8 +13,7 @@
 #include <iomanip>
 #include <chrono>
 
-//look at this again. You need to know how much introgression has occurred.. Or do you know this? Think about it.
-// It's in "Writetodatablock()"
+// Implement parallelize programming. Do multiple simulations parallele. 
 
 using namespace boost::accumulators;
 enum nameofstream {Parametersoff, Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var};
@@ -112,6 +111,8 @@ class Individual{
 
     bool Genotype(const int &chromosome, const int &locus) { return genome[chromosome][locus]; }
 
+    int GenotypeCount(const int &chromosome) {return genome[chromosome].count();}
+    
     private:
     void Make_localbit(boost::dynamic_bitset<> &local, const boost::dynamic_bitset<> &global)
     {
@@ -135,28 +136,48 @@ std::vector<Individual*>::iterator it;
 
 struct DataBlock{
     public:
-    std::vector<std::vector<int>> type0;
-    std::vector<std::vector<int>> type1;
+    std::vector<int> popsize;
+    std::vector<std::vector<int>> allele0;
+    std::vector<std::vector<int>> allele1;
+    std::vector<int> major0;
+    std::vector<int> major1;
+    std::vector<int> introgressed0;
+    std::vector<int> introgressed1;
 };
 
 std::vector<DataBlock*> DataSet; 
 
 void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pars, DataBlock* &SimData){
 
+    // Popsize
+    SimData->popsize.push_back(population.size());
 
     std::vector<int> count[2];
     count[0].resize(pars.NLOCI,0);
     count[1].resize(pars.NLOCI,0);
+    int temp0 = 0, temp1 = 0, ind0 = 0, ind1 = 0;
     for(Individual* ind : population){
         for(int i = 0; i < pars.NPLOIDY; ++i){
+            if(ind->Genotype(i,pars.index[0])){
+                ++ind0;
+                temp0 += ind->GenotypeCount(i) - 1;
+            }
+            else{
+                ++ind1;
+                temp1 += ind->GenotypeCount(i);
+            } 
+            // Genome allele frequencies
             for(int j = 0; j < pars.NLOCI; ++j){
                 ++count[ind->Genotype(i,j)][j];
             }
         }
     }
-
-    SimData->type0.push_back(count[0]);
-    SimData->type1.push_back(count[1]);
+    SimData->allele0.push_back(count[0]);
+    SimData->allele1.push_back(count[1]);
+    SimData->major0.push_back(ind0);
+    SimData->major1.push_back(ind1);
+    SimData->introgressed0.push_back(temp0);
+    SimData->introgressed1.push_back(temp1);
 }
 
 bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &pars){ 
@@ -220,7 +241,7 @@ bool RunSimulation(const Parameters &SimPars){
 
 void InitializeGlobalEnvironment(const Parameters &GlobalPars){
     rnd::set_seed();
-    srand(static_cast<unsigned>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
+    //srand(static_cast<unsigned>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
     const int GLOBALMAX = 100000;
 
     r_global.resize(GLOBALMAX);
@@ -241,7 +262,7 @@ void InitializeGlobalEnvironment(const Parameters &GlobalPars){
 }
 
 void CollectParameters(int argc, char* argv[], Parameters &GlobalPars){
-    if (argc != 12) {std::cout << "Argc != 12" << std::endl; return -1;}
+    if (argc != 12) {std::cout << "Argc != 12" << std::endl;}
     
     //General 
     GlobalPars.MUTATIONRATE = 0.0;
@@ -312,9 +333,8 @@ void WriteOutput(std::ofstream arrayofstream[4], Parameters &pars){
     arrayofstream[Parametersoff] << "SC_GENOME" << std::endl;
 
     for (int j = 0; j < pars.NLOCI; ++j) {
-            arrayofstream[Parametersoff] << DataSet[0]->SC_GENOME[j] << arrayofstream[Parametersoff].fill();
+            arrayofstream[Parametersoff] << pars.SC_GENOME[j] << " ";
         }
-    
     arrayofstream[Parametersoff] << std::endl;
 
     //Simulation output
@@ -333,48 +353,45 @@ void WriteOutput(std::ofstream arrayofstream[4], Parameters &pars){
     << "VAR_RESCUE0" << arrayofstream[Dataoff].fill() 
     << "VAR_RESCUE1" << std::endl; 
     for(int i = 0; i < pars.NGEN; ++i){
-        accumulator_set<double, stats<tag::mean, tag::variance > > introgressed;
-        accumulator_set<double, stats<tag::mean, tag::variance > > pGlobal;
-        accumulator_set<double, stats<tag::mean, tag::variance > > qGlobal;
         accumulator_set<int, stats<tag::mean, tag::variance > > popsize;
-        accumulator_set<int, stats<tag::mean, tag::variance > > rescue0;
-        accumulator_set<int, stats<tag::mean, tag::variance > > rescue1;
+        accumulator_set<int, stats<tag::mean, tag::variance > > major0;
+        accumulator_set<int, stats<tag::mean, tag::variance > > major1;
+        accumulator_set<int, stats<tag::mean, tag::variance > > introgressed0;
+        accumulator_set<int, stats<tag::mean, tag::variance > > introgressed1;
+
         ///FINISH ANALYSIS OF THE GENOTYPE RESCUE PER LOCUS PART. 
         for(int j = 0; j < pars.NREP; ++j){
-            introgressed(DataSet[j]->totalintrogressed[i]);
-            pGlobal(DataSet[j]->p[i]);
-            qGlobal(DataSet[j]->q[i]);
             popsize(DataSet[j]->popsize[i]);
-            rescue0(DataSet[j]->rescue[0][i]);
-            rescue1(DataSet[j]->rescue[1][i]);
+            major0(DataSet[j]->major0[i]);
+            major1(DataSet[j]->major1[i]);
+            introgressed0(DataSet[j]->introgressed0[i]);
+            introgressed1(DataSet[j]->introgressed1[i]);
         }
 
         arrayofstream[Dataoff]
         << i << arrayofstream[Dataoff].fill() 
-        << mean(introgressed) << arrayofstream[Dataoff].fill()
-        << mean(pGlobal) << arrayofstream[Dataoff].fill()
-        << mean(qGlobal) << arrayofstream[Dataoff].fill() 
         << mean(popsize) << arrayofstream[Dataoff].fill()
-        << mean(rescue0) << arrayofstream[Dataoff].fill()
-        << mean(rescue1) << arrayofstream[Dataoff].fill()
+        << mean(major0) << arrayofstream[Dataoff].fill()
+        << mean(major1) << arrayofstream[Dataoff].fill() 
+        << mean(introgressed0) << arrayofstream[Dataoff].fill()
+        << mean(introgressed1) << arrayofstream[Dataoff].fill()
 
-        << variance(introgressed) << arrayofstream[Dataoff].fill()
-        << variance(qGlobal) << arrayofstream[Dataoff].fill()
-        << variance(pGlobal) << arrayofstream[Dataoff].fill()
         << variance(popsize) << arrayofstream[Dataoff].fill()
-        << variance(rescue0) << arrayofstream[Dataoff].fill()
-        << variance(rescue1) << std::endl;
-    }
+        << variance(major0) << arrayofstream[Dataoff].fill()
+        << variance(major1) << arrayofstream[Dataoff].fill()
+        << variance(introgressed0) << arrayofstream[Dataoff].fill()
+        << variance(introgressed1) << arrayofstream[Dataoff].fill();
+    };
     
     for(int i = 0; i < pars.NGEN; ++i){
         arrayofstream[AlleleFrequencyoff_mean] << i << arrayofstream[AlleleFrequencyoff_mean].fill(); 
         arrayofstream[AlleleFrequencyoff_var] << i << arrayofstream[AlleleFrequencyoff_var].fill();
         for(int l = 0; l < pars.NLOCI; ++l)
         {
-            accumulator_set<double, stats<tag::mean, tag::variance > > locus;
+            accumulator_set<int, stats<tag::mean, tag::variance > > locus;
             for(int r = 0; r < pars.NREP; ++r)
             {
-                locus(DataSet[r]->frac[i][l]);
+                locus(DataSet[r]->allele0[i][l]);
             }
             arrayofstream[AlleleFrequencyoff_mean] << mean(locus) << arrayofstream[AlleleFrequencyoff_mean].fill();
             arrayofstream[AlleleFrequencyoff_var] << variance(locus) << arrayofstream[AlleleFrequencyoff_var].fill(); 

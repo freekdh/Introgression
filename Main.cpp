@@ -1,4 +1,3 @@
-
 #include <boost/dynamic_bitset.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/accumulators/accumulators.hpp>
@@ -12,8 +11,6 @@
 #include <ctime>
 #include <iomanip>
 #include <chrono>
-
-// Implement parallelize programming. Do multiple simulations parallele. 
 
 using namespace boost::accumulators;
 enum nameofstream {Parametersoff, Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var};
@@ -132,8 +129,6 @@ class Individual{
     std::vector<boost::dynamic_bitset<>> genome; // circular genome of individual
 };
 
-std::vector<Individual*>::iterator it;
-
 struct DataBlock{
     public:
     std::vector<int> popsize;
@@ -151,7 +146,6 @@ void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pa
 
     // Popsize
     SimData->popsize.push_back(population.size());
-
     std::vector<int> count[2];
     count[0].resize(pars.NLOCI,0);
     count[1].resize(pars.NLOCI,0);
@@ -172,6 +166,7 @@ void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pa
             }
         }
     }
+
     SimData->allele0.push_back(count[0]);
     SimData->allele1.push_back(count[1]);
     SimData->major0.push_back(ind0);
@@ -181,30 +176,36 @@ void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pa
 }
 
 bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &pars){ 
+    std::vector<Individual*>::iterator it;
+
     // Calculate offspring population size
     const int nparents = population.size();
     const double popgrowthrate = 1.0 + pars.INTRINSIC_GROWTHRATE * (1.0 - ((double)nparents / (double)pars.K));
     assert(popgrowthrate >= 0.0);
     const int noffspring = rnd::poisson((double)nparents * popgrowthrate);
     std::vector<Individual*> offspring(noffspring);
-    
+
     // Selection 
     bool rescue = false;
     rnd::discrete_distribution fitnessdist((int)nparents);
     for(int i = 0; i < nparents; ++i)
         fitnessdist[i] = population[i]->AdditiveFitness(pars);
-    for(Individual* ind : offspring) {
-        ind = new Individual(population[fitnessdist.sample()],population[fitnessdist.sample()]);
+    for(it = offspring.begin(); it != offspring.end(); ++it){
+        *it = new Individual(population[fitnessdist.sample()],population[fitnessdist.sample()]);
         if(rescue == false){
-            if(ind->rescue(pars)==true) {rescue = true;}
+            if((*it)->rescue(pars)==true) {rescue = true;}
         }
     }
 
+    for(Individual* ind : offspring)
+        ind->Genotype(0,pars.index[0]);
+
     // Cleanup
     for(Individual* ind : population) delete ind;
+
     population.clear();
-    population.reserve(noffspring);
     population = offspring;
+
     return rescue;
 }
 
@@ -213,15 +214,17 @@ bool RunSimulation(const Parameters &SimPars){
     DataBlock* SimData = new DataBlock;
 
     // Initialize population
-    std::vector<Individual*> type0(SimPars.NINIT[0], new Individual(SimPars.INIT_GENOME[0]));
-    std::vector<Individual*> type1(SimPars.NINIT[1], new Individual(SimPars.INIT_GENOME[1]));
-    std::vector<Individual*> population;
-    population.reserve(SimPars.NINIT[0]+SimPars.NINIT[1]);
-    population.insert(population.end(),type0.begin(), type0.end());
-    population.insert(population.end(),type1.begin(), type1.end());
+    std::vector<Individual*> population(SimPars.NINIT[0]+SimPars.NINIT[1]);
+    for(int i = 0; i < SimPars.NINIT[0]; ++i){
+        population[i] = new Individual(SimPars.INIT_GENOME[0]);
+    }
+    for(int i = SimPars.NINIT[0]; i < SimPars.NINIT[0]+SimPars.NINIT[1];++i){
+        population[i] = new Individual(SimPars.INIT_GENOME[1]);
+    }
 
     // Run simulation
     WriteToDataBlock(population, SimPars, SimData);
+
     for (int i = 0; i < SimPars.NGEN; ++i){
         if(ItteratePopulation(population, SimPars)==false){
             for (Individual* i: population) delete i;
@@ -232,7 +235,7 @@ bool RunSimulation(const Parameters &SimPars){
             WriteToDataBlock(population, SimPars, SimData);
             }
     }    
- 
+  
     // Cleanup and Write DataBlock
     for (Individual* i: population) delete i;
     DataSet.push_back(SimData);
@@ -340,18 +343,17 @@ void WriteOutput(std::ofstream arrayofstream[4], Parameters &pars){
     //Simulation output
     arrayofstream[Dataoff] 
     << "Generation" << arrayofstream[Dataoff].fill() 
-    << "AVG_Introgressed" << arrayofstream[Dataoff].fill()
-    << "AVG_p" << arrayofstream[Dataoff].fill() 
-    << "AVG_q" << arrayofstream[Dataoff].fill() 
-    << "AVG_size" << arrayofstream[Dataoff].fill()
-    << "AVG_RESCUE0" << arrayofstream[Dataoff].fill() 
-    << "AVG_RESCUE1" << arrayofstream[Dataoff].fill()
-    << "VAR_Introgressed" << arrayofstream[Dataoff].fill()
-    << "VAR_p" << arrayofstream[Dataoff].fill() 
-    << "VAR_q" << arrayofstream[Dataoff].fill()
-    << "VAR_size" << arrayofstream[Dataoff].fill() 
-    << "VAR_RESCUE0" << arrayofstream[Dataoff].fill() 
-    << "VAR_RESCUE1" << std::endl; 
+    << "AVG_popsize" << arrayofstream[Dataoff].fill()
+    << "AVG_major0" << arrayofstream[Dataoff].fill() 
+    << "AVG_major1" << arrayofstream[Dataoff].fill() 
+    << "AVG_introgressed0" << arrayofstream[Dataoff].fill()
+    << "AVG_introgressed1" << arrayofstream[Dataoff].fill() 
+    << "VAR_popsize" << arrayofstream[Dataoff].fill()
+    << "VAR_major0" << arrayofstream[Dataoff].fill() 
+    << "VAR_major1" << arrayofstream[Dataoff].fill()
+    << "VAR_introgressed0" << arrayofstream[Dataoff].fill() 
+    << "VAR_introgressed1" << std::endl;
+
     for(int i = 0; i < pars.NGEN; ++i){
         accumulator_set<int, stats<tag::mean, tag::variance > > popsize;
         accumulator_set<int, stats<tag::mean, tag::variance > > major0;
@@ -371,16 +373,16 @@ void WriteOutput(std::ofstream arrayofstream[4], Parameters &pars){
         arrayofstream[Dataoff]
         << i << arrayofstream[Dataoff].fill() 
         << mean(popsize) << arrayofstream[Dataoff].fill()
-        << mean(major0) << arrayofstream[Dataoff].fill()
-        << mean(major1) << arrayofstream[Dataoff].fill() 
-        << mean(introgressed0) << arrayofstream[Dataoff].fill()
-        << mean(introgressed1) << arrayofstream[Dataoff].fill()
+        << (double)mean(major0)/(double)pars.NPLOIDY << arrayofstream[Dataoff].fill()
+        << (double)mean(major1)/(double)pars.NPLOIDY << arrayofstream[Dataoff].fill() 
+        << mean(introgressed0)/(double)(pars.NPLOIDY*(pars.NLOCI-1)) << arrayofstream[Dataoff].fill()
+        << mean(introgressed1)/(double)(pars.NPLOIDY*(pars.NLOCI-1)) << arrayofstream[Dataoff].fill()
 
         << variance(popsize) << arrayofstream[Dataoff].fill()
-        << variance(major0) << arrayofstream[Dataoff].fill()
-        << variance(major1) << arrayofstream[Dataoff].fill()
-        << variance(introgressed0) << arrayofstream[Dataoff].fill()
-        << variance(introgressed1) << arrayofstream[Dataoff].fill();
+        << (double)variance(major0)/((double)pars.NPLOIDY*(double)pars.NPLOIDY) << arrayofstream[Dataoff].fill()
+        << (double)variance(major1)/((double)pars.NPLOIDY*(double)pars.NPLOIDY) << arrayofstream[Dataoff].fill()
+        << variance(introgressed0)/(double)(pars.NPLOIDY*(pars.NLOCI-1)*pars.NPLOIDY*(pars.NLOCI-1)) << arrayofstream[Dataoff].fill()
+        << variance(introgressed1)/(double)(pars.NPLOIDY*(pars.NLOCI-1)*pars.NPLOIDY*(pars.NLOCI-1)) << arrayofstream[Dataoff].fill() << std::endl;
     };
     
     for(int i = 0; i < pars.NGEN; ++i){
@@ -388,12 +390,12 @@ void WriteOutput(std::ofstream arrayofstream[4], Parameters &pars){
         arrayofstream[AlleleFrequencyoff_var] << i << arrayofstream[AlleleFrequencyoff_var].fill();
         for(int l = 0; l < pars.NLOCI; ++l)
         {
-            accumulator_set<int, stats<tag::mean, tag::variance > > locus;
+            accumulator_set<double, stats<tag::mean, tag::variance > > locus;
             for(int r = 0; r < pars.NREP; ++r)
             {
-                locus(DataSet[r]->allele0[i][l]);
+                locus((double)DataSet[r]->allele0[i][l] / ((double)DataSet[r]->popsize[i] * (double)pars.NPLOIDY));
             }
-            arrayofstream[AlleleFrequencyoff_mean] << mean(locus) << arrayofstream[AlleleFrequencyoff_mean].fill();
+            arrayofstream[AlleleFrequencyoff_mean] << mean(locus)  << arrayofstream[AlleleFrequencyoff_mean].fill();
             arrayofstream[AlleleFrequencyoff_var] << variance(locus) << arrayofstream[AlleleFrequencyoff_var].fill(); 
         }
         arrayofstream[AlleleFrequencyoff_mean] << std::endl;
@@ -444,22 +446,27 @@ std::string CreateOutputStreams(std::ofstream arrayofstream[4]){
 }
 
 int main(int argc, char *argv[]){
-    
+
     // Initialize simulation
     Parameters GlobalPars;
     CollectParameters(argc,argv,GlobalPars);
     InitializeGlobalEnvironment(GlobalPars);
 
     // Run nrep successful simulations
+    auto start = std::chrono::high_resolution_clock::now();
+    #pragma omp parallel for
     for (int i = 0; i < GlobalPars.NREP; ++i){
-        std::cout << "Replicate: " << i << std::endl;
         while(RunSimulation(GlobalPars)==false); 
     }
+    auto finish = std::chrono::high_resolution_clock::now();
    
     // Write outputfiles
     std::ofstream arrayofstream[4]; 
     CreateOutputStreams(arrayofstream); 
 	WriteOutput(arrayofstream, GlobalPars);
 
+    // Show Time elapsed
+    std::chrono::duration<double> elapsed = finish-start;
+    std::cout << "Elapsed time: " << elapsed.count() << " s" << std::endl;
     return 0;
 }

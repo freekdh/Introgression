@@ -36,6 +36,7 @@
                 "/usr/include/x86_64-linux-gnu",
                 "/usr/include",
                 "/usr/boost_1_66_0/",
+                "/usr/local/include/boost_1_67_0/",
                 "${workspaceRoot}"
             ],
             "defines": [],
@@ -51,6 +52,7 @@
                     "/usr/include/x86_64-linux-gnu",
                     "/usr/include",
                     "/usr/boost_1_66_0/",
+                    "/usr/local/include/boost_1_67_0/",
                     "${workspaceRoot}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
@@ -80,5 +82,5 @@
             }
         }
     ],
-    "version": 3
+    "version": 4
 }

@@ -6,7 +6,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "g++ -std=c++11 -I /usr/boost_1_66_0/ -g Main.cpp random.cpp random.h utils.cpp utils.h -o test",
+            "command": "g++ -fopenmp -O3 -std=c++11 -I /usr/local/include/boost_1_67_0/ -g Main.cpp random.cpp random.h utils.cpp utils.h -o test.a /usr/local/lib/libboost_filesystem.a /usr/local/lib/libboost_system.a",
             "group": {
                 "kind": "build",
                 "isDefault": true

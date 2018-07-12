@@ -1,6 +1,3 @@
-// [[Rcpp::depends(BH)]]
-// [[Rcpp::plugins("cpp11")]]
-
 #include <boost/dynamic_bitset.hpp>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
@@ -12,8 +9,15 @@
 #include <ctime>
 #include <iomanip>
 #include <chrono>
-#include <Rcpp.h>
 #include <string>
+#include <Rcpp.h>
+#include <progress.hpp>
+#ifdef _OPENMP
+    #include <omp.h>
+#endif
+// [[Rcpp::plugins(openmp)]]
+// [[Rcpp::depends(RcppProgress)]]
+// [[Rcpp::depends(BH)]]
 
 using namespace boost::accumulators;
 enum nameofstream {Parametersoff, Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var};
@@ -438,19 +442,26 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars){
 }
 
 // [[Rcpp::export]]
-Rcpp::List RunSimulation(double r, int nloci, int nploidy, int ninit0, int ninit1, int distlocal, double scmajor, double sclocal, int ngen, int nrep, double rec, int k){
+Rcpp::List RunSimulation(double r, int nloci, int nploidy, int ninit0, int ninit1, int distlocal, double scmajor, double sclocal, int ngen, int nrep, double rec, int k, int threads = 0){
 
     // Initialize simulation
     Parameters GlobalPars;
     CollectParameters( r,  nloci,  nploidy,  ninit0,  ninit1,  distlocal,  scmajor,  sclocal,  ngen,  nrep,  rec,  k, GlobalPars);
     InitializeGlobalEnvironment(GlobalPars);
+    #ifdef _OPENMP
+        if(threads > 0)
+            omp_set_num_threads(threads);
+        REprintf("Parallel activated : Number of threads=%i\n",omp_get_max_threads());   
+    #endif
+    Progress p(GlobalPars.NREP, true);
 
     // Run nrep successful simulations
+    #pragma omp parallel for
     for (int i = 0; i < GlobalPars.NREP; ++i){
+        p.increment();
         while(RunSimulation(GlobalPars)==false); 
     }
-   
+    
     // Create output
     return WriteOutput(GlobalPars) ;
- 
 }

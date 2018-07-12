@@ -143,8 +143,8 @@ struct DataBlock{
     std::vector<std::vector<int>> allele1;
     std::vector<int> major0;
     std::vector<int> major1;
-    std::vector<int> introgressed0;
-    std::vector<int> introgressed1;
+    std::vector<double> introgressed0;
+    std::vector<double> introgressed1;
 };
 
 std::vector<DataBlock*> DataSet; 
@@ -152,7 +152,8 @@ std::vector<DataBlock*> DataSet;
 void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pars, DataBlock* &SimData){
 
     // Popsize
-    SimData->popsize.push_back(population.size());
+    const int populationsize = population.size();
+    SimData->popsize.push_back(populationsize);
     std::vector<int> count[2];
     count[0].resize(pars.NLOCI,0);
     count[1].resize(pars.NLOCI,0);
@@ -160,12 +161,12 @@ void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pa
     for(Individual* ind : population){
         for(int i = 0; i < pars.NPLOIDY; ++i){
             if(ind->Genotype(i,pars.index[0])){
-                ++ind0;
-                temp0 += ind->GenotypeCount(i) - 1;
+                ++ind1;
+                temp1 += ind->GenotypeCount(i) - 1;
             }
             else{
-                ++ind1;
-                temp1 += ind->GenotypeCount(i);
+                ++ind0;
+                temp0 += ind->GenotypeCount(i); 
             } 
             // Genome allele frequencies
             for(int j = 0; j < pars.NLOCI; ++j){
@@ -178,8 +179,8 @@ void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pa
     SimData->allele1.push_back(count[1]);
     SimData->major0.push_back(ind0);
     SimData->major1.push_back(ind1);
-    SimData->introgressed0.push_back(temp0);
-    SimData->introgressed1.push_back(temp1);
+    SimData->introgressed0.push_back(temp0/(double)((pars.NLOCI-1)*ind0));
+    SimData->introgressed1.push_back(temp1/(double)((pars.NLOCI-1)*ind1));
 }
 
 bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &pars){ 
@@ -357,29 +358,29 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars){
 
     for(int i = 0; i < GlobalPars.NGEN; ++i){
         accumulator_set<int, stats<tag::mean, tag::variance > > popsize;
-        accumulator_set<int, stats<tag::mean, tag::variance > > major0;
-        accumulator_set<int, stats<tag::mean, tag::variance > > major1;
-        accumulator_set<int, stats<tag::mean, tag::variance > > introgressed0;
-        accumulator_set<int, stats<tag::mean, tag::variance > > introgressed1;
+        accumulator_set<double, stats<tag::mean, tag::variance > > major0;
+        accumulator_set<double, stats<tag::mean, tag::variance > > major1;
+        accumulator_set<double, stats<tag::mean, tag::variance > > introgressed0;
+        accumulator_set<double, stats<tag::mean, tag::variance > > introgressed1;
 
         for(int j = 0; j < GlobalPars.NREP; ++j){
             popsize(DataSet[j]->popsize[i]);
-            major0(DataSet[j]->major0[i]);
-            major1(DataSet[j]->major1[i]);
+            major0((double)DataSet[j]->major0[i]/(double)GlobalPars.NPLOIDY);
+            major1((double)DataSet[j]->major1[i]/(double)GlobalPars.NPLOIDY);
             introgressed0(DataSet[j]->introgressed0[i]);
             introgressed1(DataSet[j]->introgressed1[i]);
         }
         generation[i] = i;
         popsizevecm[i] = mean(popsize);
-        major0vecm[i] = (double)mean(major0)/(double)GlobalPars.NPLOIDY;
-        major1vecm[i] = (double)mean(major1)/(double)GlobalPars.NPLOIDY;
-        introgressed0vecm[i] = mean(introgressed0)/(double)(GlobalPars.NPLOIDY*(GlobalPars.NLOCI-1));
-        introgressed1vecm[i] = mean(introgressed1)/(double)(GlobalPars.NPLOIDY*(GlobalPars.NLOCI-1));
+        major0vecm[i] = mean(major0);
+        major1vecm[i] = mean(major1);
+        introgressed0vecm[i] = mean(introgressed0);
+        introgressed1vecm[i] = mean(introgressed1);
         popsizevecv[i] = variance(popsize);
-        major0vecv[i] = (double)variance(major0)/((double)GlobalPars.NPLOIDY*(double)GlobalPars.NPLOIDY);
-        major1vecv[i] = (double)variance(major1)/((double)GlobalPars.NPLOIDY*(double)GlobalPars.NPLOIDY);
-        introgressed0vecv[i] = variance(introgressed0)/(((double)(GlobalPars.NPLOIDY*(GlobalPars.NLOCI-1)))*((double)(GlobalPars.NPLOIDY*(GlobalPars.NLOCI-1))));
-        introgressed1vecv[i] = variance(introgressed1)/(((double)(GlobalPars.NPLOIDY*(GlobalPars.NLOCI-1)))*((double)(GlobalPars.NPLOIDY*(GlobalPars.NLOCI-1))));
+        major0vecv[i] = variance(major0);
+        major1vecv[i] = variance(major1);
+        introgressed0vecv[i] = variance(introgressed0);
+        introgressed1vecv[i] = variance(introgressed1);
     };
     
     Rcpp::DataFrame data =  Rcpp::DataFrame::create(
@@ -422,8 +423,8 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars){
     alleledatamean.push_back(generation,"Generation");
     alleledatavar.push_back(generation,"Generation");
     for(int i = 0; i < GlobalPars.NLOCI; ++i){
-        alleledatamean.push_back((allelefrequencymean[i]), avglocus+(char)i);
-        alleledatavar.push_back((allelefrequencyvar[i]), varlocus+(char)i);
+        alleledatamean.push_back((allelefrequencymean[i]), avglocus+std::to_string(i));
+        alleledatavar.push_back((allelefrequencyvar[i]), varlocus+std::to_string(i));
     }
 
     // Cleanup

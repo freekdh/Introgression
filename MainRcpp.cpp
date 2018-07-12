@@ -1,5 +1,6 @@
 // [[Rcpp::depends(BH)]]
 // [[Rcpp::plugins("cpp11")]]
+
 #include <boost/dynamic_bitset.hpp>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
@@ -12,6 +13,7 @@
 #include <iomanip>
 #include <chrono>
 #include <Rcpp.h>
+#include <string>
 
 using namespace boost::accumulators;
 enum nameofstream {Parametersoff, Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var};
@@ -314,20 +316,29 @@ void CollectParameters(double &r, int &nloci, int &nploidy, int &ninit0, int &ni
     assert(GlobalPars.NLOCAL_ADAPTED_LOCI + 1 < GlobalPars.NLOCI);
 }
 
-// [[Rcpp::export]]
-Rcpp::List RunSimulation(double r, int nloci, int nploidy, int ninit0, int ninit1, int distlocal, double scmajor, double sclocal, int ngen, int nrep, double rec, int k){
+Rcpp::List WriteOutput(const Parameters &GlobalPars){
 
-    // Initialize simulation
-    Parameters GlobalPars;
-    CollectParameters( r,  nloci,  nploidy,  ninit0,  ninit1,  distlocal,  scmajor,  sclocal,  ngen,  nrep,  rec,  k, GlobalPars);
-    InitializeGlobalEnvironment(GlobalPars);
-
-    // Run nrep successful simulations
-    for (int i = 0; i < GlobalPars.NREP; ++i){
-        while(RunSimulation(GlobalPars)==false); 
-    }
+   // Parameters
+    Rcpp::DataFrame parsdata =  Rcpp::DataFrame::create(
+        Rcpp::_["NINIT0"] = GlobalPars.NINIT[0], 
+        Rcpp::_["NINIT1"] = GlobalPars.NINIT[1],
+        Rcpp::_["NGEN"] = GlobalPars.NGEN,
+        Rcpp::_["NREP"] = GlobalPars.NREP,
+        Rcpp::_["NLOCI"] = GlobalPars.NLOCI,
+        Rcpp::_["NPLOIDY"] = GlobalPars.NPLOIDY,
+        Rcpp::_["MUTATIONRATE"] = GlobalPars.MUTATIONRATE,
+        Rcpp::_["RECOMBINATIONRATE"] = GlobalPars.RECOMBINATIONRATE,
+        Rcpp::_["GROWTHRATE"] = GlobalPars.INTRINSIC_GROWTHRATE,
+        Rcpp::_["CARRYINGCAPACITY"] = GlobalPars.K,
+        Rcpp::_["SC_MAJOR"] = GlobalPars.SC_MAJOR,
+        Rcpp::_["SC_LOCAL"] = GlobalPars.SC_LOCAL,
+        Rcpp::_["INDEX_MAJOR"] = GlobalPars.index[0],
+        Rcpp::_["INDEX_LOCAL"] = GlobalPars.index[1],
+        Rcpp::_["DISTLOCAL"] = GlobalPars.DISTLOCAL
+    );
    
     // Write outputfiles
+    Rcpp::NumericVector generation(GlobalPars.NGEN);    
     Rcpp::NumericVector popsizevecm(GlobalPars.NGEN);
     Rcpp::NumericVector major0vecm(GlobalPars.NGEN);
     Rcpp::NumericVector major1vecm(GlobalPars.NGEN);
@@ -338,6 +349,7 @@ Rcpp::List RunSimulation(double r, int nloci, int nploidy, int ninit0, int ninit
     Rcpp::NumericVector major1vecv(GlobalPars.NGEN);
     Rcpp::NumericVector introgressed0vecv(GlobalPars.NGEN);
     Rcpp::NumericVector introgressed1vecv(GlobalPars.NGEN);
+    
 
     for(int i = 0; i < GlobalPars.NGEN; ++i){
         accumulator_set<int, stats<tag::mean, tag::variance > > popsize;
@@ -353,7 +365,7 @@ Rcpp::List RunSimulation(double r, int nloci, int nploidy, int ninit0, int ninit
             introgressed0(DataSet[j]->introgressed0[i]);
             introgressed1(DataSet[j]->introgressed1[i]);
         }
-
+        generation[i] = i;
         popsizevecm[i] = mean(popsize);
         major0vecm[i] = (double)mean(major0)/(double)GlobalPars.NPLOIDY;
         major1vecm[i] = (double)mean(major1)/(double)GlobalPars.NPLOIDY;
@@ -367,22 +379,28 @@ Rcpp::List RunSimulation(double r, int nloci, int nploidy, int ninit0, int ninit
     };
     
     Rcpp::DataFrame data =  Rcpp::DataFrame::create(
-        Rcpp::_["Popsize_avg"] = popsizevecm, 
-        Rcpp::_["Major0_avg"] = major0vecm, 
-        Rcpp::_["Major1_avg"] = major1vecm, 
-        Rcpp::_["Introgressed0_avg"] = introgressed0vecm, 
-        Rcpp::_["Introgressed1_avg"] = introgressed1vecm,
-        Rcpp::_["Popsize_var"] = popsizevecm, 
-        Rcpp::_["Major0_var"] = major0vecm, 
-        Rcpp::_["Major1_var"] = major1vecm, 
-        Rcpp::_["Introgressed0_var"] = introgressed0vecm, 
-        Rcpp::_["Introgressed1_var"] = introgressed1vecm
+        Rcpp::_["Generation"] = generation,
+        Rcpp::_["Popsize_avg"] = (popsizevecm), 
+        Rcpp::_["Major0_avg"] = (major0vecm), 
+        Rcpp::_["Major1_avg"] = (major1vecm), 
+        Rcpp::_["Introgressed0_avg"] = (introgressed0vecm), 
+        Rcpp::_["Introgressed1_avg"] = (introgressed1vecm),
+        Rcpp::_["Popsize_var"] = (popsizevecv), 
+        Rcpp::_["Major0_var"] = (major0vecv), 
+        Rcpp::_["Major1_var"] = (major1vecv), 
+        Rcpp::_["Introgressed0_var"] = (introgressed0vecv), 
+        Rcpp::_["Introgressed1_var"] = (introgressed1vecv)
     );
 
-    Rcpp::NumericVector allelefrequency(GlobalPars.NGEN); // Solve this problem with a vector tomorrow
+    std::vector<Rcpp::NumericVector> allelefrequencymean(GlobalPars.NLOCI);
+    std::vector<Rcpp::NumericVector> allelefrequencyvar(GlobalPars.NLOCI);
+
+    for(int i = 0; i < GlobalPars.NLOCI; ++i){
+        allelefrequencymean[i] = Rcpp::NumericVector(GlobalPars.NGEN); 
+        allelefrequencyvar[i] = Rcpp::NumericVector(GlobalPars.NGEN); 
+    }
+
     for(int i = 0; i < GlobalPars.NGEN; ++i){
-        arrayofstream[AlleleFrequencyoff_mean] << i << arrayofstream[AlleleFrequencyoff_mean].fill(); 
-        arrayofstream[AlleleFrequencyoff_var] << i << arrayofstream[AlleleFrequencyoff_var].fill();
         for(int l = 0; l < GlobalPars.NLOCI; ++l)
         {
             accumulator_set<double, stats<tag::mean, tag::variance > > locus;
@@ -390,16 +408,49 @@ Rcpp::List RunSimulation(double r, int nloci, int nploidy, int ninit0, int ninit
             {
                 locus((double)DataSet[r]->allele0[i][l] / ((double)DataSet[r]->popsize[i] * (double)GlobalPars.NPLOIDY));
             }
-            arrayofstream[AlleleFrequencyoff_mean] << mean(locus)  << arrayofstream[AlleleFrequencyoff_mean].fill();
-            arrayofstream[AlleleFrequencyoff_var] << variance(locus) << arrayofstream[AlleleFrequencyoff_var].fill(); 
+            allelefrequencymean[l][i] = mean(locus);
+            allelefrequencyvar[l][i] = variance(locus);
         }
-        arrayofstream[AlleleFrequencyoff_mean] << std::endl;
-        arrayofstream[AlleleFrequencyoff_var] << std::endl;
     }   
-    
-    
+
+    Rcpp::DataFrame alleledatamean, alleledatavar;
+    std::string avglocus = "avglocus", varlocus = "varlocus";
+    alleledatamean.push_back(generation,"Generation");
+    alleledatavar.push_back(generation,"Generation");
+    for(int i = 0; i < GlobalPars.NLOCI; ++i){
+        alleledatamean.push_back((allelefrequencymean[i]), avglocus+(char)i);
+        alleledatavar.push_back((allelefrequencyvar[i]), varlocus+(char)i);
+    }
+
+    // Cleanup
+    for(int i = 0; i < GlobalPars.NREP; ++i){
+        delete DataSet[i];
+    }
+    DataSet.clear();
+
     return Rcpp::List::create(
-        Rcpp::_["data"] = data,
-        Rcpp::_["allelefavg"] = 
-    )
+        Rcpp::_["pars"] = (parsdata),
+        Rcpp::_["data"] = (data),
+        Rcpp::_["allelefavg"] = (alleledatamean),
+        Rcpp::_["allelefvar"] = (alleledatavar)
+    );
+
+}
+
+// [[Rcpp::export]]
+Rcpp::List RunSimulation(double r, int nloci, int nploidy, int ninit0, int ninit1, int distlocal, double scmajor, double sclocal, int ngen, int nrep, double rec, int k){
+
+    // Initialize simulation
+    Parameters GlobalPars;
+    CollectParameters( r,  nloci,  nploidy,  ninit0,  ninit1,  distlocal,  scmajor,  sclocal,  ngen,  nrep,  rec,  k, GlobalPars);
+    InitializeGlobalEnvironment(GlobalPars);
+
+    // Run nrep successful simulations
+    for (int i = 0; i < GlobalPars.NREP; ++i){
+        while(RunSimulation(GlobalPars)==false); 
+    }
+   
+    // Create output
+    return WriteOutput(GlobalPars) ;
+ 
 }

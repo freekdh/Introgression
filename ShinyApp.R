@@ -23,22 +23,21 @@ testdata=RunSimulation(
 100,    #nrep  
 0.01,    #rec
 200,    #k
-4)      #threads
+1)      #threads
 
 #Population size and type0 & type1
-populationsizeplot <- ggplot(testdata[[2]]) + 
-geom_line(aes(x=Generation, y=Popsize_avg)) + 
-geom_ribbon(aes(x=Generation, ymin=Popsize_avg-sqrt(Popsize_var), ymax=Popsize_avg+sqrt(Popsize_var)), fill = "blue", alpha = 0.3) +
-geom_line(aes(x=Generation, y=Major0_avg)) + 
-geom_ribbon(aes(x=Generation, ymin=Major0_avg-sqrt(Major0_avg), ymax=Major0_avg+sqrt(Major0_avg)), fill = "red", alpha = 0.3) +
-geom_line(aes(x=Generation, y=Major1_avg)) +
-geom_ribbon(aes(x=Generation, ymin=Major1_avg-sqrt(Major1_avg), ymax=Major1_avg+sqrt(Major1_avg)), fill = "green", alpha = 0.3) +
-theme_minimal() + 
-xlab("Generation") + 
-ylab("Populationsize")
+plotPopulation <- function(data){
+ggplot(data[[2]]) + 
+geom_line(aes(x=Generation, y=Popsize_avg)) + geom_ribbon(aes(x=Generation, ymin=Popsize_avg-sqrt(Popsize_var), ymax=Popsize_avg+sqrt(Popsize_var)), fill = "blue", alpha = 0.3) +
+geom_line(aes(x=Generation, y=Major0_avg)) + geom_ribbon(aes(x=Generation, ymin=Major0_avg-sqrt(Major0_avg), ymax=Major0_avg+sqrt(Major0_avg)), fill = "red", alpha = 0.3) +
+geom_line(aes(x=Generation, y=Major1_avg)) + geom_ribbon(aes(x=Generation, ymin=Major1_avg-sqrt(Major1_avg), ymax=Major1_avg+sqrt(Major1_avg)), fill = "green", alpha = 0.3) +
+theme_minimal() + xlab("Generation") + ylab("Populationsize")
+}
+
 
 #Introgression 
-introgressionplot <- ggplot(testdata[[2]]) + 
+plotIntrogression <- function(data){
+ggplot(data[[2]]) + 
 geom_line(aes(x=Generation, y=Introgressed0_avg)) +
 geom_ribbon(aes(x=Generation, ymin=Introgressed0_avg-sqrt(Introgressed0_var), ymax=Introgressed0_avg+sqrt(Introgressed0_var)), fill = "red", alpha = 0.3) +
 geom_line(aes(x=Generation, y=Introgressed1_avg)) +
@@ -46,8 +45,9 @@ geom_ribbon(aes(x=Generation, ymin=Introgressed1_avg-sqrt(Introgressed1_var), ym
 theme_minimal() + 
 xlab("Generation") + 
 ylab("Introgression")
+}
 
-grid.arrange(populationsizeplot, introgressionplot,ncol = 1)
+grid.arrange(plotPopulation(testdata), plotIntrogression(testdata),ncol = 1)
 
 #allelefrequencies
 dataallelemean <-tidyr::gather(as.data.frame(testdata[[3]]), locus, value, 2:ncol(as.data.frame(testdata[[3]])))
@@ -55,7 +55,7 @@ dataallelevar <-tidyr::gather(as.data.frame(testdata[[4]]), locus, value, 2:ncol
 dataallele <- dplyr::bind_cols(dataallelemean,dataallelevar[3])
 dataallele <- dplyr::mutate(dataallele, col=factor(locus,locus))
 allelefrequencyplot <- ggplot(dataallele, aes(col, value, ymin=value-sqrt(value1),ymax=value+sqrt(value1))) + 
-geom_pointrange(aes(frame = Generation)) + 
+geom_pointrange(aes(frame = Generation), shape=22) + 
 theme_minimal() + 
 xlab("Locus") +
 ylab("Allelefrequency") + 
@@ -64,6 +64,35 @@ theme(axis.text.x = element_blank())
 ggplotly(allelefrequencyplot)
 
 
+#Start the Shiny interface
+
+ui <- fluidPage(
+    titlePanel("Evolutionary Rescue"),
+
+    sidebarLayout(
+        sidebarPanel(
+            "Parameters"
+        ),
+    mainPanel(
+        "Plots",
+        plotlyOutput("plotlyout"),
+        ggplotOutput("ggplotout")
+    )
+    )
+)
+
+server <- function(input, output){
+    output$plotlyout <- renderPlotly({
+        ggplotly(allelefrequencyplot)
+    })
+
+    output$ggplotout <- renderPlot({
+        plotPopulation(testdata)
+    })
+}
+
+
+shinyApp(ui,server)
 
 Rcpp.package.skeleton(
     name = "IntrogressionRcpp7", 

@@ -34,7 +34,6 @@ geom_line(aes(x=Generation, y=Major1_avg)) + geom_ribbon(aes(x=Generation, ymin=
 theme_minimal() + xlab("Generation") + ylab("Populationsize")
 }
 
-
 #Introgression 
 plotIntrogression <- function(data){
 ggplot(data[[2]]) + 
@@ -46,7 +45,6 @@ theme_minimal() +
 xlab("Generation") + 
 ylab("Introgression")
 }
-
 
 grid.arrange(plotPopulation(testdata), plotIntrogression(testdata),ncol = 1)
 
@@ -65,7 +63,7 @@ theme(axis.text.x = element_blank())
 ggplotly(allelefrequencyplot)
 
 
-shinyApp(ui,server)
+runApp("./ShinyApp")
 
 Rcpp.package.skeleton(
     name = "IntrogressionRcpp7", 
@@ -77,5 +75,3 @@ Rcpp.package.skeleton(
 #LinkingTo: Rcpp, BH, RcppProgress
 #Depends: BH, RcppProgress
 # Something
-
-

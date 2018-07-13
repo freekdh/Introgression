@@ -11,19 +11,19 @@ library(plotly)
 sourceCpp("/home/freek/Documents/VisualCode/C++/Introgression/MainRcpp.cpp")
 
 testdata=RunSimulation( 
-0.1,    #growthrate
-100,     #nloci
-2,      #nploidy
-190,      #ninit0
-10,      #ninit1
-1,      #distlocal
-0.1,    #scmajor
-0.0,    #sclocal
-50,     #ngen
-100,    #nrep  
-0.01,    #rec
-200,    #k
-1)      #threads
+r = 0.1,    #growthrate
+nloci = 100,    #nloci
+nploidy = 2,      #nploidy
+ninit0 = 190,      #ninit0
+ninit1 = 10,      #ninit1
+distlocal = 1,      #distlocal
+scmajor = 0.1,    #scmajor
+sclocal = 0.0,    #sclocal
+ngen = 50,     #ngen
+nrep = 100,    #nrep  
+rec= 0.01,    #rec
+k = 200,        #k
+threads = 1)      #threads
 
 #Population size and type0 & type1
 plotPopulation <- function(data){
@@ -47,6 +47,7 @@ xlab("Generation") +
 ylab("Introgression")
 }
 
+
 grid.arrange(plotPopulation(testdata), plotIntrogression(testdata),ncol = 1)
 
 #allelefrequencies
@@ -64,34 +65,6 @@ theme(axis.text.x = element_blank())
 ggplotly(allelefrequencyplot)
 
 
-#Start the Shiny interface
-
-ui <- fluidPage(
-    titlePanel("Evolutionary Rescue"),
-
-    sidebarLayout(
-        sidebarPanel(
-            "Parameters"
-        ),
-    mainPanel(
-        "Plots",
-        plotlyOutput("plotlyout"),
-        ggplotOutput("ggplotout")
-    )
-    )
-)
-
-server <- function(input, output){
-    output$plotlyout <- renderPlotly({
-        ggplotly(allelefrequencyplot)
-    })
-
-    output$ggplotout <- renderPlot({
-        plotPopulation(testdata)
-    })
-}
-
-
 shinyApp(ui,server)
 
 Rcpp.package.skeleton(
@@ -104,3 +77,5 @@ Rcpp.package.skeleton(
 #LinkingTo: Rcpp, BH, RcppProgress
 #Depends: BH, RcppProgress
 # Something
+
+

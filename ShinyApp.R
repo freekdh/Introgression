@@ -8,9 +8,9 @@ library(dplyr)
 library(tidyr)
 library(plotly)
 
-sourceCpp("/home/freek/Documents/VisualCode/C++/Introgression/MainRcpp.cpp")
+sourceCpp("/home/freek/Documents/VisualCode/C++/Introgression/MainRcppSingle.cpp")
 
-testdata=RunSimulation( 
+InitializeSimulation( 
 r = 0.1,    #growthrate
 nloci = 100,    #nloci
 nploidy = 2,      #nploidy
@@ -20,23 +20,22 @@ distlocal = 1,      #distlocal
 scmajor = 0.1,    #scmajor
 sclocal = 0.0,    #sclocal
 ngen = 50,     #ngen
-nrep = 100,    #nrep  
 rec= 0.01,    #rec
-k = 200,        #k
-threads = 1)      #threads
+k = 200)      #k
+
+for(x in c(1:20)) RunSimulation()
+
+testdata <- WriteOutputandCleanup()
 
 #Population size and type0 & type1
-plotPopulation <- function(data){
-ggplot(data[[2]]) + 
+ggplot(testdata[[2]]) + 
 geom_line(aes(x=Generation, y=Popsize_avg)) + geom_ribbon(aes(x=Generation, ymin=Popsize_avg-sqrt(Popsize_var), ymax=Popsize_avg+sqrt(Popsize_var)), fill = "blue", alpha = 0.3) +
 geom_line(aes(x=Generation, y=Major0_avg)) + geom_ribbon(aes(x=Generation, ymin=Major0_avg-sqrt(Major0_avg), ymax=Major0_avg+sqrt(Major0_avg)), fill = "red", alpha = 0.3) +
 geom_line(aes(x=Generation, y=Major1_avg)) + geom_ribbon(aes(x=Generation, ymin=Major1_avg-sqrt(Major1_avg), ymax=Major1_avg+sqrt(Major1_avg)), fill = "green", alpha = 0.3) +
 theme_minimal() + xlab("Generation") + ylab("Populationsize")
-}
 
 #Introgression 
-plotIntrogression <- function(data){
-ggplot(data[[2]]) + 
+ggplot(testdata[[2]]) + 
 geom_line(aes(x=Generation, y=Introgressed0_avg)) +
 geom_ribbon(aes(x=Generation, ymin=Introgressed0_avg-sqrt(Introgressed0_var), ymax=Introgressed0_avg+sqrt(Introgressed0_var)), fill = "red", alpha = 0.3) +
 geom_line(aes(x=Generation, y=Introgressed1_avg)) +
@@ -44,9 +43,6 @@ geom_ribbon(aes(x=Generation, ymin=Introgressed1_avg-sqrt(Introgressed1_var), ym
 theme_minimal() + 
 xlab("Generation") + 
 ylab("Introgression")
-}
-
-grid.arrange(plotPopulation(testdata), plotIntrogression(testdata),ncol = 1)
 
 #allelefrequencies
 dataallelemean <-tidyr::gather(as.data.frame(testdata[[3]]), locus, value, 2:ncol(as.data.frame(testdata[[3]])))
@@ -62,9 +58,10 @@ theme(axis.text.x = element_blank())
 
 ggplotly(allelefrequencyplot)
 
-
+# Run shiny app
 runApp("./ShinyApp")
 
+# Make R package
 Rcpp.package.skeleton(
     name = "IntrogressionRcpp7", 
     cpp_files = c("MainRcpp.cpp", "random.h", "random.cpp", "utils.h", "utils.cpp"), 

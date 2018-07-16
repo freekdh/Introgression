@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <chrono>
 #include <string>
+#include <atomic>
 #include <Rcpp.h>
 #include <progress.hpp>
 #ifdef _OPENMP
@@ -21,9 +22,6 @@
 
 using namespace boost::accumulators;
 enum nameofstream {Parametersoff, Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var};
-
-boost::dynamic_bitset<> r_global;
-boost::dynamic_bitset<> m_global;
 
 struct Parameters{
     double RECOMBINATIONRATE = 0.5;
@@ -45,13 +43,16 @@ struct Parameters{
     double SC_MAJOR;
     double SC_LOCAL;
     int NLOCAL_ADAPTED_LOCI;
+
+    boost::dynamic_bitset<> r_global;
+    boost::dynamic_bitset<> m_global;
 };
 
 class Individual{
   public:
     Individual(const std::vector<boost::dynamic_bitset<>> &INITGENOME) : genome(INITGENOME) {;}
 
-    Individual(Individual* parent1, Individual* parent2){
+    Individual(Individual* parent1, Individual* parent2, const Parameters &pars){
         Individual* parent[2] = {parent1, parent2};
         const int NPLOIDY = parent[0]->genome.size();
         const int NLOCI = parent[0]->genome[0].size();
@@ -82,8 +83,8 @@ class Individual{
         {
             for (int p = 0; p < 2; ++p)
             {
-                Make_localbit(r_localbit, r_global);
-                Make_localbit(m_localbit, m_global);
+                Make_localbit(r_localbit, pars.r_global);
+                Make_localbit(m_localbit, pars.m_global);
 
                 temp1 = parent[p]->genome[j] & r_localbit;
                 temp2 = parent[p]->genome[j + 1] & r_localbit.flip();
@@ -147,8 +148,6 @@ struct DataBlock{
     std::vector<double> introgressed1;
 };
 
-std::vector<DataBlock*> DataSet; 
-
 void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pars, DataBlock* &SimData){
 
     // Popsize
@@ -199,7 +198,7 @@ bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &
     for(int i = 0; i < nparents; ++i)
         fitnessdist[i] = population[i]->AdditiveFitness(pars);
     for(it = offspring.begin(); it != offspring.end(); ++it){
-        *it = new Individual(population[fitnessdist.sample()],population[fitnessdist.sample()]);
+        *it = new Individual(population[fitnessdist.sample()],population[fitnessdist.sample()],pars);
         if(rescue == false){
             if((*it)->rescue(pars)==true) {rescue = true;}
         }
@@ -217,7 +216,7 @@ bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &
     return rescue;
 }
 
-bool RunSimulation(const Parameters &SimPars){
+bool RunSimulation(const Parameters &SimPars, DataBlock* &DataBlockpointer, std::atomic<int> &nofixcounter){
     // Set local parameters
     DataBlock* SimData = new DataBlock;
 
@@ -237,6 +236,7 @@ bool RunSimulation(const Parameters &SimPars){
         if(ItteratePopulation(population, SimPars)==false){
             for (Individual* i: population) delete i;
             delete SimData;
+            ++nofixcounter;
             return false;
             }
         else{
@@ -246,30 +246,8 @@ bool RunSimulation(const Parameters &SimPars){
   
     // Cleanup and Write DataBlock
     for (Individual* i: population) delete i;
-    DataSet.push_back(SimData);
+    DataBlockpointer = SimData;
     return true;
-}
-
-void InitializeGlobalEnvironment(const Parameters &GlobalPars){
-    rnd::set_seed();
-    //srand(static_cast<unsigned>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
-    const int GLOBALMAX = 100000;
-
-    r_global.resize(GLOBALMAX);
-    boost::dynamic_bitset<> a(1);
-    a[0] = rnd::bernoulli(0.5);
-    for (int i = 0; i < GLOBALMAX; ++i)
-    {
-        if (rnd::bernoulli(GlobalPars.RECOMBINATIONRATE) == true)
-        a.flip();
-        r_global[i] = a[0];
-    }
-
-    m_global.resize(GLOBALMAX);
-    for (int i = 0; i < GLOBALMAX; ++i)
-    {
-        m_global[i] = rnd::bernoulli(GlobalPars.MUTATIONRATE);
-    }
 }
 
 void CollectParameters(double &r, int &nloci, int &nploidy, int &ninit0, int &ninit1, int &distlocal, double &scmajor, double &sclocal, int &ngen, int &nrep, double &rec, int &k, Parameters &GlobalPars){    
@@ -307,6 +285,24 @@ void CollectParameters(double &r, int &nloci, int &nploidy, int &ninit0, int &ni
     GlobalPars.SC_GENOME[GlobalPars.index[0]] = GlobalPars.SC_MAJOR;
     GlobalPars.SC_GENOME[GlobalPars.index[1]] = GlobalPars.SC_LOCAL;
 
+    const int GLOBALMAX = 100000;
+
+    GlobalPars.r_global.resize(GLOBALMAX);
+    boost::dynamic_bitset<> a(1);
+    a[0] = rnd::bernoulli(0.5);
+    for (int i = 0; i < GLOBALMAX; ++i)
+    {
+        if (rnd::bernoulli(GlobalPars.RECOMBINATIONRATE) == true)
+        a.flip();
+        GlobalPars.r_global[i] = a[0];
+    }
+
+    GlobalPars.m_global.resize(GLOBALMAX);
+    for (int i = 0; i < GLOBALMAX; ++i)
+    {
+        GlobalPars.m_global[i] = rnd::bernoulli(GlobalPars.MUTATIONRATE);
+    }
+
     // Make sure all parameters are there
     assert(GlobalPars.NREP > 0);
     assert(GlobalPars.NLOCI > 1);
@@ -321,7 +317,7 @@ void CollectParameters(double &r, int &nloci, int &nploidy, int &ninit0, int &ni
     assert(GlobalPars.NLOCAL_ADAPTED_LOCI + 1 < GlobalPars.NLOCI);
 }
 
-Rcpp::List WriteOutput(const Parameters &GlobalPars){
+Rcpp::List WriteOutput(const Parameters &GlobalPars, std::vector<DataBlock*> &DataSet, std::atomic<int> &nofixcounter){
 
    // Parameters
     Rcpp::DataFrame parsdata =  Rcpp::DataFrame::create(
@@ -427,6 +423,8 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars){
         alleledatavar.push_back((allelefrequencyvar[i]), varlocus+std::to_string(i));
     }
 
+    double fixation = (double)GlobalPars.NREP/(double(GlobalPars.NREP+nofixcounter.load()));
+
     // Cleanup
     for(int i = 0; i < GlobalPars.NREP; ++i){
         delete DataSet[i];
@@ -437,7 +435,8 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars){
         Rcpp::_["pars"] = (parsdata),
         Rcpp::_["data"] = (data),
         Rcpp::_["allelefavg"] = (alleledatamean),
-        Rcpp::_["allelefvar"] = (alleledatavar)
+        Rcpp::_["allelefvar"] = (alleledatavar),
+        Rcpp::_["fixation"] = fixation
     );
 
 }
@@ -445,24 +444,24 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars){
 // [[Rcpp::export]]
 Rcpp::List RunSimulation(double r, int nloci, int nploidy, int ninit0, int ninit1, int distlocal, double scmajor, double sclocal, int ngen, int nrep, double rec, int k, int threads = 0){
 
-    // Initialize simulation
+    // Prepare for simulation
+    rnd::set_seed();
     Parameters GlobalPars;
     CollectParameters( r,  nloci,  nploidy,  ninit0,  ninit1,  distlocal,  scmajor,  sclocal,  ngen,  nrep,  rec,  k, GlobalPars);
-    InitializeGlobalEnvironment(GlobalPars);
-    #ifdef _OPENMP
-        if(threads > 0)
-            omp_set_num_threads(threads);
-        REprintf("Parallel activated : Number of threads=%i\n",omp_get_max_threads());   
-    #endif
-    Progress p(GlobalPars.NREP, true);
+    std::vector<DataBlock*> DataSet(nrep);
+    std::atomic<int> nofixcounter(0); // for thread safety
 
     // Run nrep successful simulations
+    #ifdef _OPENMP
+        REprintf("Parallel activated : Number of threads=%i\n",omp_get_max_threads());   
+    #endif
+    Progress p(nrep, true);
     #pragma omp parallel for
-    for (int i = 0; i < GlobalPars.NREP; ++i){
+    for (int task = 0; task < nrep; ++task){
+        while(RunSimulation(GlobalPars, DataSet[task], nofixcounter)==false);
         p.increment();
-        while(RunSimulation(GlobalPars)==false); 
     }
-    
+
     // Create output
-    return WriteOutput(GlobalPars) ;
+    return WriteOutput(GlobalPars, DataSet, nofixcounter) ;
 }

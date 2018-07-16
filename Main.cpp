@@ -11,6 +11,9 @@
 #include <ctime>
 #include <iomanip>
 #include <chrono>
+#ifdef _OPENMP
+    #include <omp.h>
+#endif
 
 using namespace boost::accumulators;
 enum nameofstream {Parametersoff, Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var};
@@ -32,6 +35,7 @@ struct Parameters{
     std::vector<double> SC_GENOME;
     std::vector<int> index;    
     std::vector<int> v;
+    int threads = 0;
 
     std::vector<boost::dynamic_bitset<>> INIT_GENOME[2];
 
@@ -209,7 +213,7 @@ bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &
     return rescue;
 }
 
-bool RunSimulation(const Parameters &SimPars){
+bool RunSimulation(const Parameters &SimPars, const int &tasknr){
     // Set local parameters
     DataBlock* SimData = new DataBlock;
 
@@ -238,7 +242,7 @@ bool RunSimulation(const Parameters &SimPars){
   
     // Cleanup and Write DataBlock
     for (Individual* i: population) delete i;
-    DataSet.push_back(SimData);
+    DataSet[tasknr] = SimData;
     return true;
 }
 
@@ -265,7 +269,7 @@ void InitializeGlobalEnvironment(const Parameters &GlobalPars){
 }
 
 void CollectParameters(int argc, char* argv[], Parameters &GlobalPars){
-    if (argc != 12) {std::cout << "Argc != 12" << std::endl;}
+    if (argc != 13) {std::cout << "Argc != 13" << std::endl;}
     
     //General 
     GlobalPars.MUTATIONRATE = 0.0;
@@ -282,6 +286,7 @@ void CollectParameters(int argc, char* argv[], Parameters &GlobalPars){
     GlobalPars.NREP = atoi(argv[9]);
     GlobalPars.RECOMBINATIONRATE = atof(argv[10]);
     GlobalPars.K = atoi(argv[11]);
+    GlobalPars.threads = atoi(argv[12]);
     GlobalPars.SC_GENOME.clear();
     GlobalPars.SC_GENOME.resize(GlobalPars.NLOCI, 0.0);
     std::vector<boost::dynamic_bitset<>> INIT_GENOME0(GlobalPars.NPLOIDY, boost::dynamic_bitset<>(GlobalPars.NLOCI));
@@ -454,9 +459,14 @@ int main(int argc, char *argv[]){
 
     // Run nrep successful simulations
     auto start = std::chrono::high_resolution_clock::now();
+    #ifdef _OPENMP
+        if(GlobalPars.threads > 0)
+            omp_set_num_threads(GlobalPars.threads);
+        REprintf("Parallel activated : Number of threads=%i\n",omp_get_max_threads());   
+    #endif
     #pragma omp parallel for
-    for (int i = 0; i < GlobalPars.NREP; ++i){
-        while(RunSimulation(GlobalPars)==false); 
+    for (int task = 0; task < GlobalPars.NREP; ++task){
+        while(RunSimulation(GlobalPars, task)==false); 
     }
     auto finish = std::chrono::high_resolution_clock::now();
    
@@ -464,6 +474,10 @@ int main(int argc, char *argv[]){
     std::ofstream arrayofstream[4]; 
     CreateOutputStreams(arrayofstream); 
 	WriteOutput(arrayofstream, GlobalPars);
+
+    // Cleanup
+    for(DataBlock* i : DataSet) delete i;
+    DataSet.clear();
 
     // Show Time elapsed
     std::chrono::duration<double> elapsed = finish-start;

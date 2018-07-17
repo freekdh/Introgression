@@ -11,6 +11,7 @@
 #include <chrono>
 #include <string>
 #include <atomic>
+#include <mutex>
 #include <Rcpp.h>
 #include <progress.hpp>
 #ifdef _OPENMP
@@ -23,27 +24,84 @@
 using namespace boost::accumulators;
 enum nameofstream {Parametersoff, Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var};
 
+std::mutex mu_datablock;
+std::mutex mu_copypars;
+
 struct Parameters{
-    double RECOMBINATIONRATE = 0.5;
+    public:
+    Parameters(double r, int nloci, int nploidy, int ninit0, int ninit1, int distlocal, double scmajor, double sclocal, int ngen, int nrep, double rec, int k, int threads = 0){
+        MUTATIONRATE = 0.0;
+        INTRINSIC_GROWTHRATE = r;
+        NLOCI = nloci;
+        NPLOIDY = nploidy;
+        NINIT[0] = ninit0;
+        NINIT[1] = ninit1;
+        NLOCAL_ADAPTED_LOCI = 1;
+        DISTLOCAL = distlocal;
+        SC_MAJOR = scmajor;
+        SC_LOCAL = sclocal;
+        NGEN = ngen;
+        NREP = nrep;
+        RECOMBINATIONRATE = rec;
+        K = k;
+
+        std::vector<boost::dynamic_bitset<>> INIT_GENOME0(NPLOIDY, boost::dynamic_bitset<>(NLOCI));
+        std::vector<boost::dynamic_bitset<>> INIT_GENOME1(NPLOIDY, boost::dynamic_bitset<>(NLOCI).set());
+        INIT_GENOME[0] = INIT_GENOME0;
+        INIT_GENOME[1] = INIT_GENOME1;
+
+        SC_GENOME.clear();
+        SC_GENOME.resize(NLOCI, 0.0);
+
+        //Genetic architecture of selection
+        index.clear();
+        index.resize(NLOCI);
+        index[0] = std::floor((double)NLOCI/2.0);
+        assert((DISTLOCAL+index[0]) < NLOCI);
+        index[1] = index[0]+DISTLOCAL;
+
+        SC_GENOME.clear();
+        SC_GENOME.resize(NLOCI, 0.0);
+        SC_GENOME[index[0]] = SC_MAJOR;
+        SC_GENOME[index[1]] = SC_LOCAL;
+
+        const int GLOBALMAX = 100000;
+
+        r_global.resize(GLOBALMAX);
+        boost::dynamic_bitset<> a(1);
+        a[0] = rnd::bernoulli(0.5);
+        for (int i = 0; i < GLOBALMAX; ++i)
+        {
+            if (rnd::bernoulli(RECOMBINATIONRATE) == true)
+            a.flip();
+            r_global[i] = a[0];
+        }
+
+        m_global.resize(GLOBALMAX);
+        for (int i = 0; i < GLOBALMAX; ++i)
+        {
+            m_global[i] = rnd::bernoulli(MUTATIONRATE);
+        }
+    }
+    
+    // Can be public bc no problem with multithread access.
+    double RECOMBINATIONRATE;
     double MUTATIONRATE = 0.0;
-    double INTRINSIC_GROWTHRATE = 0.01;
-    int NGEN = 20;
-    int NLOCI = 20;
-    int DISTLOCAL = 1;
-    int NPLOIDY = 2;
-    int NREP = 1;
-    int NINIT[2] = {1,10};
-    int K = 100;
-    std::vector<double> SC_GENOME;
-    std::vector<int> index;    
-    std::vector<int> v;
-
-    std::vector<boost::dynamic_bitset<>> INIT_GENOME[2];
-
+    double INTRINSIC_GROWTHRATE;
+    int NGEN;
+    int NLOCI;
+    int DISTLOCAL;
+    int NPLOIDY;
+    int NREP;
+    int NINIT[2];
+    int K;
     double SC_MAJOR;
     double SC_LOCAL;
     int NLOCAL_ADAPTED_LOCI;
 
+    std::vector<double> SC_GENOME;
+    std::vector<int> index;
+    std::vector<boost::dynamic_bitset<>> INIT_GENOME[2];
     boost::dynamic_bitset<> r_global;
     boost::dynamic_bitset<> m_global;
 };
@@ -148,6 +206,19 @@ struct DataBlock{
     std::vector<double> introgressed1;
 };
 
+// Public struct for multithreading
+struct SimData{  
+
+    void push_back_protect(DataBlock* datablock){
+        mu_datablock.lock();
+        DataSet.push_back(datablock);
+        mu_datablock.unlock();
+    };
+
+    std::vector<DataBlock*> DataSet;
+    std::atomic<int> nofixcounter; // for thread safety incrementation
+};
+
 void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pars, DataBlock* &SimData){
 
     // Popsize
@@ -216,7 +287,12 @@ bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &
     return rescue;
 }
 
-bool RunSimulation(const Parameters &SimPars, DataBlock* &DataBlockpointer, std::atomic<int> &nofixcounter){
+bool RunSimulation(const Parameters &GlobalPars, SimData &SimulationData){
+    // Need to access elements of SimPars from multiple thread so make copy:
+    mu_copypars.lock();
+    Parameters SimPars = GlobalPars;
+    mu_copypars.unlock();
+
     // Set local parameters
     DataBlock* SimData = new DataBlock;
 
@@ -236,7 +312,7 @@ bool RunSimulation(const Parameters &SimPars, DataBlock* &DataBlockpointer, std:
         if(ItteratePopulation(population, SimPars)==false){
             for (Individual* i: population) delete i;
             delete SimData;
-            ++nofixcounter;
+            ++SimulationData.nofixcounter;
             return false;
             }
         else{
@@ -246,78 +322,11 @@ bool RunSimulation(const Parameters &SimPars, DataBlock* &DataBlockpointer, std:
   
     // Cleanup and Write DataBlock
     for (Individual* i: population) delete i;
-    DataBlockpointer = SimData;
+    SimulationData.push_back_protect(SimData);
     return true;
 }
 
-void CollectParameters(double &r, int &nloci, int &nploidy, int &ninit0, int &ninit1, int &distlocal, double &scmajor, double &sclocal, int &ngen, int &nrep, double &rec, int &k, Parameters &GlobalPars){    
-    //General 
-    GlobalPars.MUTATIONRATE = 0.0;
-    GlobalPars.INTRINSIC_GROWTHRATE = r;
-    GlobalPars.NLOCI = nloci;
-    GlobalPars.NPLOIDY = nploidy;
-    GlobalPars.NINIT[0] = ninit0;
-    GlobalPars.NINIT[1] = ninit1;
-    GlobalPars.NLOCAL_ADAPTED_LOCI = 1;
-    GlobalPars.DISTLOCAL = distlocal;
-    GlobalPars.SC_MAJOR = scmajor;
-    GlobalPars.SC_LOCAL = sclocal;
-    GlobalPars.NGEN = ngen;
-    GlobalPars.NREP = nrep;
-    GlobalPars.RECOMBINATIONRATE = rec;
-    GlobalPars.K = k;
-    GlobalPars.SC_GENOME.clear();
-    GlobalPars.SC_GENOME.resize(GlobalPars.NLOCI, 0.0);
-    std::vector<boost::dynamic_bitset<>> INIT_GENOME0(GlobalPars.NPLOIDY, boost::dynamic_bitset<>(GlobalPars.NLOCI));
-    std::vector<boost::dynamic_bitset<>> INIT_GENOME1(GlobalPars.NPLOIDY, boost::dynamic_bitset<>(GlobalPars.NLOCI).set());
-    GlobalPars.INIT_GENOME[0] = INIT_GENOME0;
-    GlobalPars.INIT_GENOME[1] = INIT_GENOME1;
-
-    //Genetic architecture of selection
-    GlobalPars.index.clear();
-    GlobalPars.index.resize(GlobalPars.NLOCI);
-    GlobalPars.index[0] = std::floor((double)GlobalPars.NLOCI/2.0);
-    assert((GlobalPars.DISTLOCAL+GlobalPars.index[0]) < GlobalPars.NLOCI);
-    GlobalPars.index[1] = GlobalPars.index[0]+GlobalPars.DISTLOCAL;
-
-    GlobalPars.SC_GENOME.clear();
-    GlobalPars.SC_GENOME.resize(GlobalPars.NLOCI, 0.0);
-    GlobalPars.SC_GENOME[GlobalPars.index[0]] = GlobalPars.SC_MAJOR;
-    GlobalPars.SC_GENOME[GlobalPars.index[1]] = GlobalPars.SC_LOCAL;
-
-    const int GLOBALMAX = 100000;
-
-    GlobalPars.r_global.resize(GLOBALMAX);
-    boost::dynamic_bitset<> a(1);
-    a[0] = rnd::bernoulli(0.5);
-    for (int i = 0; i < GLOBALMAX; ++i)
-    {
-        if (rnd::bernoulli(GlobalPars.RECOMBINATIONRATE) == true)
-        a.flip();
-        GlobalPars.r_global[i] = a[0];
-    }
-
-    GlobalPars.m_global.resize(GLOBALMAX);
-    for (int i = 0; i < GLOBALMAX; ++i)
-    {
-        GlobalPars.m_global[i] = rnd::bernoulli(GlobalPars.MUTATIONRATE);
-    }
-
-    // Make sure all parameters are there
-    assert(GlobalPars.NREP > 0);
-    assert(GlobalPars.NLOCI > 1);
-    assert(GlobalPars.NLOCI >= GlobalPars.NLOCAL_ADAPTED_LOCI + 1);// nlocaladaptedloci + major locus
-    assert(GlobalPars.NPLOIDY % 2 == 0 && GlobalPars.NPLOIDY > 0);
-    assert(GlobalPars.NINIT[0] > 0);
-    assert(GlobalPars.NINIT[1] > 0);
-    assert(GlobalPars.NGEN > 0);
-    assert(1.0 >= GlobalPars.SC_LOCAL >= 0.0);
-    assert(1.0 >= GlobalPars.SC_MAJOR >= 0.0);
-    assert(GlobalPars.NLOCAL_ADAPTED_LOCI >= 0);
-    assert(GlobalPars.NLOCAL_ADAPTED_LOCI + 1 < GlobalPars.NLOCI);
-}
-
-Rcpp::List WriteOutput(const Parameters &GlobalPars, std::vector<DataBlock*> &DataSet, std::atomic<int> &nofixcounter){
+Rcpp::List WriteOutput(const Parameters &GlobalPars, SimData &SimulationData){
 
    // Parameters
     Rcpp::DataFrame parsdata =  Rcpp::DataFrame::create(
@@ -337,7 +346,7 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars, std::vector<DataBlock*> &Da
         Rcpp::_["INDEX_LOCAL"] = GlobalPars.index[1],
         Rcpp::_["DISTLOCAL"] = GlobalPars.DISTLOCAL
     );
-   
+    
     // Write outputfiles
     Rcpp::NumericVector generation(GlobalPars.NGEN);    
     Rcpp::NumericVector popsizevecm(GlobalPars.NGEN);
@@ -351,7 +360,6 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars, std::vector<DataBlock*> &Da
     Rcpp::NumericVector introgressed0vecv(GlobalPars.NGEN);
     Rcpp::NumericVector introgressed1vecv(GlobalPars.NGEN);
     
-
     for(int i = 0; i < GlobalPars.NGEN; ++i){
         accumulator_set<int, stats<tag::mean, tag::variance > > popsize;
         accumulator_set<double, stats<tag::mean, tag::variance > > major0;
@@ -360,11 +368,11 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars, std::vector<DataBlock*> &Da
         accumulator_set<double, stats<tag::mean, tag::variance > > introgressed1;
 
         for(int j = 0; j < GlobalPars.NREP; ++j){
-            popsize(DataSet[j]->popsize[i]);
-            major0((double)DataSet[j]->major0[i]/(double)GlobalPars.NPLOIDY);
-            major1((double)DataSet[j]->major1[i]/(double)GlobalPars.NPLOIDY);
-            introgressed0(DataSet[j]->introgressed0[i]);
-            introgressed1(DataSet[j]->introgressed1[i]);
+            popsize(SimulationData.DataSet[j]->popsize[i]);
+            major0((double)SimulationData.DataSet[j]->major0[i]/(double)GlobalPars.NPLOIDY);
+            major1((double)SimulationData.DataSet[j]->major1[i]/(double)GlobalPars.NPLOIDY);
+            introgressed0(SimulationData.DataSet[j]->introgressed0[i]);
+            introgressed1(SimulationData.DataSet[j]->introgressed1[i]);
         }
         generation[i] = i;
         popsizevecm[i] = mean(popsize);
@@ -407,7 +415,7 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars, std::vector<DataBlock*> &Da
             accumulator_set<double, stats<tag::mean, tag::variance > > locus;
             for(int r = 0; r < GlobalPars.NREP; ++r)
             {
-                locus((double)DataSet[r]->allele0[i][l] / ((double)DataSet[r]->popsize[i] * (double)GlobalPars.NPLOIDY));
+                locus((double)SimulationData.DataSet[r]->allele0[i][l] / ((double)SimulationData.DataSet[r]->popsize[i] * (double)GlobalPars.NPLOIDY));
             }
             allelefrequencymean[l][i] = mean(locus);
             allelefrequencyvar[l][i] = variance(locus);
@@ -423,13 +431,14 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars, std::vector<DataBlock*> &Da
         alleledatavar.push_back((allelefrequencyvar[i]), varlocus+std::to_string(i));
     }
 
-    double fixation = (double)GlobalPars.NREP/(double(GlobalPars.NREP+nofixcounter.load()));
+    double fixation = (double)GlobalPars.NREP/(double(GlobalPars.NREP+SimulationData.nofixcounter.load()));
 
     // Cleanup
     for(int i = 0; i < GlobalPars.NREP; ++i){
-        delete DataSet[i];
+        delete SimulationData.DataSet[i];
     }
-    DataSet.clear();
+    SimulationData.DataSet.clear();
+    SimulationData.nofixcounter = 0;
 
     return Rcpp::List::create(
         Rcpp::_["pars"] = (parsdata),
@@ -443,25 +452,26 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars, std::vector<DataBlock*> &Da
 
 // [[Rcpp::export]]
 Rcpp::List RunSimulation(double r, int nloci, int nploidy, int ninit0, int ninit1, int distlocal, double scmajor, double sclocal, int ngen, int nrep, double rec, int k, int threads = 0){
-
+    const int NREP = nrep;
     // Prepare for simulation
     rnd::set_seed();
-    Parameters GlobalPars;
-    CollectParameters( r,  nloci,  nploidy,  ninit0,  ninit1,  distlocal,  scmajor,  sclocal,  ngen,  nrep,  rec,  k, GlobalPars);
-    std::vector<DataBlock*> DataSet(nrep);
-    std::atomic<int> nofixcounter(0); // for thread safety
+    const Parameters GlobalPars(r, nloci, nploidy, ninit0, ninit1, distlocal, scmajor, sclocal, ngen, nrep, rec, k);
+    SimData SimulationData;
 
     // Run nrep successful simulations
     #ifdef _OPENMP
         REprintf("Parallel activated : Number of threads=%i\n",omp_get_max_threads());   
     #endif
     Progress p(nrep, true);
-    #pragma omp parallel for
-    for (int task = 0; task < nrep; ++task){
-        while(RunSimulation(GlobalPars, DataSet[task], nofixcounter)==false);
+    #pragma omp parallel
+    {
+    #pragma omp for schedule(static)
+    for (int task = 0; task < NREP; ++task){
+        while(RunSimulation(GlobalPars, SimulationData)==false);
         p.increment();
     }
-
+    }
+    
     // Create output
-    return WriteOutput(GlobalPars, DataSet, nofixcounter) ;
+    return WriteOutput(GlobalPars, SimulationData) ;
 }

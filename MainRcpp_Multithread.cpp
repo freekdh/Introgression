@@ -17,15 +17,14 @@
 #ifdef _OPENMP
     #include <omp.h>
 #endif
+
 // [[Rcpp::plugins(openmp)]]
 // [[Rcpp::depends(RcppProgress)]]
 // [[Rcpp::depends(BH)]]
 
 using namespace boost::accumulators;
-enum nameofstream {Parametersoff, Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var};
 
 std::mutex mu_datablock;
-std::mutex mu_copypars;
 
 struct Parameters{
     public:
@@ -208,13 +207,16 @@ struct DataBlock{
 
 // Public struct for multithreading
 struct SimData{  
+    SimData(){
+        nofixcounter = 0;
+    }
 
-    void push_back_protect(DataBlock* datablock){
+    void push_back_protect(DataBlock* &datablock){
         mu_datablock.lock();
         DataSet.push_back(datablock);
         mu_datablock.unlock();
     };
-
+ 
     std::vector<DataBlock*> DataSet;
     std::atomic<int> nofixcounter; // for thread safety incrementation
 };
@@ -287,11 +289,7 @@ bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &
     return rescue;
 }
 
-bool RunSimulation(const Parameters &GlobalPars, SimData &SimulationData){
-    // Need to access elements of SimPars from multiple thread so make copy:
-    mu_copypars.lock();
-    Parameters SimPars = GlobalPars;
-    mu_copypars.unlock();
+bool RunSimulation(const Parameters &SimPars, SimData &SimulationData){
 
     // Set local parameters
     DataBlock* SimData = new DataBlock;
@@ -432,13 +430,11 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars, SimData &SimulationData){
     }
 
     double fixation = (double)GlobalPars.NREP/(double(GlobalPars.NREP+SimulationData.nofixcounter.load()));
-
+        
     // Cleanup
     for(int i = 0; i < GlobalPars.NREP; ++i){
         delete SimulationData.DataSet[i];
     }
-    SimulationData.DataSet.clear();
-    SimulationData.nofixcounter = 0;
 
     return Rcpp::List::create(
         Rcpp::_["pars"] = (parsdata),
@@ -451,8 +447,7 @@ Rcpp::List WriteOutput(const Parameters &GlobalPars, SimData &SimulationData){
 }
 
 // [[Rcpp::export]]
-Rcpp::List RunSimulation(double r, int nloci, int nploidy, int ninit0, int ninit1, int distlocal, double scmajor, double sclocal, int ngen, int nrep, double rec, int k, int threads = 0){
-    const int NREP = nrep;
+Rcpp::List IntrogressionSimulation(double r, int nloci, int nploidy, int ninit0, int ninit1, int distlocal, double scmajor, double sclocal, int ngen, int nrep, double rec, int k, int threads = 0){
     // Prepare for simulation
     rnd::set_seed();
     const Parameters GlobalPars(r, nloci, nploidy, ninit0, ninit1, distlocal, scmajor, sclocal, ngen, nrep, rec, k);
@@ -460,18 +455,16 @@ Rcpp::List RunSimulation(double r, int nloci, int nploidy, int ninit0, int ninit
 
     // Run nrep successful simulations
     #ifdef _OPENMP
-        REprintf("Parallel activated : Number of threads=%i\n",omp_get_max_threads());   
+        if(threads>0) omp_set_num_threads(threads);
+        //REprintf("Parallel activated : Number of threads=%i\n",omp_get_max_threads());   
     #endif
     Progress p(nrep, true);
-    #pragma omp parallel
-    {
-    #pragma omp for schedule(static)
-    for (int task = 0; task < NREP; ++task){
+
+    #pragma omp parallel for schedule(static)
+    for (int task = 0; task < nrep; ++task){
         while(RunSimulation(GlobalPars, SimulationData)==false);
         p.increment();
     }
-    }
-    
-    // Create output
-    return WriteOutput(GlobalPars, SimulationData) ;
+
+    return WriteOutput(GlobalPars, SimulationData);
 }

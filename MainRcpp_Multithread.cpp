@@ -18,6 +18,7 @@
     #include <omp.h>
 #endif
 
+// [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::plugins(openmp)]]
 // [[Rcpp::depends(RcppProgress)]]
 // [[Rcpp::depends(BH)]]
@@ -456,7 +457,7 @@ Rcpp::List IntrogressionSimulation(double r, int nloci, int nploidy, int ninit0,
     // Run nrep successful simulations
     #ifdef _OPENMP
         if(threads>0) omp_set_num_threads(threads);
-        //REprintf("Parallel activated : Number of threads=%i\n",omp_get_max_threads());   
+        REprintf("Parallel activated : Number of threads=%i\n",omp_get_max_threads());   
     #endif
     Progress p(nrep, true);
 

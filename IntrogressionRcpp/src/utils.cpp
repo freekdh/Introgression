@@ -42,8 +42,8 @@ bool echo_stdclog = true;
 void echo(const std::string &message, const bool &write_to_clog)
 {
 	//writes messages to the log file
-	std::ofstream fp_out;
-	bool init = true;
+	static std::ofstream fp_out;
+	static bool init = true;
 	if(init)
 	{
 		fp_out.open("messages.txt");
@@ -97,8 +97,8 @@ void clip_low(double &val, const double &min)
 
 void mark_time(const bool &set)
 {
-    bool init = true;
-    std::chrono::high_resolution_clock::time_point t0 = std::chrono::high_resolution_clock::now();
+    static bool init = true;
+    static std::chrono::high_resolution_clock::time_point t0 = std::chrono::high_resolution_clock::now();
     
     if(set || init) init = false;
     else {

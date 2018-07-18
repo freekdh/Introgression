@@ -462,7 +462,7 @@ int main(int argc, char *argv[]){
     #ifdef _OPENMP
         if(GlobalPars.threads > 0)
             omp_set_num_threads(GlobalPars.threads);
-        REprintf("Parallel activated : Number of threads=%i\n",omp_get_max_threads());   
+        std::cout << "Parallel activated : Number of threads= " << omp_get_max_threads() << std::endl;   
     #endif
     #pragma omp parallel for
     for (int task = 0; task < GlobalPars.NREP; ++task){

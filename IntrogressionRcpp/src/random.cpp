@@ -45,8 +45,8 @@ namespace rnd {
     int integer(const int &n)
     {
         typedef std::uniform_int_distribution<int> distribution;
-        int k = n;
-        distribution distr(0, k - 1);
+        static int k = n;
+        static distribution distr(0, k - 1);
         if (k != n) {
             k = n;
             distr = distribution(0, k - 1);
@@ -57,8 +57,8 @@ namespace rnd {
 	bool bernoulli(const double &p)
     {
         typedef std::bernoulli_distribution distribution;
-        double z = p;
-        distribution distr(z);
+        static double z = p;
+        static distribution distr(z);
         if(p > 0.0 && p < 1.0) {
             if (z != p) {
                 z = p;
@@ -74,9 +74,9 @@ namespace rnd {
 	int binomial(const int &n, const double &p)
     {
         typedef std::binomial_distribution<int> distribution;
-        int k = n;
-        double z = p;
-        distribution distr(k, z);
+        static int k = n;
+        static double z = p;
+        static distribution distr(k, z);
         if(p > 0.0 && p < 1.0) {
             if (k != n || z != p) {
                 k = n;
@@ -93,8 +93,8 @@ namespace rnd {
 	int poisson(const double &r)
 	{
         typedef std::poisson_distribution<int> distribution;
-        double z = r;
-        distribution distr(z);
+        static double z = r;
+        static distribution distr(z);
         if(r > 0.0) {
             if (z != r) {
                 z = r;
@@ -108,15 +108,15 @@ namespace rnd {
 
 	double uniform()
 	{
-        std::uniform_real_distribution<double> distr(0.0, 1.0);
+        static std::uniform_real_distribution<double> distr(0.0, 1.0);
         return distr(rng);
 	}
     
     double normal(const double &mean, const double &stdev)
 	{
         typedef std::normal_distribution<double> distribution;
-        double z1 = mean, z2 = stdev > 0.0 ? stdev : 1.0;
-        distribution distr(z1, z2);
+        static double z1 = mean, z2 = stdev > 0.0 ? stdev : 1.0;
+        static distribution distr(z1, z2);
         if(stdev > 0.0) {
             if (z1 != mean || z2 != stdev) {
                 z1 = mean;
@@ -132,8 +132,8 @@ namespace rnd {
     double exponential(const double &r)
 	{
         typedef std::exponential_distribution<double> distribution;
-        double z = r;
-        distribution distr(z);
+        static double z = r;
+        static distribution distr(z);
         if(r > 0.0) {
             if (z != r) {
             z = r;

@@ -268,7 +268,7 @@ void InitializeGlobalEnvironment(const Parameters &GlobalPars){
     }
 }
 
-void CollectParameters(int argc, char* argv[], Parameters &GlobalPars){
+void CollectParametersCommandline(int argc, char* argv[], Parameters &GlobalPars){
     if (argc != 13) {std::cout << "Argc != 13" << std::endl;}
     
     //General 

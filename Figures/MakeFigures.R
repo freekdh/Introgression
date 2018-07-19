@@ -8,12 +8,12 @@ library(tidyr)
 library(plotly)
 library(rbenchmark)
 library(gridExtra)
-library(pkgIntrogression2)
+library(pkgIntrogression)
 
 ### BASELINE PARAMETERS ###
 pars <- list(
 "r" = 0.1,          #growthrate
-"nloci" = 10,       #nloci
+"nloci" = 200,       #nloci
 "nploidy" = 2,      #nploidy
 "ninit0" = 100,      #ninit0
 "ninit1" = 1,       #ninit1
@@ -23,14 +23,9 @@ pars <- list(
 "ngen" = 50,        #ngen
 "rec"= 0.5,         #rec
 "k" = 100,           #k
-"nrep" = 500,       #nrep
-"threads" = 1       #multithreading
+"nrep" = 5000,       #nrep
+"threads" = 0       #multithreading
 )
-
-start_time <- Sys.time()
-testdata <- do.call(IntrogressionSimulation, pars)
-end_time <- Sys.time()
-end_time - start_time
 
 #################### FIXATION PROBABILITY ~ FIGURE 1 ######################
 

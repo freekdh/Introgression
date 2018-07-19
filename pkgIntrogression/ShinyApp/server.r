@@ -2,8 +2,6 @@
 paramNames <- c("r", "nloci", "nploidy", "ninit0" ,"ninit1", 
 	"distlocal", "scmajor", "sclocal", "ngen", "rec", "k")
 
-sourceCpp("/home/freek/Documents/VisualCode/C++/Introgression/MainRcpp_Shiny.cpp")
-
 plot_pop <- function(nav) {
 ggplot(nav[[2]]) + 
 geom_line(aes(x=Generation, y=Popsize_avg)) + geom_ribbon(aes(x=Generation, ymin=Popsize_avg-sqrt(Popsize_var), ymax=Popsize_avg+sqrt(Popsize_var)), fill = "blue", alpha = 0.3) +

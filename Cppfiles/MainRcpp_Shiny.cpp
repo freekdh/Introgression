@@ -327,7 +327,7 @@ void CollectParameters(double &r, int &nloci, int &nploidy, int &ninit0, int &ni
 }
 
 // [[Rcpp::export]]
-void InitializeSimulation(double r, int nloci, int nploidy, int ninit0, int ninit1, int distlocal, double scmajor, double sclocal, int ngen, double rec, int k){
+void Shiny_InitializeSimulation(double r, int nloci, int nploidy, int ninit0, int ninit1, int distlocal, double scmajor, double sclocal, int ngen, double rec, int k){
     if(RUNSIMULATION_FUN == true) {std::cerr << "First write output or clear dataset : WriteOutputandCleanupt()" << std::endl;}
     else{
         // Prepare for simulations
@@ -338,7 +338,7 @@ void InitializeSimulation(double r, int nloci, int nploidy, int ninit0, int nini
 }
 
 // [[Rcpp::export]]
-void RunSimulation(){
+void Shiny_RunSimulation(){
     if(INITIALIZESIMULATION_FUN == true){
         // Run nrep successful simulations
         while(RunSimulation(GlobalPars)==false);        
@@ -348,7 +348,7 @@ void RunSimulation(){
 }
 
 // [[Rcpp::export]]
-Rcpp::List WriteOutputandCleanup(){
+Rcpp::List Shiny_WriteOutputandCleanup(){
 
     if(INITIALIZESIMULATION_FUN == true && RUNSIMULATION_FUN == true){
         // Parameters

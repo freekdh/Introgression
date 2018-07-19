@@ -8,8 +8,7 @@ library(tidyr)
 library(plotly)
 library(rbenchmark)
 library(gridExtra)
-
-sourceCpp("/home/freek/Documents/VisualCode/C++/Introgression/MainRcpp_Multithread.cpp")
+library(pkgIntrogression2)
 
 ### BASELINE PARAMETERS ###
 pars <- list(
@@ -25,7 +24,7 @@ pars <- list(
 "rec"= 0.5,         #rec
 "k" = 100,           #k
 "nrep" = 500,       #nrep
-"threads" = 0       #multithreading
+"threads" = 1       #multithreading
 )
 
 start_time <- Sys.time()

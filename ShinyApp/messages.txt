@@ -1,0 +1,2 @@
+Mon Jul 16 15:05:16 2018 : random seed set to 77646031
+Mon Jul 16 15:05:36 2018 : random seed set to 2150958877

@@ -37,6 +37,8 @@
                 "/usr/include",
                 "/usr/boost_1_66_0/",
                 "/usr/local/include/boost_1_67_0/",
+                "/usr/local/lib/R/site-library/Rcpp/include/",
+                "/usr/local/lib/R/site-library/sourcetools/include/sourcetools/r/",
                 "${workspaceRoot}"
             ],
             "defines": [],
@@ -53,6 +55,8 @@
                     "/usr/include",
                     "/usr/boost_1_66_0/",
                     "/usr/local/include/boost_1_67_0/",
+                    "/usr/local/lib/R/site-library/Rcpp/include/",
+                    "/usr/local/lib/R/site-library/sourcetools/include/sourcetools/r/",
                     "${workspaceRoot}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,

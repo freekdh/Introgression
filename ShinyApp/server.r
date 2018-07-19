@@ -1,59 +1,68 @@
 
 paramNames <- c("r", "nloci", "nploidy", "ninit0" ,"ninit1", 
-	"distlocal", "scmajor", "sclocal", "ngen", "nrep", "rec", "k")
+	"distlocal", "scmajor", "sclocal", "ngen", "rec", "k")
 
-sourceCpp("/home/freek/Documents/VisualCode/C++/Introgression/MainRcpp.cpp")
+sourceCpp("/home/freek/Documents/VisualCode/C++/Introgression/MainRcpp_Shiny.cpp")
 
 plot_pop <- function(nav) {
-  plotPopulation(nav)
+ggplot(nav[[2]]) + 
+geom_line(aes(x=Generation, y=Popsize_avg)) + geom_ribbon(aes(x=Generation, ymin=Popsize_avg-sqrt(Popsize_var), ymax=Popsize_avg+sqrt(Popsize_var)), fill = "blue", alpha = 0.3) +
+geom_line(aes(x=Generation, y=Major0_avg)) + geom_ribbon(aes(x=Generation, ymin=Major0_avg-sqrt(Major0_avg), ymax=Major0_avg+sqrt(Major0_avg)), fill = "red", alpha = 0.3) +
+geom_line(aes(x=Generation, y=Major1_avg)) + geom_ribbon(aes(x=Generation, ymin=Major1_avg-sqrt(Major1_avg), ymax=Major1_avg+sqrt(Major1_avg)), fill = "green", alpha = 0.3) +
+theme_minimal() + xlab("Generation") + ylab("Populationsize")
 }
 
 plot_intro <- function(nav) {
-  plotIntrogression(nav)
+ggplot(nav[[2]]) + 
+geom_line(aes(x=Generation, y=Introgressed0_avg)) +
+geom_ribbon(aes(x=Generation, ymin=Introgressed0_avg-sqrt(Introgressed0_var), ymax=Introgressed0_avg+sqrt(Introgressed0_var)), fill = "red", alpha = 0.3) +
+geom_line(aes(x=Generation, y=Introgressed1_avg)) +
+geom_ribbon(aes(x=Generation, ymin=Introgressed1_avg-sqrt(Introgressed1_var), ymax=Introgressed1_avg+sqrt(Introgressed1_var)), fill = "green", alpha = 0.3) +
+theme_minimal() + 
+xlab("Generation") + 
+ylab("Introgression")
 }
 
-# Define server logic required to generate and plot a random distribution
-#
-# Idea and original code by Pierre Chretien
-# Small updates by Michael Kapler
-#
+RunAllSimulation <- function(pars){
+  do.call(InitializeSimulation,pars)
+  
+  withProgress(message="Running simulations",value = 0,{
+    for(x in c(1:100)){
+      incProgress(1/100, detail = paste("Doing replicate", x))
+      RunSimulation()
+    }
+  })
+
+  WriteOutputandCleanup()
+}
+
 function(input, output, session) {
 
-	getParams <- function(prefix) {
-		input[[paste0(prefix, "_recalc")]]
+  getParams <- function(prefix) {
+    input[[paste0(prefix, "_recalc")]]
 
-		params <- lapply(paramNames, function(p) {
-			input[[paste0(prefix, "_", p)]]
-		})
-		names(params) <- paramNames
-		params
-	}
+    params <- lapply(paramNames, function(p) {
+      input[[paste0(prefix, "_", p)]]
+    })
+    names(params) <- paramNames
+    params
+  }
 
-  # Function that generates scenarios and computes NAV. The expression
-  # is wrapped in a call to reactive to indicate that:
-  #
-  #  1) It is "reactive" and therefore should be automatically
-  #     re-executed when inputs change
-  #
-  navA <- reactive(do.call(RunSimulation, getParams("a"))) # 
+  navA <- reactive(RunAllSimulation(getParams("a")) ) # 
 
-  # Expression that plot NAV paths. The expression
-  # is wrapped in a call to renderPlot to indicate that:
-  #
-  #  1) It is "reactive" and therefore should be automatically
-  #     re-executed when inputs change
-  #  2) Its output type is a plot
-  #
-
-output$a_PopulationPlot <- renderPlot({
+  output$a_PopulationPlot <- renderPlot({
     plot_pop(navA())
   })
 
-output$a_IntrogressionPlot <- renderPlot({
+  output$a_IntrogressionPlot <- renderPlot({
     plot_intro(navA())
   })
 
-output$a_lociPlot <- renderPlotly({
+  output$fixation_output <- renderText({ 
+    paste("The fixation probability is: ", navA()$fixation)
+  })
+
+  output$a_lociPlot <- renderPlotly({
   #allelefrequencies
   dataallelemean <-tidyr::gather(as.data.frame(navA()[[3]]), locus, value, 2:ncol(as.data.frame(navA()[[3]])))
   dataallelevar <-tidyr::gather(as.data.frame(navA()[[4]]), locus, value, 2:ncol(as.data.frame(navA()[[4]])))

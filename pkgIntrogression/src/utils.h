@@ -29,9 +29,6 @@
 #include <cstdlib>
 #include <string>
 
-extern const double	PI2;
-extern const double	PI;
-extern const double SQRT2;
 extern bool echo_stdclog;
 
 void echo(const std::string&, const bool& = echo_stdclog);

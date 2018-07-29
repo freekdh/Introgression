@@ -4,14 +4,34 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "build_CSV",
             "type": "shell",
-            "command": "g++ -fopenmp -O3 -std=c++11 -I /usr/local/include/boost_1_67_0/ -g Main.cpp random.cpp random.h utils.cpp utils.h -o test.a /usr/local/lib/libboost_filesystem.a /usr/local/lib/libboost_system.a",
+            "command": "g++ -fopenmp -O3 -std=c++11 -I /usr/local/include/boost_1_67_0/ -g IntrogressionSimulations.cpp IntrogressionSimulations.h CSV_output.cpp random.cpp random.h utils.cpp utils.h -o CSVtest.a /usr/local/lib/libboost_filesystem.a /usr/local/lib/libboost_system.a",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
             "problemMatcher":"$gcc"
+        },
+        {
+            "label": "build_RCPP",
+            "type": "shell",
+            "command": "g++ -fopenmp -O3 -std=c++11 -I /usr/local/include/boost_1_67_0/ -g IntrogressionSimulations.cpp IntrogressionSimulations.h Rcpp_output.cpp random.cpp random.h utils.cpp utils.h -o RCPPtest.a",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher":"$gcc"            
+        },
+        {
+            "label": "build_SHINY",
+            "type": "shell",
+            "command": "g++ -fopenmp -O3 -std=c++11 -I /usr/local/include/boost_1_67_0/ -g IntrogressionSimulations.cpp IntrogressionSimulations.h Shiny_output.cpp random.cpp random.h utils.cpp utils.h -o test.a",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher":"$gcc"            
         }
     ]
 }

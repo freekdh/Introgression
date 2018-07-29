@@ -5,32 +5,54 @@
 
 using namespace Rcpp;
 
-// IntrogressionSimulation
-Rcpp::List IntrogressionSimulation(double r, int nloci, int nploidy, int ninit0, int ninit1, int distlocal, double scmajor, double sclocal, int ngen, int nrep, double rec, int k, int threads);
-RcppExport SEXP _pkgIntrogression_IntrogressionSimulation(SEXP rSEXP, SEXP nlociSEXP, SEXP nploidySEXP, SEXP ninit0SEXP, SEXP ninit1SEXP, SEXP distlocalSEXP, SEXP scmajorSEXP, SEXP sclocalSEXP, SEXP ngenSEXP, SEXP nrepSEXP, SEXP recSEXP, SEXP kSEXP, SEXP threadsSEXP) {
+// RcppIntrogressionSimulation
+Rcpp::List RcppIntrogressionSimulation(Rcpp::List parslist, int setthreads, bool progressbar);
+RcppExport SEXP _pkgIntrogression_RcppIntrogressionSimulation(SEXP parslistSEXP, SEXP setthreadsSEXP, SEXP progressbarSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type r(rSEXP);
-    Rcpp::traits::input_parameter< int >::type nloci(nlociSEXP);
-    Rcpp::traits::input_parameter< int >::type nploidy(nploidySEXP);
-    Rcpp::traits::input_parameter< int >::type ninit0(ninit0SEXP);
-    Rcpp::traits::input_parameter< int >::type ninit1(ninit1SEXP);
-    Rcpp::traits::input_parameter< int >::type distlocal(distlocalSEXP);
-    Rcpp::traits::input_parameter< double >::type scmajor(scmajorSEXP);
-    Rcpp::traits::input_parameter< double >::type sclocal(sclocalSEXP);
-    Rcpp::traits::input_parameter< int >::type ngen(ngenSEXP);
-    Rcpp::traits::input_parameter< int >::type nrep(nrepSEXP);
-    Rcpp::traits::input_parameter< double >::type rec(recSEXP);
-    Rcpp::traits::input_parameter< int >::type k(kSEXP);
-    Rcpp::traits::input_parameter< int >::type threads(threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(IntrogressionSimulation(r, nloci, nploidy, ninit0, ninit1, distlocal, scmajor, sclocal, ngen, nrep, rec, k, threads));
+    Rcpp::traits::input_parameter< Rcpp::List >::type parslist(parslistSEXP);
+    Rcpp::traits::input_parameter< int >::type setthreads(setthreadsSEXP);
+    Rcpp::traits::input_parameter< bool >::type progressbar(progressbarSEXP);
+    rcpp_result_gen = Rcpp::wrap(RcppIntrogressionSimulation(parslist, setthreads, progressbar));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ShinyInitializeSimulation
+void ShinyInitializeSimulation(const Rcpp::List& parslist);
+RcppExport SEXP _pkgIntrogression_ShinyInitializeSimulation(SEXP parslistSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type parslist(parslistSEXP);
+    ShinyInitializeSimulation(parslist);
+    return R_NilValue;
+END_RCPP
+}
+// ShinyRunSimulation
+void ShinyRunSimulation();
+RcppExport SEXP _pkgIntrogression_ShinyRunSimulation() {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    ShinyRunSimulation();
+    return R_NilValue;
+END_RCPP
+}
+// ShinyWriteOutputandCleanup
+Rcpp::List ShinyWriteOutputandCleanup();
+RcppExport SEXP _pkgIntrogression_ShinyWriteOutputandCleanup() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(ShinyWriteOutputandCleanup());
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_pkgIntrogression_IntrogressionSimulation", (DL_FUNC) &_pkgIntrogression_IntrogressionSimulation, 13},
+    {"_pkgIntrogression_RcppIntrogressionSimulation", (DL_FUNC) &_pkgIntrogression_RcppIntrogressionSimulation, 3},
+    {"_pkgIntrogression_ShinyInitializeSimulation", (DL_FUNC) &_pkgIntrogression_ShinyInitializeSimulation, 1},
+    {"_pkgIntrogression_ShinyRunSimulation", (DL_FUNC) &_pkgIntrogression_ShinyRunSimulation, 0},
+    {"_pkgIntrogression_ShinyWriteOutputandCleanup", (DL_FUNC) &_pkgIntrogression_ShinyWriteOutputandCleanup, 0},
     {NULL, NULL, 0}
 };
 

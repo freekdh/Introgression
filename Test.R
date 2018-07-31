@@ -18,3 +18,8 @@ ShinyRunSimulation()
 ShinyWriteOutputandCleanup()
 
 hello <- RcppIntrogressionSimulation(testpars,0,1)
+
+## shiny stuff
+
+shiny::runApp("/home/freek/Documents/VisualCode/C++/Introgression/pkgIntrogression/ShinyApp", display.mode = "normal")
+

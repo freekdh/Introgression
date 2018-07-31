@@ -3,14 +3,16 @@ paste(getwd(),"/Cppfiles", sep="")
 # Make R package
 Rcpp.package.skeleton(
     name = "pkgIntrogression", 
-    cpp_files = c("sourcefiles/IntrogressionSimulations.cpp",
-    "sourcefiles/IntrogressionSimulations.h",
-    "sourcefiles/Rcpp_output.cpp",
-    "sourcefiles/Shiny_output.cpp", 
-    "sourcefiles/random.h", 
-    "sourcefiles/random.cpp", 
-    "sourcefiles/utils.h", 
-    "sourcefiles/utils.cpp"), 
+    code_files = c("ShinyApp/ShinyExport.R", "ShinyApp/server.r", "ShinyApp/ui.r"),
+    cpp_files = c("CppFiles/IntrogressionSimulations.cpp",
+    "CppFiles/IntrogressionSimulations.h",
+    "CppFiles/Rcpp_output.cpp",
+    "CppFiles/Shiny_output.cpp", 
+    "CppFiles/random.h", 
+    "CppFiles/random.cpp", 
+    "CppFiles/utils.h", 
+    "CppFiles/utils.cpp",
+    "CppFiles/Makevars"), 
     example_code = FALSE,
     author = "F.J.H. de Haas",
     email = "dehaas@zoology.ubc.ca")
@@ -19,4 +21,3 @@ Rcpp.package.skeleton(
 #Imports: Rcpp (>= 0.12.17), BH, RcppProgress
 #LinkingTo: Rcpp, BH, RcppProgress
 
-#And add the MakeVars file with the openmp flag

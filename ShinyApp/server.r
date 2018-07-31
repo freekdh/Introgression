@@ -22,16 +22,16 @@ ylab("Introgression")
 }
 
 RunAllSimulation <- function(pars){
-  do.call(InitializeSimulation,pars)
+  do.call(ShinyInitializeSimulation,pars)
   
   withProgress(message="Running simulations",value = 0,{
     for(x in c(1:100)){
       incProgress(1/100, detail = paste("Doing replicate", x))
-      RunSimulation()
+      ShinyRunSimulation()
     }
   })
 
-  WriteOutputandCleanup()
+  ShinyWriteOutputandCleanup()
 }
 
 function(input, output, session) {

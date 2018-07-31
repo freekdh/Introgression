@@ -6,7 +6,7 @@
         {
             "label": "build_CSV",
             "type": "shell",
-            "command": "g++ -fopenmp -O3 -std=c++11 -I /usr/local/include/boost_1_67_0/ -g IntrogressionSimulations.cpp IntrogressionSimulations.h CSV_output.cpp random.cpp random.h utils.cpp utils.h -o CSVtest.a /usr/local/lib/libboost_filesystem.a /usr/local/lib/libboost_system.a",
+            "command": "g++ -fopenmp -O3 -std=c++11 -I /usr/local/include/boost_1_67_0/ -g ./CppFiles/IntrogressionSimulations.cpp ./CppFiles/IntrogressionSimulations.h ./CppFiles/CSV_output.cpp ./CppFiles/random.cpp ./CppFiles/random.h ./CppFiles/utils.cpp ./CppFiles/utils.h -o ./CppFiles/CSVtest.a /usr/local/lib/libboost_filesystem.a /usr/local/lib/libboost_system.a",
             "group": {
                 "kind": "build",
                 "isDefault": true

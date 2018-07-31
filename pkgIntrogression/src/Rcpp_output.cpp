@@ -153,12 +153,12 @@ Rcpp::List RcppIntrogressionSimulation(Rcpp::List parslist, int setthreads = 0, 
         else omp_set_num_threads(maxthreads);
         REprintf("Parallel activated : Number of threads=%i\n",omp_get_max_threads());   
     #endif
-    //if(progressbar == true) Progress p(GlobalPars.NREP, true);
+    if(progressbar == true) Progress p(GlobalPars.NREP, true);
 
     #pragma omp parallel for schedule(static)
     for (int task = 0; task < GlobalPars.NREP; ++task){
         while(RunSimulation(GlobalPars, SimulationData)==false);
-    //    if(progressbar == true) p.increment();
+        if(progressbar == true) p.increment();
     }
 
     return Rcpp_WriteOutput(GlobalPars, SimulationData);

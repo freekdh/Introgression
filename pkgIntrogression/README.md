@@ -1,8 +1,8 @@
-# velocyto.R
+# pkgIntrogression
 Introgression simulations complementing published paper
 
 ## System requirements
-velocyto.R can be installed on unix-flavored systems, and requires the following key elements:
+pkgIntrogression can be installed on unix-flavored systems, and requires the following key elements:
 
 * C++11
 * Open MP support

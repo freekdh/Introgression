@@ -6,7 +6,8 @@ renderInputs <- function(prefix) {
     fluidRow(
         column(3,
         sliderInput(paste0(prefix, "_", "ngen"), "Number of generations:", min = 10, max = 100, value = 100,step = 20),
-        sliderInput(paste0(prefix, "_", "nloci"), "Number of loci:", min = 50, max = 200, value = 50, step = 25)
+        sliderInput(paste0(prefix, "_", "nloci"), "Number of loci:", min = 50, max = 200, value = 50, step = 25),
+        sliderInput(paste0(prefix, "_", "nrep"), "Number of repetitions:", min = 1, max = 100, value = 50, step = 10)
         ),
         column(3,
         sliderInput(paste0(prefix, "_", "nploidy"), "Number of ploidy:", min = 2, max = 6, value = 2, step = 2),
@@ -25,7 +26,7 @@ renderInputs <- function(prefix) {
         )
     ),
     p(actionButton(paste0(prefix, "_", "recalc"),
-      "Re-run simulation", icon("random")
+      "Run simulation", icon("random")
     ))
   )
 }

@@ -23,13 +23,11 @@ plot_intro <- function(nav) {
 }
 
 RunAllSimulation <- function(pars){
-
-  print(pars)
   pkgIntrogression::ShinyInitializeSimulation(pars)
   
   withProgress(message="Running simulations",value = 0,{
-    for(x in c(1:100)){
-      incProgress(0.01, detail = paste("Doing replicate", x))
+    for(x in c(1:pars$nrep)){
+      incProgress(1/pars$nrep, detail = paste("Doing replicate", x))
       pkgIntrogression::ShinyRunSimulation()
     }
   })
@@ -46,18 +44,17 @@ function(input, output, session) {
     length(params) <- 12
     params <- lapply(paramNames, function(p) {input[[paste0(prefix, "_", p)]]})
     names(params) <- paramNames
-    params$nrep <- 100
     as.list(params)
   }
 
-  navA <- reactive(RunAllSimulation(getParams("a")) ) # 
+  navA <- eventReactive(input$a_recalc, RunAllSimulation(getParams("a")) ) # 
 
   output$a_PopulationPlot <- renderPlot({
-    plot_pop(navA())
+    suppressWarnings(plot_pop(navA()))
   })
 
   output$a_IntrogressionPlot <- renderPlot({
-    plot_intro(navA())
+    suppressWarnings(plot_intro(navA()))
   })
 
   output$fixation_output <- renderText({ 
@@ -77,7 +74,7 @@ function(input, output, session) {
   ylab("Allelefrequency") + 
   theme(axis.text.x = element_blank())
 
-  ggplotly(allelefrequencyplot)
+  suppressWarnings(ggplotly(allelefrequencyplot))
 })
 
 }

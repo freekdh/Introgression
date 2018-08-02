@@ -1,0 +1,136 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 1.0 (10/11/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND THEMES
+%----------------------------------------------------------------------------------------
+
+\documentclass{beamer}
+
+\mode<presentation> {
+
+% The Beamer class comes with a number of default slide themes
+% which change the colors and layouts of slides. Below this is a list
+% of all the themes, uncomment each in turn to see what they look like.
+
+%\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+% As well as themes, the Beamer class has a number of color themes
+% for any slide theme. Uncomment each of these in turn to see how it
+% changes the colors of your current slide theme.
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+%\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+\usepackage{xcolor}% or package color
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{bm}
+
+\graphicspath{{./Figures/}}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title[lab meeting]{Evolutionary rescue by introgressive hybridization} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+\author{F.J.H. de Haas \& S.P. Otto} % Your name
+
+\date{\today} % Date, can be changed to a custom date
+
+\begin{document}
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+\begin{frame}{Orr and Unckles 2014}
+
+Evolutionary rescue is characterized by a U-shaped curve of population size.
+
+\includegraphics[width=0.5\columnwidth]{Ushape_ER.png}
+
+\end{frame}
+
+\begin{frame}{Analytical model}
+
+\begin{equation}
+    \begin{array}{l}
+	F_w[t+1] = \overbrace{\frac{1}{2} (F_w[t]+F_b[t]) p_b[t+1]}^\text{$w$ x $b$}  + \overbrace{F_w[t] (1-p_b[t+1])}^\text{$w$ x $w$}
+	 \\ \\
+	F_b[t+1]  = \overbrace{\frac{1}{2} (F_w[t]+F_b[t]) (1-p_b[t+1])}^\text{$b$ x $w$} 
+	+ \overbrace{F_b[t] p_b[t+1]}^\text{$b$ x $b$}
+	\end{array}
+\end{equation}
+
+Assumptions: \\
+1) Infinite population size \\
+2) Infinite \# of loci \\
+3) Free recombining loci ($r = 0.5$) 
+    
+\end{frame}
+
+\begin{frame}{Model}
+    \begin{equation}
+    F_b[t] = \sum_{i=1}^t 2^{-i} (1-p_b[i])
+\end{equation}
+\end{frame}
+
+\end{document}

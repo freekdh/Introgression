@@ -1,5 +1,5 @@
 # pkgIntrogression
-Introgression simulations complementing published paper
+Introgression simulations complementing paper in prep
 
 ## System requirements
 pkgIntrogression can be installed on unix-flavored systems, and requires the following key elements:
@@ -25,14 +25,3 @@ cd velocyto.R/dockers/debian9
 docker build -t velocyto .
 docker run --name velocyto -it velocyto
 ```
-
-## Tutorials
-
-### [Chromaffin / SMART-seq2](http://pklab.med.harvard.edu/velocyto/notebooks/R/chromaffin2.nb.html)
-The example shows how to annotate SMART-seq2 reads from bam file and estimate RNA velocity.
-
-### [Dentate Gyrus / loom](http://pklab.med.harvard.edu/velocyto/notebooks/R/DG1.nb.html)
-The example shows how to load spliced/unspliced matrices from loom files prepared by [velocyto.py CLI](http://velocyto.org/velocyto.py/tutorial/index.html#running-the-cli), use [pagoda2](https://github.com/hms-dbmi/pagoda2) to cluster/embed cells, and then visualize RNA velocity on that embedding.
-
-### [Mouse BM / dropEst](http://pklab.med.harvard.edu/velocyto/notebooks/R/SCG71.nb.html)
-This example shows how to start analysis using dropEst count matrices, which can calculated from inDrop or 10x bam files using [dropEst pipeline](https://github.com/hms-dbmi/dropEst/). It then uses [pagoda2](https://github.com/hms-dbmi/pagoda2) to cluster/embed cells, and then visualize RNA velocity on that embedding.

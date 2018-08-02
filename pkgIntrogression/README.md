@@ -1,5 +1,5 @@
 # pkgIntrogression
-Introgression simulations complementing published paper
+Introgression simulations complementing paper in prep
 
 ## System requirements
 pkgIntrogression can be installed on unix-flavored systems, and requires the following key elements:

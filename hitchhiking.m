@@ -1,14 +1,37 @@
 function hitchhiking()
     
-    size = 6;
-    mat = recombinationMatrix(0.5,size); % don't go over 12
-    mat2 = selectionMatrix(size); % don't go over 12
+    size = 7;
+    recmat = recombinationMatrix(0.1,size); % don't go over 12
+    selmat = selectionMatrix(size); % don't go over 12
     
-    initvec = initialvec(1,2,6,1,size);
-    powermat = mat*mat2;
+    initvec = initialvec(1,2,size,1,size);
+    powermat = recmat*selmat;
+            
+    [AB,Ab,aB,ab] = data(100,initvec,powermat, size)
+    [AB,Ab,aB,ab];
+    
+    plot([AB,Ab,aB,ab])
+end
+
+function [AB,Ab,aB,ab] = data(t,initvec,powermat,size)
+    temppower = eye(size^4);
+    AB = zeros(t,1);
+    Ab = zeros(t,1);
+    aB = zeros(t,1);
+    ab = zeros(t,1);
+    
+    for tt = 1:t
+        vec = temppower*initvec;
+        for i = 1: size^4
+            [k,l,m,n] = elem2mat(i,size);
+            AB(tt) = AB(tt) + k*vec(i);
+            Ab(tt) = Ab(tt) + l*vec(i);
+            aB(tt) = aB(tt) + m*vec(i);
+            ab(tt) = ab(tt) + n*vec(i);
+        end
         
-    [AB,Ab,aB,ab] = expected(2,initvec,powermat,size);
-    [AB,Ab,aB,ab]
+        temppower = temppower*powermat;
+    end
 end
 
 function [AB,Ab,aB,ab] = expected(t, initvec, powermat, size)
@@ -125,24 +148,5 @@ function [i,j,k,l] = elem2mat (index, N)
     j = mod(floor((index-1)/(N)),N)+1;
     k = mod(floor((index-1)/(N*N)),N)+1;
     l = mod(floor((index-1)/(N*N*N)),N)+1;
-end
-
-function testfunc(size)
-    matrix = sparse(size^4,size^4);
-    matrix(mat2elem(2,2,2,2,size),mat2elem(2,2,2,2,size)) = 1;
-    matrix(mat2elem(3,2,2,2,size),mat2elem(2,2,2,2,size)) = 1;
-    matrix(mat2elem(2,3,2,2,size),mat2elem(2,2,2,2,size)) = 1;
-    matrix(mat2elem(2,2,3,2,size),mat2elem(2,2,2,2,size)) = 1;
-    matrix(mat2elem(2,2,2,3,size),mat2elem(2,2,2,2,size)) = 1;
-
-    matrix(mat2elem(1,2,2,2,size),mat2elem(2,2,2,2,size)) = 1;
-    matrix(mat2elem(2,1,2,2,size),mat2elem(2,2,2,2,size)) = 1;
-    matrix(mat2elem(2,2,1,2,size),mat2elem(2,2,2,2,size)) = 1;
-    matrix(mat2elem(2,2,2,1,size),mat2elem(2,2,2,2,size)) = 1; 
-    
-    matrix(mat2elem(3,3,3,3,size),mat2elem(2,2,2,2,size)) = 1;    
-    matrix(mat2elem(1,1,1,1,size),mat2elem(2,2,2,2,size)) = 1;    
-    
-    spy(matrix) 
 end
 

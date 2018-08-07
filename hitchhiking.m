@@ -1,14 +1,14 @@
 function hitchhiking()
     
     size = 6;
-    recmat = recombinationMatrix(0.05,.5,size); % don't go over 10
-    selmat = selectionMatrix(size, 0.1, 0.01, 0.01, 0.1, .5); % don't go over 10
+    recmat = recombinationMatrix(size, 0.5,.05); % don't go over 10
+    selmat = selectionMatrix(size, 0.1, 0.0, 0, 0.1, .05); % don't go over 10
     
-    initvec = initialvec(1,2,size,1,size);
+    initvec = initialvec(1,3,3,1,size);
     powermat = selmat*recmat;
             
-    [AB,Ab,aB,ab] = data(100,initvec,powermat, size);
-    [AB,Ab,aB,ab];
+    [AB,Ab,aB,ab] = data(500,initvec,powermat, size);
+    [AB,Ab,aB,ab]
     
     %plot([AB-1,Ab-1,aB-1,ab-1])
         
@@ -36,31 +36,12 @@ function [AB,Ab,aB,ab] = data(t,initvec,powermat,size)
     end
 end
 
-function [AB,Ab,aB,ab] = expected(t, initvec, powermat, size)
-
-    vec = powermat^t*initvec;
-
-    AB = 0;
-    Ab = 0;
-    aB = 0;
-    ab = 0;
-    
-    for i = 1: size^4
-        [k,l,m,n] = elem2mat(i,size);
-        AB = AB + k*vec(i);
-        Ab = Ab + l*vec(i);
-        aB = aB + m*vec(i);
-        ab = ab + n*vec(i);
-    end
-    
-end
-
 function vec = initialvec(AB,Ab,aB,ab,size)
 vec = zeros(size^4,1);
 vec(mat2elem(AB,Ab,aB,ab,size)) = 1;
 end
 
-function matrix = recombinationMatrix(rec,dt,size)
+function matrix = recombinationMatrix(size, rec,dt)
     matrix = sparse(size^4,size^4);
     for AB = 1:size
         for Ab = 1:size

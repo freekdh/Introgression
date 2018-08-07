@@ -1,16 +1,18 @@
 function hitchhiking()
     
-    size = 7;
-    recmat = recombinationMatrix(0.1,size); % don't go over 12
-    selmat = selectionMatrix(size); % don't go over 12
+    size = 6;
+    recmat = recombinationMatrix(0.05,.5,size); % don't go over 10
+    selmat = selectionMatrix(size, 0.1, 0.01, 0.01, 0.1, .5); % don't go over 10
     
     initvec = initialvec(1,2,size,1,size);
-    powermat = recmat*selmat;
+    powermat = selmat*recmat;
             
-    [AB,Ab,aB,ab] = data(100,initvec,powermat, size)
+    [AB,Ab,aB,ab] = data(100,initvec,powermat, size);
     [AB,Ab,aB,ab];
     
-    plot([AB,Ab,aB,ab])
+    %plot([AB-1,Ab-1,aB-1,ab-1])
+        
+	plot([(AB-1)./((Ab-1)+(AB-1)),(aB-1)./((aB-1)+(ab-1))])
 end
 
 function [AB,Ab,aB,ab] = data(t,initvec,powermat,size)
@@ -58,7 +60,7 @@ vec = zeros(size^4,1);
 vec(mat2elem(AB,Ab,aB,ab,size)) = 1;
 end
 
-function matrix = recombinationMatrix(rec,size)
+function matrix = recombinationMatrix(rec,dt,size)
     matrix = sparse(size^4,size^4);
     for AB = 1:size
         for Ab = 1:size
@@ -67,10 +69,10 @@ function matrix = recombinationMatrix(rec,size)
                     sum=AB+Ab+aB+ab-4;
                     temp =0;
                     if(AB ~= size && Ab ~= 1 && aB ~= 1 && ab ~= size)
-                    matrix(mat2elem(AB+1,Ab-1,aB-1,ab+1,size), mat2elem(AB,Ab,aB,ab,size)) = ((Ab-1)/sum)*((aB-1)/sum)*rec; temp = temp + ((Ab-1)/sum)*((aB-1)/sum)*rec;
+                    matrix(mat2elem(AB+1,Ab-1,aB-1,ab+1,size), mat2elem(AB,Ab,aB,ab,size)) = (Ab-1)*(aB-1)*dt*rec; temp = temp + (Ab-1)*(aB-1)*dt*rec;
                     end
                     if(AB ~= 1 && Ab ~= size && aB ~= size && ab ~= 1)
-                    matrix(mat2elem(AB-1,Ab+1,aB+1,ab-1,size), mat2elem(AB,Ab,aB,ab,size)) = ((AB-1)/sum)*((ab-1)/sum)*rec; temp = temp + ((AB-1)/sum)*((ab-1)/sum)*rec;                 
+                    matrix(mat2elem(AB-1,Ab+1,aB+1,ab-1,size), mat2elem(AB,Ab,aB,ab,size)) = (AB-1)*(ab-1)*dt*rec; temp = temp + (AB-1)*(ab-1)*dt*rec;                 
                     end
                     
                     if(sum ~= 0)
@@ -85,12 +87,8 @@ function matrix = recombinationMatrix(rec,size)
     
 end
 
-function matrix = selectionMatrix(size)
+function matrix = selectionMatrix(size, bA, dA, ba, da, dt)
     matrix = sparse(size^4,size^4);
-    bA = 0.2;
-    dA = 0.02;
-    ba = 0.02;
-    da = 0.2;
     for AB = 1:size
         for Ab = 1:size
             for aB = 1:size
@@ -98,29 +96,29 @@ function matrix = selectionMatrix(size)
                     sum=AB+Ab+aB+ab-4;
                     temp = 0;
                     if(AB ~= 1)
-                    matrix(mat2elem(AB-1,Ab,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = ((AB-1)/sum)*dA; temp=temp+((AB-1)/sum)*dA;
+                    matrix(mat2elem(AB-1,Ab,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = (AB-1)*dt*dA; temp=temp+(AB-1)*dt*dA;
                     end
                     if(Ab ~= 1)
-                    matrix(mat2elem(AB,Ab-1,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = ((Ab-1)/sum)*dA; temp=temp+((Ab-1)/sum)*dA;
+                    matrix(mat2elem(AB,Ab-1,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = (Ab-1)*dt*dA; temp=temp+(Ab-1)*dt*dA;
                     end
                     if(aB ~= 1)
-                    matrix(mat2elem(AB,Ab,aB-1,ab,size),mat2elem(AB,Ab,aB,ab,size)) = ((aB-1)/sum)*da; temp=temp+((aB-1)/sum)*da;
+                    matrix(mat2elem(AB,Ab,aB-1,ab,size),mat2elem(AB,Ab,aB,ab,size)) = (aB-1)*dt*da; temp=temp+(aB-1)*dt*da;
                     end
                     if(ab ~= 1)
-                    matrix(mat2elem(AB,Ab,aB,ab-1,size),mat2elem(AB,Ab,aB,ab,size)) = ((ab-1)/sum)*da; temp=temp+((ab-1)/sum)*da;
+                    matrix(mat2elem(AB,Ab,aB,ab-1,size),mat2elem(AB,Ab,aB,ab,size)) = (ab-1)*dt*da; temp=temp+(ab-1)*dt*da;
                     end
                     
                     if(AB ~= 1 && AB ~= size)
-                    matrix(mat2elem(AB+1,Ab,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = ((AB-1)/sum)*bA; temp=temp+((AB-1)/sum)*bA;
+                    matrix(mat2elem(AB+1,Ab,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = (AB-1)*dt*bA; temp=temp+(AB-1)*dt*bA;
                     end
                     if(Ab ~= 1 && Ab ~= size)
-                    matrix(mat2elem(AB,Ab+1,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = ((Ab-1)/sum)*bA; temp=temp+((Ab-1)/sum)*bA;
+                    matrix(mat2elem(AB,Ab+1,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = (Ab-1)*dt*bA; temp=temp+(Ab-1)*dt*bA;
                     end
                     if(aB ~= 1 && aB ~= size)
-                    matrix(mat2elem(AB,Ab,aB+1,ab,size),mat2elem(AB,Ab,aB,ab,size)) = ((aB-1)/sum)*ba; temp=temp+((aB-1)/sum)*ba;
+                    matrix(mat2elem(AB,Ab,aB+1,ab,size),mat2elem(AB,Ab,aB,ab,size)) = (aB-1)*dt*ba; temp=temp+(aB-1)*dt*ba;
                     end
                     if(ab ~= 1 && ab ~= size)
-                    matrix(mat2elem(AB,Ab,aB,ab+1,size),mat2elem(AB,Ab,aB,ab,size)) = ((ab-1)/sum)*ba; temp=temp+((ab-1)/sum)*ba;
+                    matrix(mat2elem(AB,Ab,aB,ab+1,size),mat2elem(AB,Ab,aB,ab,size)) = (ab-1)*dt*ba; temp=temp+(ab-1)*dt*ba;
                     end
                     
                     
@@ -133,9 +131,6 @@ function matrix = selectionMatrix(size)
     end
     
     matrix(1,1) = 1;
-    
-    % now the upper limit 
-    
     
 end
 

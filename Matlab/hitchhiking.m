@@ -10,32 +10,45 @@ function hitchhiking()
     initvec = initialvec(1,2,6,1,size);
     powermat = selmat*recmat;
             
-    [AB,Ab,aB,ab] = data(500,initvec,powermat, size);
-    [AB,Ab,aB,ab];
+    [E_AB,E_Ab,E_aB,E_ab,V_AB,V_Ab,V_aB,V_ab] = data(500,initvec,powermat, size);
+    [E_AB,E_Ab,E_aB,E_ab,V_AB,V_Ab,V_aB,V_ab];
     
-    csvwrite("./data/neutral.csv",[AB,Ab,aB,ab]);
+    csvwrite("./data/neutral.csv",[E_AB,E_Ab,E_aB,E_ab,V_AB,V_Ab,V_aB,V_ab]);
     
     %plot([AB-1,Ab-1,aB-1,ab-1])
         
-	plot([(AB-1)./((Ab-1)+(AB-1)),(aB-1)./((aB-1)+(ab-1))])
+	%plot([(AB-1)./((Ab-1)+(AB-1)),(aB-1)./((aB-1)+(ab-1))])
 end
 
-function [AB,Ab,aB,ab] = data(t,initvec,powermat,size)
+function [E_AB,E_Ab,E_aB,E_ab,V_AB,V_Ab,V_aB,V_ab] = data(t,initvec,powermat,size)
     temppower = eye(size^4);
-    AB = zeros(t,1);
-    Ab = zeros(t,1);
-    aB = zeros(t,1);
-    ab = zeros(t,1);
+    E_AB = zeros(t,1);
+    E_Ab = zeros(t,1);
+    E_aB = zeros(t,1);
+    E_ab = zeros(t,1);
+    V_AB = zeros(t,1);
+    V_Ab = zeros(t,1);
+    V_aB = zeros(t,1);
+    V_ab = zeros(t,1);
     
     for tt = 1:t
         vec = temppower*initvec;
         for i = 1: size^4
             [k,l,m,n] = elem2mat(i,size);
-            AB(tt) = AB(tt) + k*vec(i);
-            Ab(tt) = Ab(tt) + l*vec(i);
-            aB(tt) = aB(tt) + m*vec(i);
-            ab(tt) = ab(tt) + n*vec(i);
+            E_AB(tt) = E_AB(tt) + (k-1)*vec(i);
+            E_Ab(tt) = E_Ab(tt) + (l-1)*vec(i);
+            E_aB(tt) = E_aB(tt) + (m-1)*vec(i);
+            E_ab(tt) = E_ab(tt) + (n-1)*vec(i);
+            V_AB(tt) = V_AB(tt) + (k-1)*(k-1)*vec(i);
+            V_Ab(tt) = V_Ab(tt) + (l-1)*(l-1)*vec(i);
+            V_aB(tt) = V_aB(tt) + (m-1)*(m-1)*vec(i);
+            V_ab(tt) = V_ab(tt) + (n-1)*(n-1)*vec(i);
         end
+        
+        V_AB(tt) = V_AB(tt) - (E_AB(tt)*E_AB(tt));
+        V_Ab(tt) = V_Ab(tt) - (E_Ab(tt)*E_Ab(tt));
+        V_aB(tt) = V_aB(tt) - (E_aB(tt)*E_aB(tt));
+        V_ab(tt) = V_ab(tt) - (E_ab(tt)*E_ab(tt));
         
         temppower = temppower*powermat;
     end

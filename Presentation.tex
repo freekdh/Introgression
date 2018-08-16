@@ -82,6 +82,7 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{bm}
+\usepackage{mathtools}
 
 \graphicspath{{./Figures/}}
 
@@ -131,6 +132,71 @@ Assumptions: \\
     \begin{equation}
     F_b[t] = \sum_{i=1}^t 2^{-i} (1-p_b[i])
 \end{equation}
+\end{frame}
+
+\begin{frame}{Discrete Markov Model}
+\footnotesize
+
+$\bold{P} = \{\{G_{AB},G_{Ab},G_{aB},G_{ab}\}\} \text{ such that } G_i\in\{0,1,...,n\}$\\ 
+$\bold{X},\bold{Y} \in \bold{P}$. \\
+
+Probability of going from $\bold{X}$ to $\bold{Y}$
+\begin{equation*}
+\bold{M}_{\bold{Y},\bold{X}}=
+\begin{aligned}
+\begin{cases}
+\begin{cases}
+    \frac{1}{C}\times G_{AB}\times W_A, & \text{if } \bold{Y} = \bold{X} + \{1,0,0,0\}; \\
+    \frac{1}{C}\times G_{Ab}\times W_A, & \text{if } \bold{Y} = \bold{X} + \{0,1,0,0\};  \\
+    \frac{1}{C}\times G_{aB}\times W_a, & \text{if } \bold{Y} = \bold{X} + \{0,0,1,0\}; \\
+    \frac{1}{C}\times G_{ab}\times W_a, & \text{if } \bold{Y} = \bold{X} + \{0,0,0,1\}; \\
+    \frac{1}{C}\times f_{AB}-r\times D, & \text{if } \bold{Y} = \bold{X} + \{-1,0,0,0\}; \\
+    \frac{1}{C}\times f_{Ab}+r\times D, & \text{if } \bold{Y} = \bold{X} + \{0,-1,0,0\};  \\
+    \frac{1}{C}\times f_{aB}+r\times D, & \text{if } \bold{Y} = \bold{X} + \{0,0,-1,0\}; \\
+    \frac{1}{C}\times f_{AB}-r\times D, & \text{if } \bold{Y} = \bold{X} + \{0,0,0,-1\}; \\
+    1, & \text{if}\ \bold{X} = \bold{Y} = \{0,0,0,0\}; \\
+    0, & otherwise;
+\end{cases}  & \text{for}\ \bold{X}_1, \bold{X}_2 \neq n; \\
+\begin{cases} 
+    1, & \text{if}\ \bold{X}_1 = \bold{Y}_1 = n; \\
+    1, & \text{if}\ \bold{X}_2 = \bold{Y}_2 = n;  \\
+    \mathrlap{0,}\hphantom{\frac{1}{C}\times f_{AB}-r\times D,} & otherwise;
+\end{cases} & otherwise;
+\end{cases},
+\end{aligned}
+\end{equation*}
+where $C$ is a normalization constant.
+\normalsize
+
+\end{frame}
+
+\begin{frame}{$F_A$ from absorbing states}
+
+    The absorbing states $\bold{A} \in \bold{P} \text{ such that } \bold{A}_1,\bold{A}_2 = n \ \text{or } \{0,0,0,0\}$
+    
+    Process $\bold{X}(t)$.
+    
+    $P[\bold{X}(\infty) = \bold{A}| \bold{X}(0) = \bold{I}]$ satisfies the left eigenvector with $\lambda = 1$ and a corresponding right eigenvector $=\bold{A}$.
+    
+    \begin{equation*}
+        \vec{p}_\bold{A}^\intercal = \vec{p}_\bold{A}^\intercal \bold{M} \ \ \ \  \text{subject to } p_{\bold{A},\bold{A}}=1 \ \text{and}\ p_{l,\bold{A}}=0
+    \end{equation*}
+    
+    solves for the probabilities to end up in state $\bold{A}$ given initial condition $\bold{I}$.  
+    
+    \begin{equation*}
+    \bold{O}=
+        \begin{bmatrix}
+        \vec{0}  \\
+        \vec{p}_{\bold{A}(1)}  \\
+        \vdots  \\
+        \vec{p}_{\bold{A}(m)} 
+    \end{bmatrix}   
+    \end{equation*}
+     
+    \begin{equation*}
+        E[F_A] = (\bold{O} \vec{I}_\bold{I}) \bullet \vec{F}_A   %transpose and do dot product with 
+    \end{equation*}
 \end{frame}
 
 \end{document}

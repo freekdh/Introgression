@@ -3,8 +3,8 @@ function hitchhiking()
         
     size = 6; 
     r = 0.5;
-    WA = 1.5;
-    Wa = 0.7;
+    WA = 1.1;
+    Wa = 0.9;
     s= (WA/Wa)-1;
     
     birthdeathmat = birthdeathv3(size,WA,Wa,r);
@@ -18,9 +18,10 @@ function hitchhiking()
             absorbmatrix(elem,:) = W(:,i)*(1/W(elem,i));
         end
     end
-        
+    
+    for n = 2:size
     %get rescue / hitchhiking but conditioned on fixation.
-    vec = absorbmatrix(:,mat2elem(1,2,size,1,size));
+    vec = absorbmatrix(:,mat2elem(1,n,size,1,size));
     FA = 0;
     for i = 2:size^4 % skip the first state (0,0,0,0)
         if(vec(i) ~= 0)
@@ -32,6 +33,7 @@ function hitchhiking()
     end
     
     FA
+    end
  
 end
 

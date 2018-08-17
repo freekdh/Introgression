@@ -121,43 +121,7 @@ We look at \textbf{genetic rescue} conditioned on evolutionary rescue.
     What is genetic rescue?
 \end{frame}
 
-\begin{frame}{The model}
-\begin{tikzpicture}[-{Stealth[inset=0pt,length=4.5pt,angle'=35,round,bend]}, scale=1]
-  \foreach \a/\t in {90/census,-30/selection,210/mating}{
-    \node (\t) at (\a:1.1cm) {$\t$};
-    \draw (\a-20:1cm)  arc (\a-20:\a-100:1cm);
-  } 
-\end{tikzpicture}
-
-\end{frame}
-
-\begin{frame}{Recursion equations}
-
-\begin{equation}
-    \begin{array}{l}
-	F_w[t+1] = \overbrace{\frac{1}{2} (F_w[t]+F_b[t]) p_b[t+1]}^\text{$w$ x $b$}  + \overbrace{F_w[t] (1-p_b[t+1])}^\text{$w$ x $w$}
-	 \\ \\
-	F_b[t+1]  = \overbrace{\frac{1}{2} (F_w[t]+F_b[t]) (1-p_b[t+1])}^\text{$b$ x $w$} 
-	+ \overbrace{F_b[t] p_b[t+1]}^\text{$b$ x $b$}
-	\end{array}
-\end{equation}
-
-Assumptions: \\
-1) Infinite population size \\
-2) Infinite \# of loci \\
-3) Free recombining loci ($r = 0.5$) 
-    
-\end{frame}
-
-\begin{frame}{Numerical Simulation}
-\begin{overpic}[width=1.0\textwidth]{Figures/NumericalSolution.eps}
-\large
- \put (55,50) {$F_b[t] = \sum_{i=1}^t 2^{-i} (1-p_b[i])$}
-\normalsize
-\end{overpic}
-\end{frame}
-
-\begin{frame}{Infinite loci approximation vs 2 loci model}
+\begin{frame}{The 2 locus model: JMS}
 
 \begin{center}
 \begin{tabular}{ c | c c c c}
@@ -168,17 +132,31 @@ Assumptions: \\
 \end{tabular}
 \end{center}
 
-%$Q$ stands for the frequency of (neutral) B alleles linked to (rescue) A alleles.
-
 When $Q_0 = 0$, $R_0 = 1$ and $r=0.5$, a recursion equation for $Q_n$ is derived: 
 
 \begin{equation*}
-    Q_n = F_b[t] = \sum_{i=1}^n 2^{-i} (1-p_b[i])
+    Q_n = \sum_{i=1}^n 2^{-i} (1-p_b[i])
 \end{equation*}
+
+\begin{tikzpicture}[-{Stealth[inset=0pt,length=4.5pt,angle'=35,round,bend]}, scale=1]
+  \foreach \a/\t in {90/census,-30/selection,210/mating}{
+    \node (\t) at (\a:1.1cm) {$\t$};
+    \draw (\a-20:1cm)  arc (\a-20:\a-100:1cm);
+  } 
+\end{tikzpicture}
 
 \end{frame}
 
-\begin{frame}{Discrete Markov Model}
+\begin{frame}{Numerical Simulation}
+\begin{overpic}[width=0.9\textwidth]{Figures/NumericalSolution.eps}
+\large
+ \put (50,50) {$F_b[t] = \sum_{i=1}^t 2^{-i} (1-p_b[i])$}
+\normalsize
+\end{overpic}
+\end{frame}
+
+
+\begin{frame}{Discrete markov birth-death model}
 \footnotesize
 
 $\bold{P} = \{\{G_{AB},G_{Ab},G_{aB},G_{ab}\}\} \text{ such that } G_i\in\{0,1,...,n\}$\\ 
@@ -238,7 +216,7 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
 \end{frame}
 
 \begin{frame}{Example of absorbing states}
-    \includegraphics[width=1.0\textwidth]{Matlab/data/gridplot.eps}
+    \includegraphics[width=1.0\textwidth]{Matlab/Figures/gridplot.eps}
 \end{frame}
 
 
@@ -258,8 +236,31 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
     Where $\vec{F}_A$ is a vector containing the deterministic expectations for the absorbing states. (*Need to specify we drop the {0,0,0,0} case*)
 \end{frame}
 
+\begin{frame}{Recursion equations}
 
-\begin{frame}{Graveyard}
+\begin{equation}
+    \begin{array}{l}
+	F_w[t+1] = \overbrace{\frac{1}{2} (F_w[t]+F_b[t]) p_b[t+1]}^\text{$w$ x $b$}  + \overbrace{F_w[t] (1-p_b[t+1])}^\text{$w$ x $w$}
+	 \\ \\
+	F_b[t+1]  = \overbrace{\frac{1}{2} (F_w[t]+F_b[t]) (1-p_b[t+1])}^\text{$b$ x $w$} 
+	+ \overbrace{F_b[t] p_b[t+1]}^\text{$b$ x $b$}
+	\end{array}
+\end{equation}
+
+Assumptions: \\
+1) Infinite population size \\
+2) Infinite \# of loci \\
+3) Free recombining loci ($r = 0.5$) 
+    
+\end{frame}
+
+\begin{frame}{Infinite loci model}
+
+\underline{Conclusion}: the models are equivalent when $B$ represents the average of an infinite amount of loci.
+    
+\end{frame}
+
+\begin{frame}{Slide Graveyard}
 
 
     \begin{equation*}

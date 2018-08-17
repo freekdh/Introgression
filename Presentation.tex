@@ -118,10 +118,20 @@ We look at \textbf{genetic rescue} conditioned on evolutionary rescue.
 \end{frame}
 
 \begin{frame}{Genetic rescue}
-   \includepdf[width=\columnwidth]{Figures/geneticrescue.pdf}
+    What is genetic rescue?
 \end{frame}
 
-\begin{frame}{Analytical model}
+\begin{frame}{The model}
+\begin{tikzpicture}[-{Stealth[inset=0pt,length=4.5pt,angle'=35,round,bend]}, scale=1]
+  \foreach \a/\t in {90/census,-30/selection,210/mating}{
+    \node (\t) at (\a:1.1cm) {$\t$};
+    \draw (\a-20:1cm)  arc (\a-20:\a-100:1cm);
+  } 
+\end{tikzpicture}
+
+\end{frame}
+
+\begin{frame}{Recursion equations}
 
 \begin{equation}
     \begin{array}{l}
@@ -148,7 +158,24 @@ Assumptions: \\
 \end{frame}
 
 \begin{frame}{Infinite loci approximation vs 2 loci model}
-    
+
+\begin{center}
+\begin{tabular}{ c | c c c c}
+ Genotype & AB & Ab & aB & ab\\ 
+  \hline
+ Frequency & p_nQ_n & p_n(1-Q_n) & (1-p_n)R_n & (1-p_n)(1-R_n)\\  
+ Fitness & 1+s & 1+s & 1 & 1   
+\end{tabular}
+\end{center}
+
+%$Q$ stands for the frequency of (neutral) B alleles linked to (rescue) A alleles.
+
+When $Q_0 = 0$, $R_0 = 1$ and $r=0.5$, a recursion equation for $Q_n$ is derived: 
+
+\begin{equation*}
+    Q_n = F_b[t] = \sum_{i=1}^n 2^{-i} (1-p_b[i])
+\end{equation*}
+
 \end{frame}
 
 \begin{frame}{Discrete Markov Model}
@@ -214,14 +241,26 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
     \includegraphics[width=1.0\textwidth]{Matlab/data/gridplot.eps}
 \end{frame}
 
-\begin{frame}{Deterministic projection: John-Maynard Smith}
 
-\begin{tikzpicture}[-{Stealth[inset=0pt,length=4.5pt,angle'=35,round,bend]}, scale=1]
-  \foreach \a/\t in {90/census,-30/selection,210/mating}{
-    \node (\t) at (\a:1.1cm) {$\t$};
-    \draw (\a-20:1cm)  arc (\a-20:\a-100:1cm);
-  } 
-\end{tikzpicture}
+
+\begin{frame}{$F_A$ from process $\bold{X}(t)$.}
+    
+    $P[\bold{X}(\infty) = \bold{A}| \bold{X}(0) = \bold{I}]$ satisfies the left eigenvector with $\lambda = 1$ and the corresponding right eigenvector $=\bold{A}$:
+    
+    \begin{equation*}
+        \vec{p}_\bold{A}^\intercal = \vec{p}_\bold{A}^\intercal \bold{M} \ \ \ \  \text{subject to } p_{\bold{A},\bold{A}}=1 \ \text{and}\ p_{l,\bold{A}}=0
+    \end{equation*}.
+    
+    \begin{equation*}
+        \mathbb{E}[F(\bold{I})] = \vec{p}_\bold{A}(\bold{I}) \bullet \vec{F}_A   %transpose and do dot product with 
+    \end{equation*}
+    
+    Where $\vec{F}_A$ is a vector containing the deterministic expectations for the absorbing states. (*Need to specify we drop the {0,0,0,0} case*)
+\end{frame}
+
+
+\begin{frame}{Graveyard}
+
 
     \begin{equation*}
     \begin{aligned}
@@ -239,21 +278,6 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
 
 $F_A$ represents the proportion of $B$ alleles that have been rescued because they have recombined to a $A$ rescue allele.
 
-\end{frame}
-
-\begin{frame}{$F_A$ from process $\bold{X}(t)$.}
-    
-    $P[\bold{X}(\infty) = \bold{A}| \bold{X}(0) = \bold{I}]$ satisfies the left eigenvector with $\lambda = 1$ and the corresponding right eigenvector $=\bold{A}$:
-    
-    \begin{equation*}
-        \vec{p}_\bold{A}^\intercal = \vec{p}_\bold{A}^\intercal \bold{M} \ \ \ \  \text{subject to } p_{\bold{A},\bold{A}}=1 \ \text{and}\ p_{l,\bold{A}}=0
-    \end{equation*}.
-    
-    \begin{equation*}
-        \mathbb{E}[F(\bold{I})] = \vec{p}_\bold{A}(\bold{I}) \bullet \vec{F}_A   %transpose and do dot product with 
-    \end{equation*}
-    
-    Where $\vec{F}_A$ is a vector containing the deterministic expectations for the absorbing states. (*Need to specify we drop the {0,0,0,0} case*)
 \end{frame}
 
 \end{document}

@@ -85,6 +85,8 @@
 \usepackage{mathtools}
 \usepackage{tikz}
 \usetikzlibrary{trees}
+\usetikzlibrary{arrows.meta, bending}
+\usepackage[percent]{overpic}
 
 \graphicspath{{./Figures/}}
 
@@ -130,10 +132,12 @@ Assumptions: \\
     
 \end{frame}
 
-\begin{frame}{Model}
-    \begin{equation}
-    F_b[t] = \sum_{i=1}^t 2^{-i} (1-p_b[i])
-\end{equation}
+\begin{frame}{Numerical Simulation}
+\begin{overpic}[width=1.0\textwidth]{Figures/NumericalSolution.eps}
+\large
+ \put (55,35) {$F_b[t] = \sum_{i=1}^t 2^{-i} (1-p_b[i])$}
+\normalsize
+\end{overpic}
 \end{frame}
 
 
@@ -149,21 +153,21 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
 \begin{aligned}
 \begin{cases}
 \begin{cases}
-    b_{AB}, & \text{if } \bold{Y} = \bold{X} + \{1,0,0,0\}; \\
-    b_{Ab}, & \text{if } \bold{Y} = \bold{X} + \{0,1,0,0\};  \\
-    b_{aB}, & \text{if } \bold{Y} = \bold{X} + \{0,0,1,0\}; \\
-    b_{ab}, & \text{if } \bold{Y} = \bold{X} + \{0,0,0,1\}; \\
-    d_{AB}, & \text{if } \bold{Y} = \bold{X} + \{-1,0,0,0\}; \\
-    d_{Ab}, & \text{if } \bold{Y} = \bold{X} + \{0,-1,0,0\};  \\
-    d_{aB}, & \text{if } \bold{Y} = \bold{X} + \{0,0,-1,0\}; \\
-    d_{ab}, & \text{if } \bold{Y} = \bold{X} + \{0,0,0,-1\}; \\
+    p_{AB+1}, & \text{if } \bold{Y} = \bold{X} + \{1,0,0,0\}; \\
+    p_{Ab+1}, & \text{if } \bold{Y} = \bold{X} + \{0,1,0,0\};  \\
+    p_{aB+1}, & \text{if } \bold{Y} = \bold{X} + \{0,0,1,0\}; \\
+    p_{ab+1}, & \text{if } \bold{Y} = \bold{X} + \{0,0,0,1\}; \\
+    p_{AB-1}, & \text{if } \bold{Y} = \bold{X} + \{-1,0,0,0\}; \\
+    p_{Ab-1}, & \text{if } \bold{Y} = \bold{X} + \{0,-1,0,0\};  \\
+    p_{aB-1}, & \text{if } \bold{Y} = \bold{X} + \{0,0,-1,0\}; \\
+    p_{ab-1}, & \text{if } \bold{Y} = \bold{X} + \{0,0,0,-1\}; \\
     1, & \text{if}\ \bold{X} = \bold{Y} = \{0,0,0,0\}; \\
     0, & otherwise;
 \end{cases}  & \text{for}\ \bold{X}_1, \bold{X}_2 \neq n; \\
 \begin{cases} 
     1, & \text{if}\ \bold{X}_1 = \bold{Y}_1 = n; \\
     1, & \text{if}\ \bold{X}_2 = \bold{Y}_2 = n;  \\
-    \mathrlap{0,}\hphantom{d_{AB},} & otherwise;
+    \mathrlap{0,}\hphantom{p_{AB+1},} & otherwise;
 \end{cases} & otherwise;
 \end{cases},
 \end{aligned}
@@ -176,20 +180,20 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
 
     \begin{equation*}
     \begin{aligned}
-        &b_{AB} & =& (f_{AB}-r(f_{AB}f_{ab}-f_{Ab}f_{aB})) & \times P_B\\
-        &b_{Ab} & =& (f_{Ab}+r(f_{AB}f_{ab}-f_{Ab}f_{aB})) & \times P_B\\
-        &b_{aB} & =& (f_{aB}+r(f_{AB}f_{ab}-f_{Ab}f_{aB})) & \times P_B\\
-        &b_{ab} & =& (f_{ab}-r(f_{AB}f_{ab}-f_{Ab}f_{aB})) & \times P_B\\
-        &d_{AB} & =& \frac{f_{AB}d_{AB}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}} & \times (1-P_B) \\
-        &d_{Ab} & =& \frac{f_{Ab}d_{Ab}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}} & \times (1-P_B) \\
-        &d_{aB} & =& \frac{f_{aB}d_{aB}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}} & \times (1-P_B) \\
-        &d_{ab} & =& \frac{f_{ab}d_{ab}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}} & \times (1-P_B) 
+        &p_{AB+1} & =& (f_{AB}-r\times D) & \times P_\text{birth};\\
+        &p_{Ab+1} & =& (f_{Ab}+r\times D) & \times P_\text{birth};\\
+        &p_{aB+1} & =& (f_{aB}+r\times D) & \times P_\text{birth};\\
+        &p_{ab+1} & =& (f_{ab}-r\times D) & \times P_\text{birth};\\
+        &p_{AB-1} & =& P_{AB|\text{death}} & \times (1-P_\text{birth}); \\
+        &p_{Ab-1} & =& P_{Ab|\text{death}} & \times (1-P_\text{birth}); \\
+        &p_{aB-1} & =& P_{aB|\text{death}} & \times (1-P_\text{birth}); \\
+        &p_{ab-1} & =& P_{ab|\text{death}} & \times (1-P_\text{birth}); 
     \end{aligned}
     \end{equation*} 
     
     \begin{equation*}
     \begin{aligned}
-        P_B = \frac{\sum_i^4 f_i b_i}{\sum_i^4 (f_i b_i + f_i d_i)}
+        P_{i|\text{death}}=\frac{f_id_i}{\sum_{i=1}^4 f_id_i} \qquad P_\text{birth} = \frac{\sum_i^4 f_i b_i}{\sum_i^4 (f_i b_i + f_i d_i)} 
     \end{aligned}
     \end{equation*}
   
@@ -200,31 +204,46 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
     \includegraphics[width=1.0\textwidth]{Matlab/data/gridplot.eps}
 \end{frame}
 
+\begin{frame}{Deterministic projection: John-Maynard Smith}
+
+\begin{tikzpicture}[-{Stealth[inset=0pt,length=4.5pt,angle'=35,round,bend]}, scale=1]
+  \foreach \a/\t in {90/census,-30/selection,210/mating}{
+    \node (\t) at (\a:1.1cm) {$\t$};
+    \draw (\a-20:1cm)  arc (\a-20:\a-100:1cm);
+  } 
+\end{tikzpicture}
+
+    \begin{equation*}
+    \begin{aligned}
+        f_{AB}(t+1)= &(f_{AB}(t)^2(1+s)^2+f_{AB}f_{aB}(1+s)+f_{AB}f_{Ab}(1+s)^2+ \\
+        &f_{AB}f_{ab}(1+s)(1-r)+f_{aB}f_{Ab}(1+s)r)/(\bar{W}^2) \\
+        f_{Ab}(t+1)=    \\
+        f_{aB}(t+1)=    \\
+        f_{ab}(t+1)=
+        \end{aligned}
+    \end{equation*}
+    
+\begin{equation*}
+    F_A(t)= \frac{f_{AB}(t)}{f_{AB}(t)+f_{Ab}(t)}
+\end{equation*}
+
+$F_A$ represents the proportion of $B$ alleles that have been rescued because they have recombined to a $A$ rescue allele.
+
+\end{frame}
+
 \begin{frame}{$F_A$ from process $\bold{X}(t)$.}
     
-    $P[\bold{X}(\infty) = \bold{A}| \bold{X}(0) = \bold{I}]$ satisfies the left eigenvector with $\lambda = 1$ and the corresponding right eigenvector $=\bold{A}$.
+    $P[\bold{X}(\infty) = \bold{A}| \bold{X}(0) = \bold{I}]$ satisfies the left eigenvector with $\lambda = 1$ and the corresponding right eigenvector $=\bold{A}$:
     
     \begin{equation*}
         \vec{p}_\bold{A}^\intercal = \vec{p}_\bold{A}^\intercal \bold{M} \ \ \ \  \text{subject to } p_{\bold{A},\bold{A}}=1 \ \text{and}\ p_{l,\bold{A}}=0
-    \end{equation*}
-    
-    solves for the probabilities to end up in state $\bold{A}$ given initial condition $\bold{I}$.  
+    \end{equation*}.
     
     \begin{equation*}
-    \bold{O}=
-        \begin{bmatrix}
-        \vec{0}  \\
-        \vec{p}_{\bold{A}(1)}  \\
-        \vdots  \\
-        \vec{p}_{\bold{A}(m)} 
-    \end{bmatrix}   
-    \end{equation*}
-     
-    \begin{equation*}
-        \mathbb{E}[F(\bold{I})] = (\bold{O} \bullet \vec{I}_\bold{I}) \bullet \vec{F}_A   %transpose and do dot product with 
+        \mathbb{E}[F(\bold{I})] = \vec{p}_\bold{A}(\bold{I}) \bullet \vec{F}_A   %transpose and do dot product with 
     \end{equation*}
     
-    Where $\vec{F}_A$ is a vector containing the deterministic expectations for the absorbing states.
+    Where $\vec{F}_A$ is a vector containing the deterministic expectations for the absorbing states. (*Need to specify we drop the {0,0,0,0} case*)
 \end{frame}
 
 \end{document}

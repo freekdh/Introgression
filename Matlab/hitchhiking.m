@@ -19,6 +19,8 @@ function hitchhiking()
         end
     end
     
+    csvwrite("test.csv",full(absorbmatrix));
+    
     for n = 2:size
     %get rescue / hitchhiking but conditioned on fixation.
     vec = absorbmatrix(:,mat2elem(1,n,size,1,size));
@@ -32,7 +34,7 @@ function hitchhiking()
         end
     end
     
-    FA
+    %FA
     end
  
 end

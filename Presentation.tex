@@ -83,6 +83,8 @@
 \usepackage{amsmath}
 \usepackage{bm}
 \usepackage{mathtools}
+\usepackage{tikz}
+\usetikzlibrary{trees}
 
 \graphicspath{{./Figures/}}
 
@@ -134,6 +136,7 @@ Assumptions: \\
 \end{equation}
 \end{frame}
 
+
 \begin{frame}{Discrete Markov Model}
 \footnotesize
 
@@ -146,21 +149,21 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
 \begin{aligned}
 \begin{cases}
 \begin{cases}
-    \frac{1}{C}\times G_{AB}\times W_A, & \text{if } \bold{Y} = \bold{X} + \{1,0,0,0\}; \\
-    \frac{1}{C}\times G_{Ab}\times W_A, & \text{if } \bold{Y} = \bold{X} + \{0,1,0,0\};  \\
-    \frac{1}{C}\times G_{aB}\times W_a, & \text{if } \bold{Y} = \bold{X} + \{0,0,1,0\}; \\
-    \frac{1}{C}\times G_{ab}\times W_a, & \text{if } \bold{Y} = \bold{X} + \{0,0,0,1\}; \\
-    \frac{1}{C}\times f_{AB}-r\times D, & \text{if } \bold{Y} = \bold{X} + \{-1,0,0,0\}; \\
-    \frac{1}{C}\times f_{Ab}+r\times D, & \text{if } \bold{Y} = \bold{X} + \{0,-1,0,0\};  \\
-    \frac{1}{C}\times f_{aB}+r\times D, & \text{if } \bold{Y} = \bold{X} + \{0,0,-1,0\}; \\
-    \frac{1}{C}\times f_{AB}-r\times D, & \text{if } \bold{Y} = \bold{X} + \{0,0,0,-1\}; \\
+    b_{AB}, & \text{if } \bold{Y} = \bold{X} + \{1,0,0,0\}; \\
+    b_{Ab}, & \text{if } \bold{Y} = \bold{X} + \{0,1,0,0\};  \\
+    b_{aB}, & \text{if } \bold{Y} = \bold{X} + \{0,0,1,0\}; \\
+    b_{ab}, & \text{if } \bold{Y} = \bold{X} + \{0,0,0,1\}; \\
+    d_{AB}, & \text{if } \bold{Y} = \bold{X} + \{-1,0,0,0\}; \\
+    d_{Ab}, & \text{if } \bold{Y} = \bold{X} + \{0,-1,0,0\};  \\
+    d_{aB}, & \text{if } \bold{Y} = \bold{X} + \{0,0,-1,0\}; \\
+    d_{ab}, & \text{if } \bold{Y} = \bold{X} + \{0,0,0,-1\}; \\
     1, & \text{if}\ \bold{X} = \bold{Y} = \{0,0,0,0\}; \\
     0, & otherwise;
 \end{cases}  & \text{for}\ \bold{X}_1, \bold{X}_2 \neq n; \\
 \begin{cases} 
     1, & \text{if}\ \bold{X}_1 = \bold{Y}_1 = n; \\
     1, & \text{if}\ \bold{X}_2 = \bold{Y}_2 = n;  \\
-    \mathrlap{0,}\hphantom{\frac{1}{C}\times f_{AB}-r\times D,} & otherwise;
+    \mathrlap{0,}\hphantom{d_{AB},} & otherwise;
 \end{cases} & otherwise;
 \end{cases},
 \end{aligned}
@@ -168,6 +171,40 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
 where $C$ is a normalization constant.
 \normalsize
 
+\end{frame}
+
+\begin{frame}{Probabilites of birth-death model}
+
+    $b_{AB}-d_{AB} = b_{Ab}-d_{Ab}=(W_A-1)$ \& $b_{aB}-d_{aB} = b_{ab}-d_{ab}=(W_a-1)$
+    
+    \begin{equation*}
+    \begin{aligned}
+        P[b] = \frac{\sum_i^4 G_i b_i}{\sum_i^4 (G_i b_i + G_i d_i)} = \frac{\sum_i^4 G_i b_i}{\sum_i^4 (2 G_i b_i - G_i W_i)}
+    \end{aligned}
+    \end{equation*}
+    
+    \begin{equation*}
+    \begin{aligned}
+        b_{AB} &= (f_{AB}-r(f_{AB}f_{ab}-f_{Ab}f_{aB}))\times P[b]\\
+        b_{Ab} &= (f_{Ab}+r(f_{AB}f_{ab}-f_{Ab}f_{aB}))\times P[b]\\
+        b_{aB} &= (f_{aB}+r(f_{AB}f_{ab}-f_{Ab}f_{aB}))\times P[b]\\
+        b_{ab} &= (f_{ab}-r(f_{AB}f_{ab}-f_{Ab}f_{aB}))\times P[b]
+    \end{aligned}
+    \end{equation*} 
+    
+    \begin{equation*}
+    \begin{aligned}
+        d_{AB} &= d_{Ab} &= \frac{W_a}{W_A+W_a}\times (1-P[b]) \\
+        d_{aB} &= d_{ab} &= \frac{W_A}{W_A+W_a}\times (1-P[b]) 
+    \end{aligned}
+    \end{equation*}
+    
+  
+    
+\end{frame}
+
+\begin{frame}{Example}
+    \includegraphics{RealizationMarkov.eps}
 \end{frame}
 
 \begin{frame}{$F_A$ from absorbing states}
@@ -197,6 +234,93 @@ where $C$ is a normalization constant.
     \begin{equation*}
         E[F_A] = (\bold{O} \vec{I}_\bold{I}) \bullet \vec{F}_A   %transpose and do dot product with 
     \end{equation*}
+\end{frame}
+
+\begin{frame}{Test frame}
+    % Set the overall layout of the tree
+\tikzstyle{level 1}=[level distance=3.5cm, sibling distance=3.5cm]
+\tikzstyle{level 2}=[level distance=3.5cm, sibling distance=1cm]
+
+% Define styles for bags and leafs
+\tikzstyle{bag} = [text width=6em, text centered]
+\tikzstyle{end} = [circle, minimum width=3pt,fill, inner sep=0pt]
+
+% The sloped option gives rotated edge labels. Personally
+% I find sloped labels a bit difficult to read. Remove the sloped options
+% to get horizontal labels. 
+\begin{tikzpicture}[grow=right, sloped]
+\footnotesize
+\node[bag] {$P$}
+    child {
+        node[bag] {$1-\frac{\sum_i^4 f_i b_i}{\sum_i^4 (f_i b_i + f_i d_i)}$}        
+        child {
+                node[end, label=right:
+                    {$\frac{f_{ab}d_{ab}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}}$}] {}
+                edge from parent
+                node[above] {ab}
+                node[below]  {}
+            }
+            child {
+                node[end, label=right:
+                    {$\frac{f_{aB}d_{aB}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}}$}] {}
+                edge from parent
+                node[above] {aB}
+                node[below]  {}
+            }
+            child {
+                node[end, label=right:
+                    {$\frac{f_{Ab}d_{Ab}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}}$}] {}
+                edge from parent
+                node[above] {Ab}
+                node[below]  {}
+            }
+            child {
+                node[end, label=right:
+                    {$\frac{f_{AB}d_{AB}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}}$}] {}
+                edge from parent
+                node[above] {AB}
+                node[below]  {}
+            }
+            edge from parent 
+            node[above] {Death}
+            node[below]  {}
+    }
+    child {
+        node[bag] {$\frac{\sum_i^4 f_i b_i}{\sum_i^4 (f_i b_i + f_i d_i)}$}        
+        child {
+                node[end, label=right:
+                    {$f_{ab}-r(f_{AB}f_{ab}-f_{Ab}f_{aB})$}] {}
+                edge from parent
+                node[above] {ab}
+                node[below]  {}
+            }
+            child {
+                node[end, label=right:
+                    {$f_{aB}+r(f_{AB}f_{ab}-f_{Ab}f_{aB})$}] {}
+                edge from parent
+                node[above] {aB}
+                node[below]  {}
+            }
+            child {
+                node[end, label=right:
+                    {$f_{Ab}+r(f_{AB}f_{ab}-f_{Ab}f_{aB})$}] {}
+                edge from parent
+                node[above] {Ab}
+                node[below]  {}
+            }
+            child {
+                node[end, label=right:
+                    {$f_{AB}-r(f_{AB}f_{ab}-f_{Ab}f_{aB})$}] {}
+                edge from parent
+                node[above] {AB}
+                node[below]  {}
+            }
+        edge from parent         
+            node[above] {Birth}
+            node[below]  {}
+    };
+\end{tikzpicture}
+
 \end{frame}
 
 \end{document}

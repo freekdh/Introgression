@@ -86,6 +86,7 @@
 \usepackage{tikz}
 \usetikzlibrary{trees}
 \usetikzlibrary{arrows.meta, bending}
+\usepackage[percent]{overpic}
 
 \graphicspath{{./Figures/}}
 
@@ -131,14 +132,12 @@ Assumptions: \\
     
 \end{frame}
 
-\begin{frame}{Numerical simulation}
-    \includegraphics[width=1.0\textwidth]{Matlab/data/Realization2.eps}
-\end{frame}
-
-\begin{frame}{Model}
-    \begin{equation}
-    F_b[t] = \sum_{i=1}^t 2^{-i} (1-p_b[i])
-\end{equation}
+\begin{frame}{Numerical Simulation}
+\begin{overpic}[width=1.0\textwidth]{Figures/NumericalSolution.eps}
+\large
+ \put (55,35) {$F_b[t] = \sum_{i=1}^t 2^{-i} (1-p_b[i])$}
+\normalsize
+\end{overpic}
 \end{frame}
 
 

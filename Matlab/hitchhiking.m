@@ -1,7 +1,7 @@
 function hitchhiking()
     %(1)AB, (2)Ab, (3)aB, (4)ab
         
-    size = 6; 
+    size = 10; 
     r = 0.5;
     WA = 1.1;
     Wa = 0.9;

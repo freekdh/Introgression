@@ -168,52 +168,41 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
 \end{cases},
 \end{aligned}
 \end{equation*}
-where $C$ is a normalization constant.
 \normalsize
 
 \end{frame}
 
 \begin{frame}{Probabilites of birth-death model}
 
-    $b_{AB}-d_{AB} = b_{Ab}-d_{Ab}=(W_A-1)$ \& $b_{aB}-d_{aB} = b_{ab}-d_{ab}=(W_a-1)$
-    
     \begin{equation*}
     \begin{aligned}
-        P[b] = \frac{\sum_i^4 G_i b_i}{\sum_i^4 (G_i b_i + G_i d_i)} = \frac{\sum_i^4 G_i b_i}{\sum_i^4 (2 G_i b_i - G_i W_i)}
-    \end{aligned}
-    \end{equation*}
-    
-    \begin{equation*}
-    \begin{aligned}
-        b_{AB} &= (f_{AB}-r(f_{AB}f_{ab}-f_{Ab}f_{aB}))\times P[b]\\
-        b_{Ab} &= (f_{Ab}+r(f_{AB}f_{ab}-f_{Ab}f_{aB}))\times P[b]\\
-        b_{aB} &= (f_{aB}+r(f_{AB}f_{ab}-f_{Ab}f_{aB}))\times P[b]\\
-        b_{ab} &= (f_{ab}-r(f_{AB}f_{ab}-f_{Ab}f_{aB}))\times P[b]
+        &b_{AB} & =& (f_{AB}-r(f_{AB}f_{ab}-f_{Ab}f_{aB})) & \times P_B\\
+        &b_{Ab} & =& (f_{Ab}+r(f_{AB}f_{ab}-f_{Ab}f_{aB})) & \times P_B\\
+        &b_{aB} & =& (f_{aB}+r(f_{AB}f_{ab}-f_{Ab}f_{aB})) & \times P_B\\
+        &b_{ab} & =& (f_{ab}-r(f_{AB}f_{ab}-f_{Ab}f_{aB})) & \times P_B\\
+        &d_{AB} & =& \frac{f_{AB}d_{AB}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}} & \times (1-P_B) \\
+        &d_{Ab} & =& \frac{f_{Ab}d_{Ab}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}} & \times (1-P_B) \\
+        &d_{aB} & =& \frac{f_{aB}d_{aB}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}} & \times (1-P_B) \\
+        &d_{ab} & =& \frac{f_{ab}d_{ab}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}} & \times (1-P_B) 
     \end{aligned}
     \end{equation*} 
     
     \begin{equation*}
     \begin{aligned}
-        d_{AB} &= d_{Ab} &= \frac{W_a}{W_A+W_a}\times (1-P[b]) \\
-        d_{aB} &= d_{ab} &= \frac{W_A}{W_A+W_a}\times (1-P[b]) 
+        P_B = \frac{\sum_i^4 f_i b_i}{\sum_i^4 (f_i b_i + f_i d_i)}
     \end{aligned}
     \end{equation*}
-    
   
     
 \end{frame}
 
-\begin{frame}{Example}
-    \includegraphics{RealizationMarkov.eps}
+\begin{frame}{Example of absorbing states}
+    \includegraphics[width=1.0\textwidth]{Matlab/data/gridplot.eps}
 \end{frame}
 
-\begin{frame}{$F_A$ from absorbing states}
-
-    The absorbing states $\bold{A} \in \bold{P} \text{ such that } \bold{A}_1,\bold{A}_2 = n \ \text{or } \{0,0,0,0\}$
+\begin{frame}{$F_A$ from process $\bold{X}(t)$.}
     
-    Process $\bold{X}(t)$.
-    
-    $P[\bold{X}(\infty) = \bold{A}| \bold{X}(0) = \bold{I}]$ satisfies the left eigenvector with $\lambda = 1$ and a corresponding right eigenvector $=\bold{A}$.
+    $P[\bold{X}(\infty) = \bold{A}| \bold{X}(0) = \bold{I}]$ satisfies the left eigenvector with $\lambda = 1$ and the corresponding right eigenvector $=\bold{A}$.
     
     \begin{equation*}
         \vec{p}_\bold{A}^\intercal = \vec{p}_\bold{A}^\intercal \bold{M} \ \ \ \  \text{subject to } p_{\bold{A},\bold{A}}=1 \ \text{and}\ p_{l,\bold{A}}=0
@@ -232,95 +221,10 @@ where $C$ is a normalization constant.
     \end{equation*}
      
     \begin{equation*}
-        E[F_A] = (\bold{O} \vec{I}_\bold{I}) \bullet \vec{F}_A   %transpose and do dot product with 
+        \mathbb{E}[F(\bold{I})] = (\bold{O} \bullet \vec{I}_\bold{I}) \bullet \vec{F}_A   %transpose and do dot product with 
     \end{equation*}
-\end{frame}
-
-\begin{frame}{Test frame}
-    % Set the overall layout of the tree
-\tikzstyle{level 1}=[level distance=3.5cm, sibling distance=3.5cm]
-\tikzstyle{level 2}=[level distance=3.5cm, sibling distance=1cm]
-
-% Define styles for bags and leafs
-\tikzstyle{bag} = [text width=6em, text centered]
-\tikzstyle{end} = [circle, minimum width=3pt,fill, inner sep=0pt]
-
-% The sloped option gives rotated edge labels. Personally
-% I find sloped labels a bit difficult to read. Remove the sloped options
-% to get horizontal labels. 
-\begin{tikzpicture}[grow=right, sloped]
-\footnotesize
-\node[bag] {$P$}
-    child {
-        node[bag] {$1-\frac{\sum_i^4 f_i b_i}{\sum_i^4 (f_i b_i + f_i d_i)}$}        
-        child {
-                node[end, label=right:
-                    {$\frac{f_{ab}d_{ab}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}}$}] {}
-                edge from parent
-                node[above] {ab}
-                node[below]  {}
-            }
-            child {
-                node[end, label=right:
-                    {$\frac{f_{aB}d_{aB}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}}$}] {}
-                edge from parent
-                node[above] {aB}
-                node[below]  {}
-            }
-            child {
-                node[end, label=right:
-                    {$\frac{f_{Ab}d_{Ab}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}}$}] {}
-                edge from parent
-                node[above] {Ab}
-                node[below]  {}
-            }
-            child {
-                node[end, label=right:
-                    {$\frac{f_{AB}d_{AB}}{f_{AB} d_{AB}+f_{Ab}d_{Ab}+f_{aB}d_{aB}+f_{ab}d_{ab}}$}] {}
-                edge from parent
-                node[above] {AB}
-                node[below]  {}
-            }
-            edge from parent 
-            node[above] {Death}
-            node[below]  {}
-    }
-    child {
-        node[bag] {$\frac{\sum_i^4 f_i b_i}{\sum_i^4 (f_i b_i + f_i d_i)}$}        
-        child {
-                node[end, label=right:
-                    {$f_{ab}-r(f_{AB}f_{ab}-f_{Ab}f_{aB})$}] {}
-                edge from parent
-                node[above] {ab}
-                node[below]  {}
-            }
-            child {
-                node[end, label=right:
-                    {$f_{aB}+r(f_{AB}f_{ab}-f_{Ab}f_{aB})$}] {}
-                edge from parent
-                node[above] {aB}
-                node[below]  {}
-            }
-            child {
-                node[end, label=right:
-                    {$f_{Ab}+r(f_{AB}f_{ab}-f_{Ab}f_{aB})$}] {}
-                edge from parent
-                node[above] {Ab}
-                node[below]  {}
-            }
-            child {
-                node[end, label=right:
-                    {$f_{AB}-r(f_{AB}f_{ab}-f_{Ab}f_{aB})$}] {}
-                edge from parent
-                node[above] {AB}
-                node[below]  {}
-            }
-        edge from parent         
-            node[above] {Birth}
-            node[below]  {}
-    };
-\end{tikzpicture}
-
+    
+    Where $\vec{F}_A$ is a vector containing the deterministic expectations for the absorbing states.
 \end{frame}
 
 \end{document}

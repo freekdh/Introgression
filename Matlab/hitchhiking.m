@@ -1,11 +1,5 @@
-function hitchhiking()
+function hitchhiking(WA, Wa, r, size)
     %(1)AB, (2)Ab, (3)aB, (4)ab
-        
-    size = 5; 
-    r = 0.0;
-    WA = 1.1;
-    Wa = 0.9;
-    
     birthdeathmat = birthdeathv3(size,WA,Wa,r);
     spy(birthdeathmat)
     %get probability of absorbption

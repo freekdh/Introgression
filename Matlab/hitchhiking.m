@@ -18,7 +18,7 @@ function hitchhiking()
         end
     end
     
-    save('twomatrices.mat', 'absorbmatrix');
+    save('absorbmat.mat', 'absorbmatrix');
 end
 
 function absorbtionmatrix()

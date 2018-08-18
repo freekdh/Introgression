@@ -1,14 +1,13 @@
 function hitchhiking()
     %(1)AB, (2)Ab, (3)aB, (4)ab
         
-    size = 8; 
-    r = 0.5;
+    size = 5; 
+    r = 0.0;
     WA = 1.1;
     Wa = 0.9;
-    s= (WA/Wa)-1;
     
     birthdeathmat = birthdeathv3(size,WA,Wa,r);
-    
+    spy(birthdeathmat)
     %get probability of absorbption
     [V,D,W] = eig(full(birthdeathmat));
     absorbmatrix = sparse(size^4,size^4);
@@ -19,24 +18,25 @@ function hitchhiking()
         end
     end
     
-    csvwrite("test.csv",full(absorbmatrix));
-    
+    save('twomatrices.mat', 'absorbmatrix');
+end
+
+function absorbtionmatrix()
     for n = 2:size
-    %get rescue / hitchhiking but conditioned on fixation.
-    vec = absorbmatrix(:,mat2elem(1,n,size,1,size));
-    FA = 0;
-    for i = 2:size^4 % skip the first state (0,0,0,0)
-        if(vec(i) ~= 0)
-            [AB,Ab,aB,ab] = elem2mat(i,size);
-            [FAtemp] = projectF(AB-1,Ab-1,aB-1,ab-1,s,r,10);
-            FA = FA+vec(i)*FAtemp/(1-vec(1)); %FAB/(FAB+FAb)
-            %Fa = Fa+vec(i)*Fatemp/(1-vec(1));
+        %get rescue / hitchhiking but conditioned on fixation.
+        vec = absorbmatrix(:,mat2elem(1,n,size,1,size));
+        FA = 0;
+        for i = 2:size^4 % skip the first state (0,0,0,0)
+            if(vec(i) ~= 0)
+                [AB,Ab,aB,ab] = elem2mat(i,size);
+                [FAtemp] = projectF(AB-1,Ab-1,aB-1,ab-1,s,r,10);
+                FA = FA+vec(i)*FAtemp/(1-vec(1)); %FAB/(FAB+FAb)
+                %Fa = Fa+vec(i)*Fatemp/(1-vec(1));
+            end
         end
+
+        %FA
     end
-    
-    %FA
-    end
- 
 end
 
 function realizations(birthdeathmat)
@@ -252,10 +252,10 @@ function matrix = birthdeathv3(size, WA, Wa, r)
                             dAb=fAb+r*D;
                             daB=faB+r*D;
                             dab=fab-r*D;
-                            deathAB=1-(WA-1);
-                            deathAb=1-(WA-1);
-                            deathaB=1-(Wa-1);
-                            deathab=1-(Wa-1);
+                            deathAB=2-WA;
+                            deathAb=2-WA;
+                            deathaB=2-Wa;
+                            deathab=2-Wa;
                             weightedsumdeath = (fAB*deathAB+fAb*deathAb+faB*deathaB+fab*deathab);
                             Pbirth=1/(1+weightedsumdeath);
                             Pdeath=1-Pbirth;
@@ -316,8 +316,8 @@ function [FA] = projectF(AB,Ab,aB,ab,s,r,t)
     fAb = Ab/sum;
     faB = aB/sum;
     fab = ab/sum;
-    Wbar = fAB*(1+s)+fAb*(1+s)+faB+fab;
     for i = 1:t
+        Wbar = fAB*(1+s)+fAb*(1+s)+faB+fab;
         fABn=(fAB*fAB*(1+s)^2+fAB*faB*(1+s)+fAB*fAb*(1+s)^2+fAB*fab*(1+s)*(1-r)+faB*fAb*(1+s)*r)/(Wbar^2);
         fAbn=(fAb*fAb*(1+s)^2+fAb*fab*(1+s)+fAb*fAB*(1+s)^2+fAB*fab*(1+s)*r+faB*fAb*(1+s)*(1-r))/(Wbar^2);
         faBn=(faB*faB+faB*fab+faB*fAB*(1+s)+fAB*fab*(1+s)*r+faB*fAb*(1+s)*(1-r))/(Wbar^2);

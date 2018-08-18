@@ -113,12 +113,12 @@ Evolutionary rescue is characterized by a U-shaped curve of population size.
 
 \includegraphics[width=0.5\columnwidth]{Ushape_ER.png}
 
-We look at \textbf{genetic rescue} conditioned on evolutionary rescue.
+We look at \textcolor{red}{\textbf{genetic rescue}} conditioned on evolutionary rescue.
 
 \end{frame}
 
 \begin{frame}{Genetic rescue}
-    What is genetic rescue?
+    What is \textcolor{red}{genetic rescue}? Some explanation what we understand by genetic rescue. 
 \end{frame}
 
 \begin{frame}{The 2 locus model: JMS}
@@ -132,27 +132,23 @@ We look at \textbf{genetic rescue} conditioned on evolutionary rescue.
 \end{tabular}
 \end{center}
 
+We assume a wildtype population of $aB$ haplotypes and a few introduced $Ab$ rescue haplotypes. Genetic rescue is defined as the proportion of $B$ alleles linked to $A$ as $t\to\infty$.
+\begin{equation*}
+    \frac{AB_n}{AB_n+Ab_n} = \frac{p_nQ_n}{p_nQ_n+p_n(1-Q_n)} = \color{red} Q_n
+\end{equation*}
+
 When $Q_0 = 0$, $R_0 = 1$ and $r=0.5$, a recursion equation for $Q_n$ is derived: 
 
 \begin{equation*}
-    Q_n = \sum_{i=1}^n 2^{-i} (1-p_b[i])
+    \color{red} Q_n = \sum_{i=1}^n 2^{-i} (1-p_i)
 \end{equation*}
-
-\begin{tikzpicture}[-{Stealth[inset=0pt,length=4.5pt,angle'=35,round,bend]}, scale=1]
-  \foreach \a/\t in {90/census,-30/selection,210/mating}{
-    \node (\t) at (\a:1.1cm) {$\t$};
-    \draw (\a-20:1cm)  arc (\a-20:\a-100:1cm);
-  } 
-\end{tikzpicture}
 
 \end{frame}
 
+
 \begin{frame}{Numerical Simulation}
-\begin{overpic}[width=0.9\textwidth]{Figures/NumericalSolution.eps}
-\large
- \put (50,50) {$F_b[t] = \sum_{i=1}^t 2^{-i} (1-p_b[i])$}
-\normalsize
-\end{overpic}
+\includegraphics[width=0.9\textwidth]{Figures/NumericalSolution.eps}
+
 \end{frame}
 
 
@@ -236,7 +232,11 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
     Where $\vec{F}_A$ is a vector containing the deterministic expectations for the absorbing states. (*Need to specify we drop the {0,0,0,0} case*)
 \end{frame}
 
-\begin{frame}{Recursion equations}
+\begin{frame}{Results}
+    \includegraphics[width=1.0\textwidth]{M}
+\end{frame}
+
+\begin{frame}{The infinite loci model - Recursion equations}
 
 \begin{equation}
     \begin{array}{l}
@@ -254,7 +254,7 @@ Assumptions: \\
     
 \end{frame}
 
-\begin{frame}{Infinite loci model}
+\begin{frame}{The infinite loci model}
 
 \underline{Conclusion}: the models are equivalent when $B$ represents the average of an infinite amount of loci.
     
@@ -278,6 +278,13 @@ Assumptions: \\
 \end{equation*}
 
 $F_A$ represents the proportion of $B$ alleles that have been rescued because they have recombined to a $A$ rescue allele.
+
+\begin{tikzpicture}[-{Stealth[inset=0pt,length=4.5pt,angle'=35,round,bend]}, scale=1]
+  \foreach \a/\t in {90/census,-30/selection,210/mating}{
+    \node (\t) at (\a:1.1cm) {$\t$};
+    \draw (\a-20:1cm)  arc (\a-20:\a-100:1cm);
+  } 
+\end{tikzpicture}
 
 \end{frame}
 

@@ -121,7 +121,7 @@ We look at \textcolor{red}{genetic rescue} conditioned on evolutionary rescue.
     What is \textcolor{red}{genetic rescue}? Some general explanation what we understand by genetic rescue. use recombination
 \end{frame}
 
-\begin{frame}{The 2 locus model: JMS}
+\begin{frame}{The 2 locus model}
 
 \begin{center}
 \begin{tabular}{ c | c c c c}
@@ -147,12 +147,28 @@ When $Q_0 = 0$, $R_0 = 1$ and $r=0.5$, a recursion equation for $Q_n$ is derived
 
 \end{frame}
 
-
 \begin{frame}{Numerical Simulation}
 \includegraphics[width=0.9\textwidth]{Figures/NumericalSolution.eps}
 
 \end{frame}
 
+\begin{frame}{The infinite loci model}
+
+\begin{equation}
+    \begin{array}{l}
+	F_w[t+1] = \overbrace{\frac{1}{2} (F_w[t]+F_b[t]) p_b[t+1]}^\text{$w$ x $b$}  + \overbrace{F_w[t] (1-p_b[t+1])}^\text{$w$ x $w$}
+	 \\ \\
+	F_b[t+1]  = \overbrace{\frac{1}{2} (F_w[t]+F_b[t]) (1-p_b[t+1])}^\text{$b$ x $w$} 
+	+ \overbrace{F_b[t] p_b[t+1]}^\text{$b$ x $b$}
+	\end{array}
+\end{equation}
+
+Assumptions: \\
+1) Infinite population size \\
+2) Infinite \# of loci \\
+3) Free recombining loci ($r = 0.5$) 
+    
+\end{frame}
 
 \begin{frame}{Discrete markov birth-death model}
 \footnotesize
@@ -241,32 +257,46 @@ Each type has a birth- and death-rate $b_i$ and $d_i$ respectively. Selection is
     where $\vec{F}_A$ is a vector containing the deterministic projections for each absorbing state. (*Need to specify we drop the {0,0,0,0} case*)
 \end{frame}
 
-\begin{frame}{Results}
+\begin{frame}{Example results}
     $r=0.5$,  $W_A=1.1$ and $W_a=0.9$.
-    \includegraphics[width=0.75\textwidth]{Matlab/Figures/Projection3DPlot.eps}
+    \includegraphics[width=0.75\textwidth]{Matlab/Figures/Projection3DPlotr050.eps}
 \end{frame}
 
-\begin{frame}{The infinite loci model - Recursion equations}
+\begin{frame}{Comparing model outcomes}
 
-\begin{equation}
-    \begin{array}{l}
-	F_w[t+1] = \overbrace{\frac{1}{2} (F_w[t]+F_b[t]) p_b[t+1]}^\text{$w$ x $b$}  + \overbrace{F_w[t] (1-p_b[t+1])}^\text{$w$ x $w$}
-	 \\ \\
-	F_b[t+1]  = \overbrace{\frac{1}{2} (F_w[t]+F_b[t]) (1-p_b[t+1])}^\text{$b$ x $w$} 
-	+ \overbrace{F_b[t] p_b[t+1]}^\text{$b$ x $b$}
-	\end{array}
-\end{equation}
-
-Assumptions: \\
-1) Infinite population size \\
-2) Infinite \# of loci \\
-3) Free recombining loci ($r = 0.5$) 
+\begin{tabular}{l | l | lll | lll}  
+Ab& aB & \multicolumn{3}{c}{r=0.5} & \multicolumn{3}{c}{r=0.05} \\
+\midrule
+& & Det & Stoch & Sim & Det & Stoch & Sim \\
+\midrule
+1 & 1 & 0.404 & 0.184 & 0.0         & 0.113 & 0.033 & 0.0\\
+     & 5 & 0.767 & 0.495 & 0.0         & 0.256 & 0.103 & 0.0 \\
+     & 9 & 0.854 & 0.583 & 0.0         & 0.302 & 0.126 & 0.0 \\
+     \midrule
+5 & 1 & 0.121 & 0.092 & 0.0         & 0.031 & 0.021 & 0.0 \\
+     & 5 & 0.404 & 0.328 & 0.0         & 0.113 & 0.081 & 0.0 \\
+     & 9 & 0.547 & 0.425 & 0.0          & 0.162 & 0.106 & 0.0\\
+     \midrule
+9 & 1 & 0.071 & 0.071 & 0.0         & 0.018 & 0.018 & 0.0 \\
+     & 5 & 0.275 & 0.275 & 0.0         & 0.073 & 0.073 & 0.0 \\
+     & 9 & 0.404 & 0.404 & 0.0          & 0.113 & 0.113 & 0.0\\
+\end{tabular}
     
 \end{frame}
+
+
 
 \begin{frame}{The infinite loci model}
 
 \underline{Conclusion}: the models are equivalent when $B$ represents the average of an infinite amount of loci.
+    
+\end{frame}
+
+\begin{frame}{Simulations}
+    The simulations need to be rewritten a bit. Make it more similar to the markov model but with more loci. 
+\end{frame}
+
+\begin{frame}{Expand simulations to loci with local adaptation}
     
 \end{frame}
 

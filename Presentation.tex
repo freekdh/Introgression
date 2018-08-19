@@ -95,7 +95,7 @@
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
 
-\title[lab meeting]{Evolutionary rescue by introgressive hybridization} % The short title appears at the bottom of every slide, the full title is only on the title page
+\title[lab meeting]{Genetic rescue by introgressive hybridization} % The short title appears at the bottom of every slide, the full title is only on the title page
 
 \author{F.J.H. de Haas \& S.P. Otto} % Your name
 
@@ -113,12 +113,12 @@ Evolutionary rescue is characterized by a U-shaped curve of population size.
 
 \includegraphics[width=0.5\columnwidth]{Ushape_ER.png}
 
-We look at \textcolor{red}{\textbf{genetic rescue}} conditioned on evolutionary rescue.
+We look at \textcolor{red}{genetic rescue} conditioned on evolutionary rescue.
 
 \end{frame}
 
 \begin{frame}{Genetic rescue}
-    What is \textcolor{red}{genetic rescue}? Some explanation what we understand by genetic rescue. 
+    What is \textcolor{red}{genetic rescue}? Some general explanation what we understand by genetic rescue. use recombination
 \end{frame}
 
 \begin{frame}{The 2 locus model: JMS}
@@ -132,9 +132,11 @@ We look at \textcolor{red}{\textbf{genetic rescue}} conditioned on evolutionary 
 \end{tabular}
 \end{center}
 
-We assume a wildtype population of $aB$ haplotypes and a few introduced $Ab$ rescue haplotypes. Genetic rescue is defined as the proportion of $B$ alleles linked to $A$ as $t\to\infty$.
+Assume a wildtype population of $aB$ haplotypes and a few introduced $Ab$ rescue haplotypes. 
+
+\textcolor{red}{Genetic rescue} is defined:
 \begin{equation*}
-    \frac{AB_n}{AB_n+Ab_n} = \frac{p_nQ_n}{p_nQ_n+p_n(1-Q_n)} = \color{red} Q_n
+    \lim_{n\to\infty} \frac{AB_n}{AB_n+Ab_n} = \lim_{n\to\infty} \frac{p_nQ_n}{p_nQ_n+p_n(1-Q_n)} = \lim_{n\to\infty} Q_n
 \end{equation*}
 
 When $Q_0 = 0$, $R_0 = 1$ and $r=0.5$, a recursion equation for $Q_n$ is derived: 
@@ -174,7 +176,7 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
     p_{ab-1}, & \text{if } \bold{Y} = \bold{X} + \{0,0,0,-1\}; \\
     1, & \text{if}\ \bold{X} = \bold{Y} = \{0,0,0,0\}; \\
     0, & otherwise;
-\end{cases}  & \text{for}\ \bold{X}_1, \bold{X}_2 \neq n; \\
+\end{cases}  & \text{if}\ \bold{X}_1, \bold{X}_2 \neq n; \\
 \begin{cases} 
     1, & \text{if}\ \bold{X}_1 = \bold{Y}_1 = n; \\
     1, & \text{if}\ \bold{X}_2 = \bold{Y}_2 = n;  \\
@@ -189,6 +191,15 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
 
 \begin{frame}{Probabilites of birth-death model}
 
+\footnotesize
+Each type has a birth- and death-rate $b_i$ and $d_i$ respectively. Selection is implemented in the death rates. All types have the same birthrate $b_{AB}=b_{Ab}=b_{aB}=b_{ab} =1$  
+
+    \begin{equation*}
+    \begin{aligned}
+        P_{i|\text{death}}=\frac{f_id_i}{\sum_{i=1}^4 f_id_i} \qquad P_\text{birth} = \frac{\sum_i^4 f_i b_i}{\sum_i^4 (f_i b_i + f_i d_i)} 
+    \end{aligned}
+    \end{equation*}
+    
     \begin{equation*}
     \begin{aligned}
         &p_{AB+1} & =& (f_{AB}-r\times D) & \times P_\text{birth};\\
@@ -201,13 +212,9 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
         &p_{ab-1} & =& P_{ab|\text{death}} & \times (1-P_\text{birth}); 
     \end{aligned}
     \end{equation*} 
+
     
-    \begin{equation*}
-    \begin{aligned}
-        P_{i|\text{death}}=\frac{f_id_i}{\sum_{i=1}^4 f_id_i} \qquad P_\text{birth} = \frac{\sum_i^4 f_i b_i}{\sum_i^4 (f_i b_i + f_i d_i)} 
-    \end{aligned}
-    \end{equation*}
-  
+ \normalsize
     
 \end{frame}
 
@@ -219,21 +226,24 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
 
 \begin{frame}{$F_A$ from process $\bold{X}(t)$.}
     
-    $P[\bold{X}(\infty) = \bold{A}| \bold{X}(0) = \bold{I}]$ satisfies the left eigenvector with $\lambda = 1$ and the corresponding right eigenvector $=\bold{A}$:
+    $P[\bold{X}(\infty) = \bold{A}| \bold{X}(0) = \bold{I}]$ satisfies the left eigenvector $p_\bold{A}^\intercal$ with $\lambda = 1$ and the corresponding right eigenvector $=\bold{A}$:
     
     \begin{equation*}
         \vec{p}_\bold{A}^\intercal = \vec{p}_\bold{A}^\intercal \bold{M} \ \ \ \  \text{subject to } p_{\bold{A},\bold{A}}=1 \ \text{and}\ p_{l,\bold{A}}=0
     \end{equation*}.
     
+    The expected deterministic projection can be calculated from the probabilities of getting absorbed: 
+    
     \begin{equation*}
         \mathbb{E}[F(\bold{I})] = \vec{p}_\bold{A}(\bold{I}) \bullet \vec{F}_A   %transpose and do dot product with 
     \end{equation*}
     
-    Where $\vec{F}_A$ is a vector containing the deterministic expectations for the absorbing states. (*Need to specify we drop the {0,0,0,0} case*)
+    where $\vec{F}_A$ is a vector containing the deterministic projections for each absorbing state. (*Need to specify we drop the {0,0,0,0} case*)
 \end{frame}
 
 \begin{frame}{Results}
-    \includegraphics[width=1.0\textwidth]{M}
+    $r=0.5$,  $W_A=1.1$ and $W_a=0.9$.
+    \includegraphics[width=0.75\textwidth]{Matlab/Figures/Projection3DPlot.eps}
 \end{frame}
 
 \begin{frame}{The infinite loci model - Recursion equations}

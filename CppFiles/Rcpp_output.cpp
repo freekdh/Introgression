@@ -16,22 +16,6 @@
     #include <omp.h>
 #endif
 
-Parameters::Parameters(const Rcpp::List &parslist){
-    MUTATIONRATE = 0.0;
-    BIRTHRATE = parslist["b"];
-    DEATHRATEA = parslist["dA"];
-    DEATHRATEa = parslist["da"];
-    NLOCI = parslist["nloci"];
-    NINIT[0] = parslist["ninit0"];
-    NINIT[1] = parslist["ninit1"];
-    NGEN = parslist["ngen"];
-    NREP = parslist["nrep"];
-    RECOMBINATIONRATE = parslist["rec"];
-    K = parslist["k"];
-
-    Initialize();
-}
-
 Rcpp::List Rcpp_WriteOutput(const Parameters &GlobalPars, SimData &SimulationData){
     using namespace boost::accumulators;
 

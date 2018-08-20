@@ -151,13 +151,12 @@ std::string CreateOutputStreams(std::ofstream arrayofstream[4]){
 }
 
 int main(int argc, char *argv[]){
-
     // Initialize simulation
     rnd::set_seed();
+    
     const Parameters GlobalPars(argc, argv);
 
     SimData SimulationData;
-
     // Run nrep successful simulations
     // auto start = std::chrono::high_resolution_clock::now();
     #ifdef _OPENMP
@@ -169,18 +168,19 @@ int main(int argc, char *argv[]){
         while(RunSimulation(GlobalPars, SimulationData)==false);
     }
     // auto finish = std::chrono::high_resolution_clock::now();
-   
+    
     // Write outputfiles
     std::ofstream arrayofstream[4]; 
     CreateOutputStreams(arrayofstream); 
 	CSV_WriteOutput(arrayofstream, GlobalPars, SimulationData);
 
+    /*
     // Cleanup
     for(int i = 0; i < GlobalPars.NREP; ++i){
         delete SimulationData.DataSet[i];
     }
+    */
 
-    // Show Time elapsed
     /*
     std::chrono::duration<double> elapsed = finish-start;
     std::cout << "Elapsed time: " << elapsed.count() << " s" << std::endl;

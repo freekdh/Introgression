@@ -202,6 +202,22 @@ Parameters::Parameters(int argc, char *argv[]){
     Initialize();
 }
 
+Parameters::Parameters(const Rcpp::List &parslist){
+    MUTATIONRATE = 0.0;
+    BIRTHRATE = parslist["b"];
+    DEATHRATEA = parslist["dA"];
+    DEATHRATEa = parslist["da"];
+    NLOCI = parslist["nloci"];
+    NINIT[0] = parslist["ninit0"];
+    NINIT[1] = parslist["ninit1"];
+    NGEN = parslist["ngen"];
+    NREP = parslist["nrep"];
+    RECOMBINATIONRATE = parslist["rec"];
+    K = parslist["k"];
+
+    Initialize();
+}
+
 void Parameters::Initialize(){
     
     //Genetic architecture of selection

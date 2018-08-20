@@ -1,0 +1,238 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage[modulo,left]{lineno}
+\renewcommand{\baselinestretch}{1.5} 
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{subcaption}
+\usepackage{float}
+
+\graphicspath{{./Figures/}}
+
+\begin{document}
+	\title{Evolutionary rescue by means of introgression}
+	\author{Freek J.H. de Haas \& Sarah P. Otto }
+	\maketitle
+
+	\begin{abstract}
+	Theory suggests that the likelihood of evolutionary rescue, where evolution prevents otherwise inevitable extinction, increases with population size and availability of genetic variation. Introgressive hybridization (IH), which refers to the back-crossing of hybrids with one or both parental lineages, can boost evolutionary rescue by introducing new genetic variation into endangered populations. Although cases of evolutionary rescue by IH are known, more often it results in demographic- or genetic swamping. Demographic swamping occurs when wasted reproductive efforts of the parental populations are caused by reduced fitness in the hybrid offspring. Genetic swamping on the other hand occurs as a result of excess gene flow into endangered populations, which leads to extinction of the pure parental genome and species' identity. We have analyzed a deterministic model, supported by individual-based simulations, to quantify the effects of demographic and genetic swamping after a single introduction event of individuals from another population. Our results suggest that an optimal number of introduced individuals can minimize both forms of swamping. Not only do our results provide insights into the trade-off between genetic and demographic swamping, it also provides tools for conservation managers to optimally rescue small and/or inbred populations.
+	\end{abstract}
+	\textit{Keywords}: hybridization, genetic swamping, demographic swamping, genetic rescue.
+	\\
+	
+	\newpage
+	
+	\section*{Introduction}
+	
+	\doublespacing
+	\linenumbers
+	\modulolinenumbers[2]
+	
+   	Long term environmental change such as \textit{global warming} poses a major challenge to population survival \cite{parmesan2006ecological} \cite{hughes2000biological}. Whether they survive these changes depends on the strength of selection relative to their adaptive capacity as determined by demographics and availability of genetic variation \cite{lynch1993evolution} \cite{gomulkiewicz1995does} \cite{orr2008population}. Scenarios where evolution can reverse demographic threats and so prevent otherwise inevitable extinction have been termed evolutionary rescue (ER). Theory predict that the probability of ER decreases with stress intensity and increases with initial population size and with abundance of genetic variation available to fuel adaptation to new conditions (for a review see \cite{bell2008adaptation}). The potential role and importance of hybridization (i.e. the crossing of different species or populations) as a conservation management tool for evolutionary rescue is currently being debated. Hybrid back-crossing with one or both parental lineages (i.e. introgression) can increase adaptive potential by introducing genetic variation through gene flow between both populations.
+	
+	However, IH does not always result in evolutionary rescue. More often it leads to (1) demographic- or (2) genetic swamping of the target population. Genetic rescue refers to the net fitness gain to one or both parental lineages, eliminating the threat of extinction. In contrast, demographic and genetic swamping results in the loss of the target lineage. On the one hand, demographic swamping occurs when wasted reproductive efforts of the parental populations causes reduced fitness in the hybrid offspring (outbreeding depression) \cite{wolf2001predicting}. Consequently, population growth rates decline below replacement rates, hastening extinction. On the other hand, genetic swamping occurs when the hybrids are significantly more fit than either parental population (outbreeding enhancement or hybrid vigor). As a result, gene flow carries undesirable alleles into the endangered population, which leads to extinction of the pure parental genome \cite{woodruff1987fifty} \cite{allendorf2001problems}. High levels of hybridization can then pose a threat to preservation of the parental lineage identity due to genetic swamping \cite{rhymer1996extinction}.
+	
+	Empirical and theoretical results are inconclusive as to what determines the outcome of hybridization events. A literature review by Todesco et al. (2016) indicates that genetic and demographic swamping are more common outcomes of introgressive hybridization than genetic rescue \cite{todesco2016hybridization}. Although examples of extinction and displacement via hybridization have been documented, there are also instances in which the parental genome has remained relatively intact despite long histories of association and possible interbreeding, along with cases of stable hybrid zone formation \cite{vila2003rescue} \cite{madsen2004novel}. One possible reason for genetic rescue appearing as an uncommon outcome of hybridization studies is the ascertainment bias of the study since they included 'extinction' but not 'rescue' as their search terms. Unfortunately, there is little guidance as to when and how much hybridization might be useful.
+	
+	Mathematical models can help to evaluate the relative risks of demographic and genetic swamping and can then be used to guide conservation approaches for evolutionary rescue of wild populations \cite{aitken2013assisted} \cite{baskett2011introgressive}. Theoretical models are especially useful where random experimentation poses a high extinction risk to the population. However, due to the unpredictable and potentially damaging effects of IH, its use as a conservation management tool remains controversial nowadays. For conservation purposes we need to know the long-term effects of hybridization and yet very little is known about what happens beyond the F2 or first back-cross generations. Here, we present a model with the aim to fill this gap by comparing the long term risks of genetic and demographic swamping relative to genetic rescue. Our model can be interpreted as a reference model for genome rescue by hybridization and can be used to assess the optimal number of parental individuals that should be introduced to minimize genetic- and demographic swamping and thus maximize the potential for evolutionary rescue. We  have also developed an R package, which allows users to interact with the individual-based simulations (implemented in $C^++$).
+	
+	\section*{Model description}
+
+    We consider a haploid model in which adaptation involves a rare beneficial allele at a single locus. Mating is random and there is no population structure or migration. The environment changes suddenly, altering the fitness of alleles; these new fitness values then remain constant through the time period studied. We assume no clonal interference among beneficial alleles \textbf{copy of Orr and Unckless 2014}. 
+    
+    Time is discrete and measured in generations. At time $t=0$, a population of size $N_0$ made up entirely of wiltype individuals experiences a sudden environmental change. As the wiltype allele has absolute fitness $1-r$ in the new environment, the number of wiltype individuals decreases geometrically through time. We assume no population regulation in which population size can grow exponentially without upper bound. 
+    
+    A beneficial allele with absolute fitness $(1+s)$ is introduced at time $t=\tau$ in $k$ copies. Evolutionary rescue, if it occurs, involves an increase in frequency of the beneficial allele before the population goes extinct. Any allele that can cause evolutionary rescue must enjoy an absolute fitness greater than one, requiring $s>r$. 
+    
+    
+    
+    
+    Consider a gene of large affect which underlies adaptation to a recent change in the biotic or abiotic environment. At this site, two alleles ($A$ \& $a$) segregate in a randomly mating population of haploid individuals.
+    
+    Before the environmental change, the population which was initially fixed for the a allele has become maladapted causing an exponential decline in population size ($W_a<0$). A single introduction event of $N_A$ number of individuals with allele A will take place at time $t=0$, without any further introductions. This moment does not necessarily coincide with the time of the environmental change, which can happen much earlier. Individuals with allele A have a fitness higher than unity ($W_A>0$) and will subsequently replace the a allele individuals resulting in evolutionary rescue.
+    
+    Population dynamics are modeled deterministically by an exponential function with growth rates depending on the fitness of both types. Although density dependent population growth models are more realistic under normal biological circumstances, we are only interested in the initial part of the dynamics of evolutionary rescue which can be more easily approximated with an exponential function. Eventually the invader type rises to a point where density dependence would alter the dynamics, but we assume that this occurs long after the fate of the invader is decided. Consequently, the temporal demographics of each type can be approximated by the following equation:
+    
+    \begin{equation}
+	N_A[t] = W_A^t N_A[0] 
+	\label{Eq N}
+	\end{equation}
+    
+    \begin{equation}
+	N_a[t] = W_a^t N_a[0] 
+	\label{Eq N}
+	\end{equation}
+    
+ in which $N_A$ and $N_a$ represent the number of individuals of either type and $W_A$ and $W_a$ determine their growth rates where $W_A>0$ and $W_a<0$.
+ 
+    We assume in our model that individual fitness remains constant, despite hybridization. It is known, however, that hybridization often influences fitness in a negative way (outbreeding depression), which is why we will expand the analytical model with simulations that include fitness effects of hybridization. In our analytical model, individuals are only subject to viability/fertility selection depending on the allele present at the major gene.
+    
+    To quantify genetic swamping that occurs due to introgression, we imagine an infinite number of freely recombining loci ($r=0.5$) where each locus has two segregating alleles {1,0}. Without explicitly tracking all possible haplotype combinations, we are able to quantify the amount of genetic swamping by following the dynamics of $F_A$ and $F_a$ which represent the proportion of alleles originating from the original population that are linked to the A- and a-allele respectively.   
+    
+    We first get an approximate sense of the dynamics based on a deterministic model that treats the $A$ locus and the genomic background independently, followed by individual-based simulations to relax some of the assumptions made in the deterministic model.
+	
+	\subsection*{Deterministic model}
+	\subsubsection*{Degree of swamping}
+	To quantify genetic swamping, we consider the background genome (i.e. all loci except the $A$ locus) of each type as a character in our model. The background genome is modeled as a very large, effectively infinite, sequence of genes, each evolving independently. Independent evolution requires that there is a fair amount of recombination between genes. When a hybridization event occurs, the background genome of each type changes depending on its current state.
+	
+	Let $F_R[t]$ and $F_I[t]$ be the fractions of resident autosomal genes at time $t$ that descend from the resident and invader population at $t=0$, respectively. Assuming genes segregate in a Mendelian fashion and individuals mate at random, the change of $F_R[t]$ and $F_I[t]$ per generation can be described by the following two recursive equations: 
+	\begin{equation}
+	\begin{split}
+	F_R[t+1] & = \overbrace{\frac{1}{2} (F_R[t]+F_I[t]) \frac{N_I[t] \Theta }{N_I[t] \Theta +N_R[t]}}^\text{resident x invader} \\  
+	& + \underbrace{F_R[t] \frac{N_R[t]}{N_I[t] \Theta +N_R[t]}}_\text{resident x resident}
+	\end{split},
+	\label{Eq FR}
+	\end{equation}
+	\begin{equation}
+	\begin{split}
+	F_I[t+1] &  = \overbrace{\frac{1}{2} (F_R[t]+F_I[t]) \frac{N_R[t] \Theta}{N_I[t]+N_R[t] \Theta}}^\text{invader x resident} \\
+	& + \underbrace{F_I[t] \frac{N_I[t]}{N_I[t]+N_R[t] \Theta}}_\text{invader x invader}
+	\end{split},
+	\label{Eq FI}
+	\end{equation}
+	with initial values $F_R[0]=1$ and $F_I[0]=0$. Equation 2 and 3 describe the consequences for residents (2) or invaders (3) individuals mating randomly with individuals of the same type or opposite types, respectively. Under our model of full recombination, the offspring has a 50\% chance of receiving each allele from either parent. Assuming an effectively infinite amount of genes that evolve independently, the offspring receives half of the alleles from either parent. The frequency of each mating event depends on the numbers of each type in the population at that time. We include hybrid breakdown as a simple factor reducing success of cross-mating by a factor $\Theta$. (\textbf{Sally}?)
+	
+	Because Equations [\ref{Eq FR}] and [\ref{Eq FI}] can not be solved directly, we use the following substitutions:
+	\begin{equation}
+	\text{dif}[t] = F_I[t] - F_R[t]
+	\label{Eq sub dif}
+	\end{equation}
+	\begin{equation}
+	\text{ave}[t] = \frac{F_I[t] + F_R[t]}{2},
+	\label{Eq sub ave}
+	\end{equation}
+	which represent the difference ($\text{dif}$) and the average ($\text{ave}$) of the genomic background. Equation 4 satisfies:
+	\begin{equation}
+	\text{dif}[t] = 2^{-t}.
+	\label{Eq dif}
+	\end{equation}
+	Equation 6 demonstrates that as time increases, the difference between the background genomes of both types reduces at a constant rate, independent of population sizes ($N_\psi$) and their relative fitness ($W_\psi$). In the deterministic scenario, the resident will always be present and as a result there will be some probability of a hybridization event at each generation. We will relax this assumption in the individual-based simulations. However, in this model we can conclude that $F_R[t]$ and $F_I[t]$ converge to an equilibrium as $t\to\infty$. At this point, hybridization no longer changes the background genome of either type [Figure \ref{Fig_TempDynamics}].
+	
+	We can now solve Equation [\ref{Eq sub ave}] after substituting in Equation [\ref{Eq dif}]:
+	\begin{equation}
+	\text{ave}[t] = \frac{1}{2} + \sum _{j=0}^{t-1} 2^{-j-2} \frac{\text{WRat}^j-\text{NRat} }{\text{WRat}^j+\text{NRat}},
+	\label{Eq ave sum}
+	\end{equation}
+	where $\text{WRat} = log[W_R] / log[W_I]$ and $\text{NRat} = N_I[0] / N_R[0]$. Approximating the sum of Equation [\ref{Eq ave sum}] with an integral gives the following solution:
+	\begin{equation}
+	\text{ave}[t] = \frac{2^{-t-\frac{1}{2}} \, _2F_1\left(1,-\frac{\log (2)}{\log (\text{WRat})};1-\frac{\log (2)}{\log (\text{WRat})};-\frac{\text{WRat}^{t-\frac{1}{2}}}{\text{NRat}}\right)}{\log (2)}.
+	\label{Eq ave integral}
+	\end{equation}
+	where $_2F_1$ is an ordinary hypergeometric functions.
+	
+	As Equation [\ref{Eq dif}] converges to zero after a long period of time ($t\to\infty$), the asymptotic degree of genetic introgression simplifies to
+	\begin{equation}
+	\begin{split}
+	\text{ave}[\infty] & = F_I[\infty] = F_R[\infty] \\
+	& = 1-\frac{\, _2F_1\left(1,-\frac{\log (2)}{\log (\text{WRat})};1-\frac{\log (2)}{\log (\text{WRat})};-\frac{1}{\text{NRat} \sqrt{\text{WRat}}}\right)}{\sqrt{2} \log (2)},
+	\end{split}
+	\label{Eq Asymptotic}
+	\end{equation}
+	where $F_I[\infty]$ represent the final degree of genetic rescue. In contrast, the final degree of swamping is given by $1-F_I[\infty]$.
+	
+	\subsubsection*{Probability of rescue through hybridization}
+	To quantify the probability of rescue we focus on the case where new beneficial mutations cannot rescue the resident population before its extinction but fixation of the invader allele at the selective locus ($A_I$) could. In 1927, Haldane used a branching process to determine an allele's fixation probability in an effectively infinite population. We let $1-P_t[k]$ be the probability that none of the $k$ copies of allele $A_I$ present at time $t$ will leave descendants at some future time.  The probability of $A_I$ establishing in the population is then $P_t[k]$.  If we assume a Poisson distribution for the number of offspring per invader, then $P_t[k]$ satisfies:
+	\begin{equation}
+	1-P_t[k] = \sum_{j=0}^{\infty} e^{-k \lambda} \frac{k \lambda^j}{j!} (1-P_{t+1}[1])^j,
+	\label{Eq branching sum}
+	\end{equation}
+	where $\lambda$ stands for the average number of births per interval. Equation \ref{Eq branching sum} can be simplified to
+	\begin{equation}
+	1-P_t[k] = e^{-k \lambda P_{t+1}[1]}.
+	\label{Eq_Branching2}
+	\end{equation}
+	If we assume a selective advantage of $\lambda = 1+s$ and that the probability of loss of the $k$ copies are independent of one another ($1-P_t[k] = (1-P_t[1]^k)$), the equilibrium of Equation \ref{Eq_Branching2} ($P_t[k] = P_{t+1}[k]$) solves:
+	\begin{equation}
+	P[k] = 1-e^{-2 k s}.
+	\label{Eq_fix}
+	\end{equation}
+	
+	\subsubsection*{Evolutionary rescue}
+	
+	To determine the optimal balance between evolutionary rescue and genetic swamping, we combine the above metrics:  
+	\begin{equation}
+	E[\text{Rescue}] = F_I[\infty] P[N_I]^c
+	\label{Eq_Rescue}
+	\end{equation}
+	where $c$ is a user specified weighting factor that determines how critical establishment of $A_I$ is ($c>>1$: very critical, $c=0$: not at all important) [Figure \ref{Fig_Analysis}].
+	
+	\subsection{Individual-based simulations}
+	
+	Individual-based simulations were implemented in $\text{C}^{++}$ to test the behavior of our analytical model under relaxed assumptions. Unlike in our deterministic analysis, we include an explicit genetic map, assortative mating, varying recombination rates and diploidy in the simulations. Simulations track a population of $N_I$ invaders and $N_R$ residents, in which each individual carries a set of neutral loci (referred to as the background genome) of length $L$ and one selective locus referred to as $A$. We allow two alleles to segregate per locus (denoted '$+$' and '$-$'). 
+	
+	At initialization, all loci (including the selective locus) are set according to the individual's type: $+$ for residents and $-$ for invaders. One generation involves the following successive stages: (1) assortative mating, (2) offspring production and (3) viability selection. The number of offspring in the next generation depends on the population fertility ($F$) and the current population size $N[t]$ by drawing from a Poisson distribution with rate parameter $N[t] F$. Each offspring is assigned two parents depending on an assortative mating parameter $M$. One parent is chosen at random and the other parent will be either random or assortative with probability $M$. There are two forms of assortative mating, either based on a random locus from the background genome or based on the selective locus ($A$). Subsequently, each offspring's genotype is determined by recombining the genotypes of both parents. Recombination occurs through successive Bernoulli trials at each locus. With probability $r$, a recombination event occurs between each pair of adjacent loci. Finally we allow $A_R$ alleles to mutate to $A_M$ alleles to account for rescue from within the resident population. Viability selection based on the selective locus determines if the offspring will survive to become a parent. Viability selection is implemented by comparing a random number from a uniform distribution to the individual's viability, which is determined by the selective locus ($A$) and includes a component of hybrid breakdown. Individuals that carry $A_I$ allele have a viability of $V_I (1 - 4 \omega q (1-q))$ to incorporate hybrid breakdown. $\omega$ represents the reduced fertility of having 50\% I alleles and 50\% of R alleles and $q$ represents the proportion of R alleles in the background genome. Individuals that carry $A_R$ have a viability of $V_R (1 - 4 \omega q (1-q))$. Each trial repeats this life-cycle for $G$ generations and each trial is repeated for $T$ trials. A successful trial of the simulation is determined by the fixation of the invader allele ($A_I$). One simulation involves $N_{trials}$ replicate trials. 
+
+	\begin{table}[]
+		\centering
+		\caption{Default simulation parameters}
+		\label{Table_ParamSim}
+		\begin{tabular}{lll}
+			\textbf{Description}	& \textbf{Parameters}		& \textbf{Value} 	\\ \hline
+			Number of loci 			& $L$			& 100 		\\ 
+			Number of trials 		& $T$ 			& 1000		\\
+			Number of generations 	& $G$			& 20		\\ 
+			Fertility 				& $F$ 			& 1.05  	\\ \hline
+			Assortative mating		& $M$ 			& 0.0 		\\  
+			Mutation-rate 			& $\mu$			& 10E-2		\\
+			Generic incompatibility	& $\omega$ 		& 0.0		\\
+			Viability invaders		& $V_I$			& 1.0		\\
+			Viability residents		& $V_R$			& 0.5 		\\
+			Initial invaders		& $N_I$			& 1 		\\
+			Initial residents		& $N_R$			& 100 		\\
+			Recombination rate		& $r$ 			& 0.5 		\\
+			
+		\end{tabular}
+	\end{table}
+
+	\section*{Results}
+	
+	$P[k]$ represents the probability of rescue of $k$ invader individuals, while $1-F_I[\infty]$ measures the final degree of genetic swamping. Numerical examination of Equation \ref{Eq Asymptotic} suggests that genetic swamping is most least present when $NRat$ ($N_I[0]/N_R[0]$) approaches $0$ and $WRat$ ($W_R/W_I$) approaches $1$ [Figure \ref{Fig_Hypergeometric}]. From a conservation point of view, $N_I$ and $t$ are the relevant parameters, as the number of invaders and the moment of introduction can be regulated. The deterministic results of the model suggest that genetic swamping is minimized when the fewest invaders are introduced with the lowest growth-rate [Figure \ref{Fig_Hypergeometric}] . 
+	
+	The fate of the invader allele ($A_I$) depends on the probability of fixation which is determined by $P[k]$. The resident allele ($A_R$), however, will inevitably go extinct. Equation \ref{Eq_fix} predicts that more initial invader alleles will increase the probability of fixation of $A_I$. Therefore, in contrast to the degree of genetic swamping which is conditioned on the invader allele ($A_I$) fixating, the probability of the $A_I$ allele fixating increases when more invaders are introduced. This trade-off is clearly shown in Figure \ref{Fig_Rescue} as a negative correlation between probability of fixation and the maximal genetic rescue ($F_I[\infty]$).  
+	
+	To weigh the risks of extinction versus genetic swamping, we analyzed Equation \ref{Eq_Rescue} and as expected, we find an optimal number of introduced invaders to maximize evolutionary rescue [Figure \ref{Fig_Analysis}]. More invaders increases the chance of fixation for the rescue allele ($A_I$), however it also increases genetic swamping through excess gene flow. If more emphasis is being put on the $A_I$ allele fixating (increase parameter $k$), more individuals should be introduced and less genetic rescue will occur [Figure \ref{Fig_Analysis}].
+	
+	The simulation results indicate that lower recombination rates ($r$) leads to an increase in genetic swamping, by increasing the hitchhiking along with allele $A_I$ [Figure \ref{Fig_Simulation}]. Interestingly, the level of genetic swamping is not affected by the population being haploid or diploid [Figure \ref{Fig_SimulationHaploidDiploid}]. The fixation probability calculated as determined by the simulations is in close accordance with the deterministic results [Table \ref{Table_FixationProbability}]. However, the overall genetic swamping of the deterministic model deviate slightly from simulations [Figure \ref{Fig_SimvsNum}].
+	
+	There is however an under approximation of the genetic swamping from simulations compared to the deterministic model \ref{Fig_Simulation}. This has to do with the conditional fixation of the simulation results. By removing the cases that do not fixate in the initial phase of the simulations this leads to a positive bias in the growth rate of the invader population \ref{Fig_TempDynamics}. The initial increase in growth rate accounts for the bias in $WRat$. Otto and Barton, 1997 have approximated the starting frequency of alleles when conditioned on fixating, to be $N_I = 1/s$ \cite{otto1997evolution}. 
+	
+	\textit{Future: discuss results including hybrid breakdown - assortative mating - mutation rate, see e-mail. Also, I cannot explain the $N_I[0] = 1/s$ rule which comes from your paper with Nick Barton, so for now it is not explained properly..}
+	
+	% Show assortative mating? %
+	
+	\begin{table}[]
+	\centering
+	\caption{Fixation probability for simulations and branching model. Simulations are run with default parameters shown in Table \ref{Table_ParamSim}. For the branching model we use $s = 0.05$ and Equation \ref{Eq_fix}.}
+	\label{Table_FixationProbability}
+	\begin{tabular}{lll}
+	\textbf{Invaders ($k$)} 	& \textbf{Simulation}	& \textbf{$P[k]$} \\ \hline
+	1				& 0.0954		& 0.0952  	\\
+	2				& 0.1893		& 0.1812  	\\
+	3				& 0.2550		& 0.2591 	\\   
+	4				& 0.3340		& 0.3296	\\
+	5				& 0.4107		& 0.3934	\\
+	6				& 0.4401		& 0.4511	\\
+	7				& 0.5112		& 0.5034	\\
+	8				& 0.5549		& 0.5506	\\
+	9				& 0.5974		& 0.5934	\\
+	10				& 0.6281		& 0.6321 	
+	\end{tabular}
+	\end{table}
+
+	\section*{Discussion}
+	
+	Genetic and demographic swamping form a risk for conservation management approaches, that involve introgressive hybridization. To provide more insight about the roles of these two factors when introgression occurs, we built a model and determined the optimal number of introduced individuals to minimize both genetic and demographic swamping. Genetic swamping is here defined as the proportion of resident alleles from an infinite locus model that have been recombined in the invader genotype which carries the rescue allele $A_I$. Rescue is defined as the probability that the invader allele ($A_I$) will fixate in the population. Fixation was determined analytically by a branching process, which depended on the number of invaders that were introduced at $t=0$.  
+	
+	Using both demographic and genetic swamping we determined the optimal number of invaders that would lead to the highest expected evolutionary rescue. The results are shown in Figure \ref{Fig_Analysis}. As expected, there is a trade-off between genetic swamping and evolutionary rescue, which can be optimized by introducing an intermediate number of hybrids.
+	
+	The simulation results are in line with the deterministic model [Figure \ref{Fig_Simulation}]. In the simulations we were able to change the recombination rate, include assortative mating, mutations and add hybrid breakdown. We found that a lower recombination rate resulted in more genetic swamping. This is due to the fact that the invaders are able to capture a smaller proportion of the resident allele due to reduced opportunity for recombining away from allele $A_R$. 
+		
+	The model we present here investigates the long term dynamics of hybridization and is simplistic in many aspects. For example, our model assumes recombination occurs across the whole genome with an equal rate. However, recent work has shown that patterns of introgression vary across the genome \cite{baack2007genomic}. Large genome-scale analyses will be required to understand whether rampant genetic exchange is the rule for hybridizing species or whether much of the genome is resistant to introgression. 
+	
+	Whether the recent theoretical results can be extended to inform when natural populations will undergo evolutionary rescue if faced with novel environmental conditions remains to be seen. To facilitate comparing these theoretical predictions with empirical data, we have attached an R-package to interact with the $\text{C}^{++}$ individual-based simulations from the R environment (R-package). We combined our model in R with the 'Shiny' package \cite{shiny} to create interactive graphs which allows the user to change parameters of the model and visualize the output instantly. The source code can be found in the supplementary materials [Figure \ref{Fig_SimulationsInR}].
+	
+	\bibliographystyle{apalike}
+	\bibliography{lib}
+\end{document}

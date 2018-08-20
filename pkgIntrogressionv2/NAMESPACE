@@ -1,0 +1,3 @@
+useDynLib(pkgIntrogressionv2)
+exportPattern("^[[:alpha:]]+")
+importFrom(Rcpp, evalCpp)

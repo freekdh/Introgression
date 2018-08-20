@@ -21,50 +21,23 @@
 
 enum nameofstream {Parametersoff, Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var};
 
-Parameters::Parameters(int argc, char *argv[]){
-        MUTATIONRATE = 0.0;
-        INTRINSIC_GROWTHRATE = std::atof(argv[1]);
-        NLOCI = std::atoi(argv[2]);
-        NPLOIDY = std::atoi(argv[3]);
-        NINIT[0] = std::atoi(argv[4]);
-        NINIT[1] = std::atoi(argv[5]);
-        NLOCAL_ADAPTED_LOCI = 1;
-        DISTLOCAL = std::atoi(argv[6]);
-        SC_MAJOR = std::atof(argv[7]);
-        SC_LOCAL = std::atof(argv[8]);
-        NGEN = std::atoi(argv[9]);
-        NREP = std::atoi(argv[10]);
-        RECOMBINATIONRATE = std::atof(argv[11]);
-        K = std::atoi(argv[12]);
-
-        Initialize();
-}
-
 void CSV_WriteOutput(std::ofstream arrayofstream[4], const Parameters &pars, SimData &SimulationData){
 
     using namespace boost::accumulators;
     // Parameters output
-    arrayofstream[Parametersoff] << "SC_MAJOR" << arrayofstream[Parametersoff].fill() << pars.SC_MAJOR << std::endl;
-    arrayofstream[Parametersoff] << "SC_LOCAL" << arrayofstream[Parametersoff].fill() << pars.SC_LOCAL << std::endl;
-    arrayofstream[Parametersoff] << "NLOCALLOCI" << arrayofstream[Parametersoff].fill() << pars.NLOCAL_ADAPTED_LOCI << std::endl;
     for (int i = 0; i < 2; ++i)
     {
         arrayofstream[Parametersoff] << "NINIT" << i << arrayofstream[Parametersoff].fill() << pars.NINIT[i] << std::endl;
     }
     arrayofstream[Parametersoff] << "NGEN" << arrayofstream[Parametersoff].fill() << pars.NGEN << std::endl;
     arrayofstream[Parametersoff] << "NLOCI" << arrayofstream[Parametersoff].fill() << pars.NLOCI << std::endl;
-    arrayofstream[Parametersoff] << "NPLOIDY" << arrayofstream[Parametersoff].fill() << pars.NPLOIDY << std::endl;
     arrayofstream[Parametersoff] << "NREP" << arrayofstream[Parametersoff].fill() << pars.NREP << std::endl;
     arrayofstream[Parametersoff] << "MUTATIONRATE" << arrayofstream[Parametersoff].fill() << pars.MUTATIONRATE << std::endl;
     arrayofstream[Parametersoff] << "RECOMBINATIONRATE" << arrayofstream[Parametersoff].fill() << pars.RECOMBINATIONRATE << std::endl;
-    arrayofstream[Parametersoff] << "INTRINSICGROWTHRATE" << arrayofstream[Parametersoff].fill() << pars.INTRINSIC_GROWTHRATE << std::endl;
     arrayofstream[Parametersoff] << "CARRYINGCAPACITY" << arrayofstream[Parametersoff].fill() << pars.K << std::endl;
-    arrayofstream[Parametersoff] << "DISTANCEFROMMAJOR" << arrayofstream[Parametersoff].fill() << pars.DISTLOCAL << std::endl;
-    arrayofstream[Parametersoff] << "SC_GENOME" << std::endl;
-
-    for (int j = 0; j < pars.NLOCI; ++j) {
-            arrayofstream[Parametersoff] << pars.SC_GENOME[j] << " ";
-        }
+    arrayofstream[Parametersoff] << "BIRTHRATE" << arrayofstream[Parametersoff].fill() << pars.BIRTHRATE << std::endl;
+    arrayofstream[Parametersoff] << "DEATHRATEA" << arrayofstream[Parametersoff].fill() << pars.DEATHRATEA << std::endl;
+    arrayofstream[Parametersoff] << "DEATHRATEa" << arrayofstream[Parametersoff].fill() << pars.DEATHRATEa << std::endl;
     arrayofstream[Parametersoff] << std::endl;
 
     //Simulation output
@@ -85,8 +58,8 @@ void CSV_WriteOutput(std::ofstream arrayofstream[4], const Parameters &pars, Sim
         accumulator_set<int, stats<tag::mean, tag::variance > > popsize;
         accumulator_set<int, stats<tag::mean, tag::variance > > major0;
         accumulator_set<int, stats<tag::mean, tag::variance > > major1;
-        accumulator_set<int, stats<tag::mean, tag::variance > > introgressed0;
-        accumulator_set<int, stats<tag::mean, tag::variance > > introgressed1;
+        accumulator_set<double, stats<tag::mean, tag::variance > > introgressed0;
+        accumulator_set<double, stats<tag::mean, tag::variance > > introgressed1;
 
         ///FINISH ANALYSIS OF THE GENOTYPE RESCUE PER LOCUS PART. 
         for(int j = 0; j < pars.NREP; ++j){
@@ -100,16 +73,16 @@ void CSV_WriteOutput(std::ofstream arrayofstream[4], const Parameters &pars, Sim
         arrayofstream[Dataoff]
         << i << arrayofstream[Dataoff].fill() 
         << mean(popsize) << arrayofstream[Dataoff].fill()
-        << (double)mean(major0)/(double)pars.NPLOIDY << arrayofstream[Dataoff].fill()
-        << (double)mean(major1)/(double)pars.NPLOIDY << arrayofstream[Dataoff].fill() 
-        << mean(introgressed0)/(double)(pars.NPLOIDY*(pars.NLOCI-1)) << arrayofstream[Dataoff].fill()
-        << mean(introgressed1)/(double)(pars.NPLOIDY*(pars.NLOCI-1)) << arrayofstream[Dataoff].fill()
+        << (double)mean(major0) << arrayofstream[Dataoff].fill()
+        << (double)mean(major1) << arrayofstream[Dataoff].fill() 
+        << mean(introgressed0) << arrayofstream[Dataoff].fill()
+        << mean(introgressed1) << arrayofstream[Dataoff].fill()
 
         << variance(popsize) << arrayofstream[Dataoff].fill()
-        << (double)variance(major0)/((double)pars.NPLOIDY*(double)pars.NPLOIDY) << arrayofstream[Dataoff].fill()
-        << (double)variance(major1)/((double)pars.NPLOIDY*(double)pars.NPLOIDY) << arrayofstream[Dataoff].fill()
-        << variance(introgressed0)/(double)(pars.NPLOIDY*(pars.NLOCI-1)*pars.NPLOIDY*(pars.NLOCI-1)) << arrayofstream[Dataoff].fill()
-        << variance(introgressed1)/(double)(pars.NPLOIDY*(pars.NLOCI-1)*pars.NPLOIDY*(pars.NLOCI-1)) << arrayofstream[Dataoff].fill() << std::endl;
+        << (double)variance(major0) << arrayofstream[Dataoff].fill()
+        << (double)variance(major1) << arrayofstream[Dataoff].fill()
+        << variance(introgressed0)<< arrayofstream[Dataoff].fill()
+        << variance(introgressed1) << arrayofstream[Dataoff].fill() << std::endl;
     };
     
     for(int i = 0; i < pars.NGEN; ++i){
@@ -120,7 +93,7 @@ void CSV_WriteOutput(std::ofstream arrayofstream[4], const Parameters &pars, Sim
             accumulator_set<double, stats<tag::mean, tag::variance > > locus;
             for(int r = 0; r < pars.NREP; ++r)
             {
-                locus((double)SimulationData.DataSet[r]->allele0[i][l] / ((double)SimulationData.DataSet[r]->popsize[i] * (double)pars.NPLOIDY));
+                locus((double)SimulationData.DataSet[r]->allele0[i][l] / ((double)SimulationData.DataSet[r]->popsize[i]));
             }
             arrayofstream[AlleleFrequencyoff_mean] << mean(locus)  << arrayofstream[AlleleFrequencyoff_mean].fill();
             arrayofstream[AlleleFrequencyoff_var] << variance(locus) << arrayofstream[AlleleFrequencyoff_var].fill(); 
@@ -128,12 +101,17 @@ void CSV_WriteOutput(std::ofstream arrayofstream[4], const Parameters &pars, Sim
         arrayofstream[AlleleFrequencyoff_mean] << std::endl;
         arrayofstream[AlleleFrequencyoff_var] << std::endl;
     }
+
+    // Cleanup
+    for(int i = 0; i < pars.NREP; ++i){
+        delete SimulationData.DataSet[i];
+    }
 }
 
 std::string CreateOutputStreams(std::ofstream arrayofstream[4]){
     
     std::string CurrentWorkingDirectory = boost::filesystem::current_path().c_str();
-    CurrentWorkingDirectory.append("/Data");
+    CurrentWorkingDirectory.append("/CppFiles/Data");
 
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
@@ -173,12 +151,12 @@ std::string CreateOutputStreams(std::ofstream arrayofstream[4]){
 }
 
 int main(int argc, char *argv[]){
-
     // Initialize simulation
     rnd::set_seed();
+    
     const Parameters GlobalPars(argc, argv);
-    SimData SimulationData;
 
+    SimData SimulationData;
     // Run nrep successful simulations
     // auto start = std::chrono::high_resolution_clock::now();
     #ifdef _OPENMP
@@ -190,18 +168,19 @@ int main(int argc, char *argv[]){
         while(RunSimulation(GlobalPars, SimulationData)==false);
     }
     // auto finish = std::chrono::high_resolution_clock::now();
-   
+    
     // Write outputfiles
     std::ofstream arrayofstream[4]; 
     CreateOutputStreams(arrayofstream); 
 	CSV_WriteOutput(arrayofstream, GlobalPars, SimulationData);
 
+    /*
     // Cleanup
     for(int i = 0; i < GlobalPars.NREP; ++i){
         delete SimulationData.DataSet[i];
     }
+    */
 
-    // Show Time elapsed
     /*
     std::chrono::duration<double> elapsed = finish-start;
     std::cout << "Elapsed time: " << elapsed.count() << " s" << std::endl;

@@ -39,6 +39,7 @@
                 "/usr/local/include/boost_1_67_0/",
                 "/usr/local/lib/R/site-library/Rcpp/include/",
                 "/usr/local/lib/R/site-library/sourcetools/include/sourcetools/r/",
+                "/usr/local/lib/R/site-library/Rcpp/include/",
                 "${workspaceRoot}"
             ],
             "defines": [],

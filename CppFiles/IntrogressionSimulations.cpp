@@ -55,7 +55,7 @@ class Individual{
         genome = temp2 & temp1.flip();
     }
 
-    inline bool rescue(const Parameters &pars){if(genome[pars.index[0]]==1){return true;} else{false;} ;}
+    inline bool rescue(const Parameters &pars){if(genome[pars.index[0]]==1){return true;} else{return false;} ;}
 
     bool Genotype(const int &locus) {return genome[locus]; }
 
@@ -116,7 +116,7 @@ bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &
     
     // Birth
     const int nparents = population.size();
-    const double popgrowthrate = 1.0 + pars.BIRTHRATE * (1.0 - ((double)nparents / (double)pars.K));
+    const double popgrowthrate = 1.0 + (pars.BIRTHRATE-1.0) * (1.0 - ((double)nparents / (double)pars.K));
     assert(popgrowthrate >= 0.0);
     const int noffspring = rnd::poisson((double)nparents * popgrowthrate);
     std::vector<Individual*> offspring(noffspring);
@@ -205,19 +205,19 @@ Parameters::Parameters(const Rcpp::List &parslist){
 #endif
 
 Parameters::Parameters(int argc, char *argv[]){
-        MUTATIONRATE = 0.0;
-        BIRTHRATE = std::atof(argv[1]);
-        DEATHRATEA = std::atof(argv[2]);
-        DEATHRATEa = std::atof(argv[3]);
-        NLOCI = std::atoi(argv[4]);
-        NINIT[0] = std::atoi(argv[5]);
-        NINIT[1] = std::atoi(argv[6]);
-        NGEN = std::atoi(argv[7]);
-        NREP = std::atoi(argv[8]);
-        RECOMBINATIONRATE = std::atof(argv[9]);
-        K = std::atoi(argv[10]);
+    MUTATIONRATE = 0.0;
+    BIRTHRATE = std::atof(argv[1]);
+    DEATHRATEA = std::atof(argv[2]);
+    DEATHRATEa = std::atof(argv[3]);
+    NLOCI = std::atoi(argv[4]);
+    NINIT[0] = std::atoi(argv[5]);
+    NINIT[1] = std::atoi(argv[6]);
+    NGEN = std::atoi(argv[7]);
+    NREP = std::atoi(argv[8]);
+    RECOMBINATIONRATE = std::atof(argv[9]);
+    K = std::atoi(argv[10]);
 
-        Initialize();
+    Initialize();
 }
 
 void Parameters::Initialize(){
@@ -228,8 +228,9 @@ void Parameters::Initialize(){
     index[0] = std::floor((double)NLOCI/2.0);
 
     std::vector<int> index;
-    boost::dynamic_bitset<> INITGENOME0(NLOCI,false);
-    boost::dynamic_bitset<> INITGENOME1(NLOCI,true);
+    boost::dynamic_bitset<> INITGENOME0(NLOCI);
+    boost::dynamic_bitset<> INITGENOME1(NLOCI);
+    INITGENOME1.set();
     INIT_GENOME[0] = INITGENOME0;
     INIT_GENOME[1] = INITGENOME1;
 

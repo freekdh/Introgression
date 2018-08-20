@@ -35,6 +35,9 @@ void CSV_WriteOutput(std::ofstream arrayofstream[4], const Parameters &pars, Sim
     arrayofstream[Parametersoff] << "MUTATIONRATE" << arrayofstream[Parametersoff].fill() << pars.MUTATIONRATE << std::endl;
     arrayofstream[Parametersoff] << "RECOMBINATIONRATE" << arrayofstream[Parametersoff].fill() << pars.RECOMBINATIONRATE << std::endl;
     arrayofstream[Parametersoff] << "CARRYINGCAPACITY" << arrayofstream[Parametersoff].fill() << pars.K << std::endl;
+    arrayofstream[Parametersoff] << "BIRTHRATE" << arrayofstream[Parametersoff].fill() << pars.BIRTHRATE << std::endl;
+    arrayofstream[Parametersoff] << "DEATHRATEA" << arrayofstream[Parametersoff].fill() << pars.DEATHRATEA << std::endl;
+    arrayofstream[Parametersoff] << "DEATHRATEa" << arrayofstream[Parametersoff].fill() << pars.DEATHRATEa << std::endl;
     arrayofstream[Parametersoff] << std::endl;
 
     //Simulation output

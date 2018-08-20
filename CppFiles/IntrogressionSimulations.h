@@ -9,7 +9,7 @@
 #include "random.h"
 
 struct Parameters{
-    Parameters();
+    Parameters(){};
     Parameters(int argc, char *argv[]);    
     Parameters(const Rcpp::List &);
 

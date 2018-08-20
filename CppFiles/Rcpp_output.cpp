@@ -10,6 +10,7 @@
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
 #include "IntrogressionSimulations.h"
+#include "Rcpp_output.h"
 #include "random.h"
 
 #ifdef _OPENMP
@@ -30,7 +31,8 @@ Rcpp::List Rcpp_WriteOutput(const Parameters &GlobalPars, SimData &SimulationDat
         Rcpp::_["CARRYINGCAPACITY"] = GlobalPars.K,
         Rcpp::_["INDEX_MAJOR"] = GlobalPars.index[0]
     );
-    
+    const int NREP = SimulationData.DataSet.size();
+ 
     // Write outputfiles
     Rcpp::NumericVector generation(GlobalPars.NGEN);    
     Rcpp::NumericVector popsizevecm(GlobalPars.NGEN);
@@ -43,7 +45,7 @@ Rcpp::List Rcpp_WriteOutput(const Parameters &GlobalPars, SimData &SimulationDat
     Rcpp::NumericVector major1vecv(GlobalPars.NGEN);
     Rcpp::NumericVector introgressed0vecv(GlobalPars.NGEN);
     Rcpp::NumericVector introgressed1vecv(GlobalPars.NGEN);
-    
+  
     for(int i = 0; i < GlobalPars.NGEN; ++i){
         accumulator_set<int, stats<tag::mean, tag::variance > > popsize;
         accumulator_set<double, stats<tag::mean, tag::variance > > major0;
@@ -51,7 +53,7 @@ Rcpp::List Rcpp_WriteOutput(const Parameters &GlobalPars, SimData &SimulationDat
         accumulator_set<double, stats<tag::mean, tag::variance > > introgressed0;
         accumulator_set<double, stats<tag::mean, tag::variance > > introgressed1;
 
-        for(int j = 0; j < GlobalPars.NREP; ++j){
+        for(int j = 0; j < NREP; ++j){
             popsize(SimulationData.DataSet[j]->popsize[i]);
             major0((double)SimulationData.DataSet[j]->major0[i]);
             major1((double)SimulationData.DataSet[j]->major1[i]);
@@ -97,7 +99,7 @@ Rcpp::List Rcpp_WriteOutput(const Parameters &GlobalPars, SimData &SimulationDat
         for(int l = 0; l < GlobalPars.NLOCI; ++l)
         {
             accumulator_set<double, stats<tag::mean, tag::variance > > locus;
-            for(int r = 0; r < GlobalPars.NREP; ++r)
+            for(int r = 0; r < NREP; ++r)
             {
                 locus((double)SimulationData.DataSet[r]->allele0[i][l] / ((double)SimulationData.DataSet[r]->popsize[i]));
             }
@@ -115,12 +117,13 @@ Rcpp::List Rcpp_WriteOutput(const Parameters &GlobalPars, SimData &SimulationDat
         alleledatavar.push_back((allelefrequencyvar[i]), varlocus+std::to_string(i));
     }
 
-    double fixation = (double)GlobalPars.NREP/(double(GlobalPars.NREP+SimulationData.nofixcounter.load()));
-        
+    double fixation = (double)NREP/(double(NREP+SimulationData.nofixcounter.load()));
+       
     // Cleanup
-    for(int i = 0; i < GlobalPars.NREP; ++i){
+    for(int i = 0; i < NREP; ++i){
         delete SimulationData.DataSet[i];
     }
+    SimulationData.DataSet.clear();
 
     return Rcpp::List::create(
         Rcpp::_["pars"] = (parsdata),

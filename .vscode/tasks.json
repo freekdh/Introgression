@@ -16,7 +16,7 @@
         {
             "label": "build_RCPP",
             "type": "shell",
-            "command": "g++ -shared -fPIC -L/usr/lib/R/lib -Wl,-z,relro -fopenmp -O3 -std=c++11 -I /usr/local/include/boost_1_67_0/ -I /usr/local/lib/R/site-library/Rcpp/include/ -I /usr/share/R/include/ -I /usr/local/lib/R/site-library/RcppProgress/include/ -g ./CppFiles/IntrogressionSimulations.cpp ./CppFiles/IntrogressionSimulations.h ./CppFiles/Rcpp_output.cpp ./CppFiles/Rcpp_output.h ./CppFiles/random.cpp ./CppFiles/random.h ./CppFiles/utils.cpp ./CppFiles/utils.h -o ./CppFiles/lib/RCPPtest.dll -llapack -lblas -lgfortran -lm -lquadmath -L/usr/lib/R/lib -lR",
+            "command": "g++ -shared -fPIC -L/usr/lib/R/lib -Wl,-z,relro -fopenmp -O3 -std=c++11 -I /usr/local/include/boost_1_67_0/ -I /usr/local/lib/R/site-library/Rcpp/include/ -I /usr/share/R/include/ -I /usr/local/lib/R/site-library/RcppProgress/include/ -g ./CppFiles/IntrogressionSimulations.cpp ./CppFiles/IntrogressionSimulations.h ./CppFiles/Rcpp_output.cpp ./CppFiles/random.cpp ./CppFiles/random.h ./CppFiles/utils.cpp ./CppFiles/utils.h -o ./CppFiles/lib/RCPPtest.dll -llapack -lblas -lgfortran -lm -lquadmath -L/usr/lib/R/lib -lR",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -26,12 +26,22 @@
         {
             "label": "build_SHINY",
             "type": "shell",
-            "command": "g++ -shared -fPIC -L/usr/lib/R/lib -fopenmp -O3 -std=c++11 -I /usr/local/include/boost_1_67_0/ -I /usr/local/lib/R/site-library/Rcpp/include/ -I /usr/share/R/include/ -I /usr/local/lib/R/site-library/RcppProgress/include/ -g ./CppFiles/IntrogressionSimulations.cpp ./CppFiles/IntrogressionSimulations.h ./CppFiles/Shiny_output.cpp ./CppFiles/Rcpp_output.cpp ./CppFiles/Rcpp_output.h ./CppFiles/random.cpp ./CppFiles/random.h ./CppFiles/utils.cpp ./CppFiles/utils.h -o ./CppFiles/lib/Shinytest.dll -llapack -lblas -lgfortran -lm -lquadmath -lR",
+            "command": "g++ -shared -fPIC -L/usr/lib/R/lib -fopenmp -O3 -std=c++11 -I /usr/local/include/boost_1_67_0/ -I /usr/local/lib/R/site-library/Rcpp/include/ -I /usr/share/R/include/ -I /usr/local/lib/R/site-library/RcppProgress/include/ -g ./CppFiles/IntrogressionSimulations.cpp ./CppFiles/IntrogressionSimulations.h ./CppFiles/Shiny_output.cpp ./CppFiles/Rcpp_output.cpp ./CppFiles/random.cpp ./CppFiles/random.h ./CppFiles/utils.cpp ./CppFiles/utils.h -o ./CppFiles/lib/Shinytest.dll -llapack -lblas -lgfortran -lm -lquadmath -lR",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
             "problemMatcher":"$gcc"            
+        },
+        {
+            "label": "build_Rpackage",
+            "type": "shell",
+            "command": "R CMD INSTALL pkgIntrogressionv2",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
+
     ]
 }

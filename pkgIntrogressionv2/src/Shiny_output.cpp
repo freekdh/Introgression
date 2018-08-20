@@ -7,20 +7,19 @@
 #define SHINYFUNCTION_H
 
 #include "IntrogressionSimulations.h"
+#include "Rcpp_output.h"
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
-#include <progress.hpp>
-#include "Rcpp_output.h"
 #include <Rcpp.h>
 #ifdef _OPENMP
     #include <omp.h>
 #endif
 
 static bool RUNSIMULATION_FUN = false, INITIALIZESIMULATION_FUN = false;
-static Parameters Shiny_Pars;
-static SimData Shiny_Data; 
+Parameters Shiny_Pars;
+SimData Shiny_Data; 
 
 // [[Rcpp::export]]
 void ShinyInitializeSimulation(const Rcpp::List &parslist){
@@ -46,12 +45,13 @@ void ShinyRunSimulation(){
 // [[Rcpp::export]]
 Rcpp::List ShinyWriteOutputandCleanup(){
     if(INITIALIZESIMULATION_FUN == true && RUNSIMULATION_FUN == true){
-        Rcpp_WriteOutput(Shiny_Pars,Shiny_Data);
+        return Rcpp_WriteOutput(Shiny_Pars,Shiny_Data);
     }
     else{
         std::cerr << "First initialize and run a simulation: InitializeSimulation() and RunSimulation()" << std::endl;
         return NULL;
     }
 }
+
 
 #endif

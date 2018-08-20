@@ -1,13 +1,12 @@
-library(pkgIntrogression)
+library(pkgIntrogressionv2)
 testpars <- list(
+    b=1.1,
+    dA=1,
+    da=0.8,
     r=0.5,
     nloci=100,
-    nploidy=2,
     ninit0=10,
     ninit1=2,
-    distlocal=1,
-    scmajor=0.22,
-    sclocal=0.0,
     ngen=20,
     nrep=1000,
     rec=0.5,
@@ -17,10 +16,9 @@ ShinyInitializeSimulation(testpars)
 ShinyRunSimulation()
 ShinyWriteOutputandCleanup()
 
-
 hello <- RcppIntrogressionSimulation(testpars,0)
 names(hello)
-hello$data
+hello$pars
 
 plot(hello$data$Popsize_avg)
 ## shiny stuff

@@ -10,73 +10,35 @@
 
 class Individual{
   public:
-    Individual(const std::vector<boost::dynamic_bitset<>> &INITGENOME) : genome(INITGENOME) {;}
+    Individual(const boost::dynamic_bitset<> &INITGENOME) : genome(INITGENOME) {;}
 
     Individual(Individual* parent1, Individual* parent2, const Parameters &pars){
         Individual* parent[2] = {parent1, parent2};
-        const int NPLOIDY = parent[0]->genome.size();
         const int NLOCI = parent[0]->genome[0].size();
-
-        assert(NPLOIDY == parent[1]->genome.size());
-        for (int i = 0; i < NPLOIDY; ++i){
-            assert(NLOCI == parent[1]->genome[i].size());
-        }
-
-        // Initialize individual
-        assert(NPLOIDY % 2 == 0 && NPLOIDY > 0);
-        genome.resize(NPLOIDY);
-        for (int i = 0; i < NPLOIDY; ++i)
-        {
-            genome[i].resize(NLOCI);
-        }
+        genome.resize(NLOCI);
 
         // Recombination & Mutation
         boost::dynamic_bitset<> temp1, temp2, temp3, r_localbit, m_localbit;
-
         r_localbit.resize(NLOCI);
         m_localbit.resize(NLOCI);
 
-        assert(r_localbit.size() == NLOCI);
-        assert(m_localbit.size() == NLOCI);
+        Make_localbit(r_localbit, pars.r_global);
+        Make_localbit(m_localbit, pars.m_global);
 
-        for (int j = 0; j < NPLOIDY; j += 2)
-        {
-            for (int p = 0; p < 2; ++p)
-            {
-                Make_localbit(r_localbit, pars.r_global);
-                Make_localbit(m_localbit, pars.m_global);
+        temp1 = parent[0]->genome & r_localbit;
+        temp2 = parent[1]->genome & r_localbit.flip();
+        temp3 = temp1 | temp2;
 
-                temp1 = parent[p]->genome[j] & r_localbit;
-                temp2 = parent[p]->genome[j + 1] & r_localbit.flip();
-                temp3 = temp1 | temp2;
-
-                temp1 = temp3 & m_localbit;
-                temp2 = temp3 | m_localbit;
-                genome[j + p] = temp2 & temp1.flip();
-            }
-        }
+        temp1 = temp3 & m_localbit;
+        temp2 = temp3 | m_localbit;
+        genome = temp2 & temp1.flip();
     }
 
-    double AdditiveFitness(const Parameters &pars){
-        double viability = 1.0;
-        for(int i = 0; i < pars.NPLOIDY; ++i){
-            for(int j = 0; j < pars.NLOCAL_ADAPTED_LOCI+1; ++j){
-                if(genome[i][pars.index[j]] == true){viability += pars.SC_GENOME[pars.index[j]];}
-            }
-        }
-        return viability;
-    }
+    inline bool rescue(const Parameters &pars){ return genome[pars.index[0]] ? true : false;} 
 
-    bool rescue(const Parameters &pars){
-        for(int i = 0; i < pars.NPLOIDY; ++i)
-            if(genome[i][pars.index[0]]) return true;
-        
-        return false;
-    }
+    bool Genotype(const int &locus) {return genome[locus]; }
 
-    bool Genotype(const int &chromosome, const int &locus) { return genome[chromosome][locus]; }
-
-    int GenotypeCount(const int &chromosome) {return genome[chromosome].count();}
+    int GenotypeCount() {return genome.count();}
     
     private:
     void Make_localbit(boost::dynamic_bitset<> &local, const boost::dynamic_bitset<> &global)
@@ -94,7 +56,7 @@ class Individual{
         }
     };
 
-    std::vector<boost::dynamic_bitset<>> genome; // circular genome of individual
+    boost::dynamic_bitset<> genome; // haploids
 };
 
 void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pars, DataBlock* &SimData){
@@ -106,19 +68,17 @@ void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pa
     count[1].resize(pars.NLOCI,0);
     int temp0 = 0, temp1 = 0, ind0 = 0, ind1 = 0;
     for(Individual* ind : population){
-        for(int i = 0; i < pars.NPLOIDY; ++i){
-            if(ind->Genotype(i,pars.index[0])){
-                ++ind1;
-                temp1 += ind->GenotypeCount(i) - 1;
-            }
-            else{
-                ++ind0;
-                temp0 += ind->GenotypeCount(i); 
-            } 
-            // Genome allele frequencies
-            for(int j = 0; j < pars.NLOCI; ++j){
-                ++count[ind->Genotype(i,j)][j];
-            }
+        if(ind->Genotype(pars.index[0])){
+            ++ind1;
+            temp1 += ind->GenotypeCount() - 1;
+        }
+        else{
+            ++ind0;
+            temp0 += ind->GenotypeCount(); 
+        } 
+        // Genome allele frequencies
+        for(int j = 0; j < pars.NLOCI; ++j){
+            ++count[ind->Genotype(j)][j];
         }
     }
 
@@ -133,23 +93,21 @@ void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pa
 bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &pars){ 
     std::vector<Individual*>::iterator it;
 
-    // Calculate offspring population size
+    // Birth
     const int nparents = population.size();
-    const double popgrowthrate = 1.0 + pars.INTRINSIC_GROWTHRATE * (1.0 - ((double)nparents / (double)pars.K));
+    const double popgrowthrate = 1.0 + pars.BIRTHRATE * (1.0 - ((double)nparents / (double)pars.K));
     assert(popgrowthrate >= 0.0);
     const int noffspring = rnd::poisson((double)nparents * popgrowthrate);
     std::vector<Individual*> offspring(noffspring);
 
-    // Selection 
-    bool rescue = false;
-    rnd::discrete_distribution fitnessdist((int)nparents);
-    for(int i = 0; i < nparents; ++i)
-        fitnessdist[i] = population[i]->AdditiveFitness(pars);
+    // Random mating 
     for(it = offspring.begin(); it != offspring.end(); ++it){
-        *it = new Individual(population[fitnessdist.sample()],population[fitnessdist.sample()],pars);
-        if(rescue == false){
-            if((*it)->rescue(pars)==true) {rescue = true;}
-        }
+        *it = new Individual(population[population[rnd::integer(nparents)]],population[rnd::integer(nparents)],pars);
+    }
+
+    // Death (selection)
+    for(it = offspring.begin(); it != offspring.end(); ++it){
+        it->Genotype(0,)
     }
 
     for(Individual* ind : offspring)
@@ -160,6 +118,11 @@ bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &
 
     population.clear();
     population = offspring;
+
+    // Calculate if rescue?
+    if(rescue == false){
+            if((*it)->rescue(pars)==true) {rescue = true;}
+        }
 
     return rescue;
 }
@@ -199,17 +162,15 @@ bool RunSimulation(const Parameters &SimPars, SimData &SimulationData){
     return true;
 }
 
+#ifdef SHINYFUNCTION_H
 Parameters::Parameters(const Rcpp::List &parslist){
     MUTATIONRATE = 0.0;
-    INTRINSIC_GROWTHRATE = parslist["r"];
+    BIRTHRATE = parslist["b"];
+    DEATHRATEA = parslist["dA"];
+    DEATHRATEa = parslist["da"];
     NLOCI = parslist["nloci"];
-    NPLOIDY = parslist["nploidy"];
     NINIT[0] = parslist["ninit0"];
     NINIT[1] = parslist["ninit1"];
-    NLOCAL_ADAPTED_LOCI = 1;
-    DISTLOCAL = parslist["distlocal"];
-    SC_MAJOR = parslist["scmajor"];
-    SC_LOCAL = parslist["sclocal"];
     NGEN = parslist["ngen"];
     NREP = parslist["nrep"];
     RECOMBINATIONRATE = parslist["rec"];
@@ -217,30 +178,38 @@ Parameters::Parameters(const Rcpp::List &parslist){
 
     Initialize();
 }
+#endif
+
+Parameters::Parameters(int argc, char *argv[]){
+        MUTATIONRATE = 0.0;
+        BIRTHRATE = std::atof(argv[1]);
+        DEATHRATEA = std::atof(argv[2]);
+        DEATHRATEa = std::atof(argv[3]);
+        NLOCI = std::atoi(argv[4]);
+        NPLOIDY = std::atoi(argv[5]);
+        NINIT[0] = std::atoi(argv[6]);
+        NINIT[1] = std::atoi(argv[7]);
+        NGEN = std::atoi(argv[8]);
+        NREP = std::atoi(argv[9]);
+        RECOMBINATIONRATE = std::atof(argv[10]);
+        K = std::atoi(argv[11]);
+
+        Initialize();
+}
 
 void Parameters::Initialize(){
-    std::vector<boost::dynamic_bitset<>> INIT_GENOME0(NPLOIDY, boost::dynamic_bitset<>(NLOCI));
-    std::vector<boost::dynamic_bitset<>> INIT_GENOME1(NPLOIDY, boost::dynamic_bitset<>(NLOCI).set());
+    boost::dynamic_bitset<>> INIT_GENOME0(NLOCI));
+    boost::dynamic_bitset<> INIT_GENOME1(NLOCI).set();
     INIT_GENOME[0] = INIT_GENOME0;
     INIT_GENOME[1] = INIT_GENOME1;
-
-    SC_GENOME.clear();
-    SC_GENOME.resize(NLOCI, 0.0);
 
     //Genetic architecture of selection
     index.clear();
     index.resize(NLOCI);
     index[0] = std::floor((double)NLOCI/2.0);
-    assert((DISTLOCAL+index[0]) < NLOCI);
-    index[1] = index[0]+DISTLOCAL;
 
-    SC_GENOME.clear();
-    SC_GENOME.resize(NLOCI, 0.0);
-    SC_GENOME[index[0]] = SC_MAJOR;
-    SC_GENOME[index[1]] = SC_LOCAL;
-
+    //Recombination and mutation
     const int GLOBALMAX = 100000;
-
     r_global.resize(GLOBALMAX);
     boost::dynamic_bitset<> a(1);
     a[0] = rnd::bernoulli(0.5);
@@ -250,10 +219,21 @@ void Parameters::Initialize(){
         a.flip();
         r_global[i] = a[0];
     }
-
     m_global.resize(GLOBALMAX);
     for (int i = 0; i < GLOBALMAX; ++i)
     {
         m_global[i] = rnd::bernoulli(MUTATIONRATE);
     }
 }
+
+/*
+double AdditiveFitness(const Parameters &pars){
+    double viability = 1.0;
+    for(int i = 0; i < pars.NPLOIDY; ++i){
+        for(int j = 0; j < pars.NLOCAL_ADAPTED_LOCI+1; ++j){
+            if(genome[i][pars.index[j]] == true){viability += pars.SC_GENOME[pars.index[j]];}
+        }
+    }
+    return viability;
+}
+*/

@@ -1,7 +1,13 @@
-function hitchhiking(WA, Wa, r, size)
+function hitchhiking()
     %(1)AB, (2)Ab, (3)aB, (4)ab
+    
+    WA = 1.1;
+    Wa = 0.9;
+    r = 0;
+    size = 5;
+    
     birthdeathmat = birthdeathv3(size,WA,Wa,r);
-    spy(birthdeathmat)
+    %spy(birthdeathmat)
     %get probability of absorbption
     [V,D,W] = eig(full(birthdeathmat));
     absorbmatrix = sparse(size^4,size^4);
@@ -11,6 +17,8 @@ function hitchhiking(WA, Wa, r, size)
             absorbmatrix(elem,:) = W(:,i)*(1/W(elem,i));
         end
     end
+    
+    absorbmatrix(:,mat2elem(1,3,3,1,5))
     
     save('absorbmat.mat', 'absorbmatrix');
 end

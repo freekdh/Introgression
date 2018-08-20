@@ -21,25 +21,6 @@
 
 enum nameofstream {Parametersoff, Dataoff, AlleleFrequencyoff_mean, AlleleFrequencyoff_var};
 
-Parameters::Parameters(int argc, char *argv[]){
-        MUTATIONRATE = 0.0;
-        INTRINSIC_GROWTHRATE = std::atof(argv[1]);
-        NLOCI = std::atoi(argv[2]);
-        NPLOIDY = std::atoi(argv[3]);
-        NINIT[0] = std::atoi(argv[4]);
-        NINIT[1] = std::atoi(argv[5]);
-        NLOCAL_ADAPTED_LOCI = 1;
-        DISTLOCAL = std::atoi(argv[6]);
-        SC_MAJOR = std::atof(argv[7]);
-        SC_LOCAL = std::atof(argv[8]);
-        NGEN = std::atoi(argv[9]);
-        NREP = std::atoi(argv[10]);
-        RECOMBINATIONRATE = std::atof(argv[11]);
-        K = std::atoi(argv[12]);
-
-        Initialize();
-}
-
 void CSV_WriteOutput(std::ofstream arrayofstream[4], const Parameters &pars, SimData &SimulationData){
 
     using namespace boost::accumulators;

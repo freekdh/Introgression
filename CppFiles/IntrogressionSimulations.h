@@ -9,31 +9,28 @@
 #include "random.h"
 
 struct Parameters{
-    Parameters(){};
-    Parameters(const Rcpp::List &);
-    #ifdef CSVFUNCTION_H
-        Parameters(int argc, char *argv[]);    
+    Parameters(int argc, char *argv[]);    
+    #ifdef SHINYFUNCTION_H
+        Parameters(const Rcpp::List &);
     #endif
 
     void Initialize();
     
     double RECOMBINATIONRATE;
-    double MUTATIONRATE = 0.0   ;
-    double INTRINSIC_GROWTHRATE;
+    double MUTATIONRATE = 0.0;
     int NGEN;
     int NLOCI;
-    int DISTLOCAL;
     int NPLOIDY;
     int NREP;
     int NINIT[2];
     int K;
-    double SC_MAJOR;
-    double SC_LOCAL;
-    int NLOCAL_ADAPTED_LOCI;
+    double BIRTHRATE;
+    double DEATHRATEA;
+    double DEATHRATEa;
 
-    std::vector<double> SC_GENOME;
+    //Initialize:
     std::vector<int> index;
-    std::vector<boost::dynamic_bitset<>> INIT_GENOME[2];
+    boost::dynamic_bitset<> INIT_GENOME[2];
     boost::dynamic_bitset<> r_global, m_global;
 };
 

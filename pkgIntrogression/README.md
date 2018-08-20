@@ -11,7 +11,7 @@ pkgIntrogression can be installed on unix-flavored systems, and requires the fol
 * plotly library
 
 ## Installation
-The easiest way to install velocyto.R is using devtools::install_github() from R:
+The easiest way to install pkgIntrogression is using devtools::install_github() from R:
 ```
 library(devtools)
 install_github("freekdh/Introgression/pkgIntrogression")

@@ -16,6 +16,22 @@
     #include <omp.h>
 #endif
 
+Parameters::Parameters(const Rcpp::List &parslist){
+    MUTATIONRATE = 0.0;
+    BIRTHRATE = parslist["b"];
+    DEATHRATEA = parslist["dA"];
+    DEATHRATEa = parslist["da"];
+    NLOCI = parslist["nloci"];
+    NINIT[0] = parslist["ninit0"];
+    NINIT[1] = parslist["ninit1"];
+    NGEN = parslist["ngen"];
+    NREP = parslist["nrep"];
+    RECOMBINATIONRATE = parslist["rec"];
+    K = parslist["k"];
+
+    Initialize();
+}
+
 Rcpp::List Rcpp_WriteOutput(const Parameters &GlobalPars, SimData &SimulationData){
     using namespace boost::accumulators;
 
@@ -25,16 +41,10 @@ Rcpp::List Rcpp_WriteOutput(const Parameters &GlobalPars, SimData &SimulationDat
         Rcpp::_["NGEN"] = GlobalPars.NGEN,
         Rcpp::_["NREP"] = GlobalPars.NREP,
         Rcpp::_["NLOCI"] = GlobalPars.NLOCI,
-        Rcpp::_["NPLOIDY"] = GlobalPars.NPLOIDY,
-        Rcpp::_["MUTATIONRATE"] = GlobalPars.MUTATIONRATE,
         Rcpp::_["RECOMBINATIONRATE"] = GlobalPars.RECOMBINATIONRATE,
-        Rcpp::_["GROWTHRATE"] = GlobalPars.INTRINSIC_GROWTHRATE,
+        Rcpp::_["GROWTHRATE"] = GlobalPars.BIRTHRATE,
         Rcpp::_["CARRYINGCAPACITY"] = GlobalPars.K,
-        Rcpp::_["SC_MAJOR"] = GlobalPars.SC_MAJOR,
-        Rcpp::_["SC_LOCAL"] = GlobalPars.SC_LOCAL,
-        Rcpp::_["INDEX_MAJOR"] = GlobalPars.index[0],
-        Rcpp::_["INDEX_LOCAL"] = GlobalPars.index[1],
-        Rcpp::_["DISTLOCAL"] = GlobalPars.DISTLOCAL
+        Rcpp::_["INDEX_MAJOR"] = GlobalPars.index[0]
     );
     
     // Write outputfiles
@@ -59,8 +69,8 @@ Rcpp::List Rcpp_WriteOutput(const Parameters &GlobalPars, SimData &SimulationDat
 
         for(int j = 0; j < GlobalPars.NREP; ++j){
             popsize(SimulationData.DataSet[j]->popsize[i]);
-            major0((double)SimulationData.DataSet[j]->major0[i]/(double)GlobalPars.NPLOIDY);
-            major1((double)SimulationData.DataSet[j]->major1[i]/(double)GlobalPars.NPLOIDY);
+            major0((double)SimulationData.DataSet[j]->major0[i]);
+            major1((double)SimulationData.DataSet[j]->major1[i]);
             introgressed0(SimulationData.DataSet[j]->introgressed0[i]);
             introgressed1(SimulationData.DataSet[j]->introgressed1[i]);
         }
@@ -105,7 +115,7 @@ Rcpp::List Rcpp_WriteOutput(const Parameters &GlobalPars, SimData &SimulationDat
             accumulator_set<double, stats<tag::mean, tag::variance > > locus;
             for(int r = 0; r < GlobalPars.NREP; ++r)
             {
-                locus((double)SimulationData.DataSet[r]->allele0[i][l] / ((double)SimulationData.DataSet[r]->popsize[i] * (double)GlobalPars.NPLOIDY));
+                locus((double)SimulationData.DataSet[r]->allele0[i][l] / ((double)SimulationData.DataSet[r]->popsize[i]));
             }
             allelefrequencymean[l][i] = mean(locus);
             allelefrequencyvar[l][i] = variance(locus);
@@ -153,12 +163,12 @@ Rcpp::List RcppIntrogressionSimulation(Rcpp::List parslist, int setthreads = 0, 
         else omp_set_num_threads(maxthreads);
         REprintf("Parallel activated : Number of threads=%i\n",omp_get_max_threads());   
     #endif
-    if(progressbar == true) Progress p(GlobalPars.NREP, true);
+    //if(progressbar == true) Progress p(GlobalPars.NREP, true);
 
     #pragma omp parallel for schedule(static)
     for (int task = 0; task < GlobalPars.NREP; ++task){
         while(RunSimulation(GlobalPars, SimulationData)==false);
-        if(progressbar == true) p.increment();
+        //if(progressbar == true) p.increment();
     }
 
     return Rcpp_WriteOutput(GlobalPars, SimulationData);

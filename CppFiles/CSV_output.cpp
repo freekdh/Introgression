@@ -58,8 +58,8 @@ void CSV_WriteOutput(std::ofstream arrayofstream[4], const Parameters &pars, Sim
         accumulator_set<int, stats<tag::mean, tag::variance > > popsize;
         accumulator_set<int, stats<tag::mean, tag::variance > > major0;
         accumulator_set<int, stats<tag::mean, tag::variance > > major1;
-        accumulator_set<int, stats<tag::mean, tag::variance > > introgressed0;
-        accumulator_set<int, stats<tag::mean, tag::variance > > introgressed1;
+        accumulator_set<double, stats<tag::mean, tag::variance > > introgressed0;
+        accumulator_set<double, stats<tag::mean, tag::variance > > introgressed1;
 
         ///FINISH ANALYSIS OF THE GENOTYPE RESCUE PER LOCUS PART. 
         for(int j = 0; j < pars.NREP; ++j){
@@ -75,14 +75,14 @@ void CSV_WriteOutput(std::ofstream arrayofstream[4], const Parameters &pars, Sim
         << mean(popsize) << arrayofstream[Dataoff].fill()
         << (double)mean(major0) << arrayofstream[Dataoff].fill()
         << (double)mean(major1) << arrayofstream[Dataoff].fill() 
-        << mean(introgressed0)/(double)(pars.NLOCI-1) << arrayofstream[Dataoff].fill()
-        << mean(introgressed1)/(double)(pars.NLOCI-1) << arrayofstream[Dataoff].fill()
+        << mean(introgressed0) << arrayofstream[Dataoff].fill()
+        << mean(introgressed1) << arrayofstream[Dataoff].fill()
 
         << variance(popsize) << arrayofstream[Dataoff].fill()
         << (double)variance(major0) << arrayofstream[Dataoff].fill()
         << (double)variance(major1) << arrayofstream[Dataoff].fill()
-        << variance(introgressed0)/(double)((pars.NLOCI-1)*(pars.NLOCI-1)) << arrayofstream[Dataoff].fill()
-        << variance(introgressed1)/(double)((pars.NLOCI-1)*(pars.NLOCI-1)) << arrayofstream[Dataoff].fill() << std::endl;
+        << variance(introgressed0)<< arrayofstream[Dataoff].fill()
+        << variance(introgressed1) << arrayofstream[Dataoff].fill() << std::endl;
     };
     
     for(int i = 0; i < pars.NGEN; ++i){
@@ -100,6 +100,11 @@ void CSV_WriteOutput(std::ofstream arrayofstream[4], const Parameters &pars, Sim
         }
         arrayofstream[AlleleFrequencyoff_mean] << std::endl;
         arrayofstream[AlleleFrequencyoff_var] << std::endl;
+    }
+
+    // Cleanup
+    for(int i = 0; i < pars.NREP; ++i){
+        delete SimulationData.DataSet[i];
     }
 }
 

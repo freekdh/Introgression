@@ -89,7 +89,7 @@ void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pa
     count[1].resize(pars.NLOCI,0);
     int temp0 = 0, temp1 = 0, ind0 = 0, ind1 = 0;
     for(Individual* ind : population){
-        if(ind->Genotype(pars.index[0])){
+        if(ind->rescue(pars)){
             ++ind1;
             temp1 += ind->GenotypeCount() - 1;
         }
@@ -107,8 +107,8 @@ void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pa
     SimData->allele1.push_back(count[1]);
     SimData->major0.push_back(ind0);
     SimData->major1.push_back(ind1);
-    SimData->introgressed0.push_back(temp0/(double)((pars.NLOCI-1)*ind0));
-    SimData->introgressed1.push_back(temp1/(double)((pars.NLOCI-1)*ind1));
+    SimData->introgressed0.push_back((double)temp0/(double)((pars.NLOCI-1)*ind0));
+    SimData->introgressed1.push_back((double)temp1/(double)((pars.NLOCI-1)*ind1));
 }
 
 bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &pars){ 
@@ -185,24 +185,6 @@ bool RunSimulation(const Parameters &SimPars, SimData &SimulationData){
     SimulationData.push_back_protect(SimData);
     return true;
 }
-
-#ifdef SHINYFUNCTION_H
-Parameters::Parameters(const Rcpp::List &parslist){
-    MUTATIONRATE = 0.0;
-    BIRTHRATE = parslist["b"];
-    DEATHRATEA = parslist["dA"];
-    DEATHRATEa = parslist["da"];
-    NLOCI = parslist["nloci"];
-    NINIT[0] = parslist["ninit0"];
-    NINIT[1] = parslist["ninit1"];
-    NGEN = parslist["ngen"];
-    NREP = parslist["nrep"];
-    RECOMBINATIONRATE = parslist["rec"];
-    K = parslist["k"];
-
-    Initialize();
-}
-#endif
 
 Parameters::Parameters(int argc, char *argv[]){
     MUTATIONRATE = 0.0;

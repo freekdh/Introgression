@@ -5,16 +5,13 @@
 #include <atomic>
 #include <vector>
 #include <boost/dynamic_bitset.hpp>
-#ifdef SHINYFUNCTION_H
-    #include <Rcpp.h>
-#endif
+#include <Rcpp.h>
 #include "random.h"
 
 struct Parameters{
+    Parameters();
     Parameters(int argc, char *argv[]);    
-    #ifdef SHINYFUNCTION_H
-        Parameters(const Rcpp::List &);
-    #endif
+    Parameters(const Rcpp::List &);
 
     void Initialize();
     

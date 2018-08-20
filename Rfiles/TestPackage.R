@@ -1,4 +1,4 @@
-library(pkgIntrogressionv2)
+library(pkgIntrogression)
 testpars <- list(
     b=1.1,
     dA=1,

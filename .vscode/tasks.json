@@ -11,7 +11,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher":"$gcc"
+            "problemMatcher": "$gcc"
         },
         {
             "label": "build_RCPP",
@@ -21,7 +21,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher":"$gcc"            
+            "problemMatcher": "$gcc"
         },
         {
             "label": "build_SHINY",
@@ -31,17 +31,17 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher":"$gcc"            
+            "problemMatcher": "$gcc"
         },
         {
             "label": "build_Rpackage",
             "type": "shell",
-            "command": "R CMD INSTALL pkgIntrogressionv2",
+            "command": "R CMD INSTALL pkgIntrogression",
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "problemMatcher": []
         }
-
     ]
 }

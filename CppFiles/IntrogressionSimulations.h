@@ -5,7 +5,9 @@
 #include <atomic>
 #include <vector>
 #include <boost/dynamic_bitset.hpp>
-#include <Rcpp.h>
+#ifdef SHINYFUNCTION_H
+    #include <Rcpp.h>
+#endif
 #include "random.h"
 
 struct Parameters{
@@ -20,7 +22,6 @@ struct Parameters{
     double MUTATIONRATE = 0.0;
     int NGEN;
     int NLOCI;
-    int NPLOIDY;
     int NREP;
     int NINIT[2];
     int K;

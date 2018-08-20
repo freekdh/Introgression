@@ -1,3 +1,24 @@
+/*=============================================================================================================
+                                                IntrogressionSimulations.cpp
+===============================================================================================================
+
+ Simulations of genetic rescue
+
+ C++-code accompanying:
+		 
+		(ms. in prep).
+
+ Written by:
+        F.J.H. de Haas
+       	Theoretical Biology Group
+        University of British Columbia
+        the Netherlands
+
+ Program version
+		xx/xx/xxxx	:
+
+=============================================================================================================*/
+
 #include <boost/dynamic_bitset.hpp>
 #include <assert.h>
 #include <stdlib.h>
@@ -14,7 +35,7 @@ class Individual{
 
     Individual(Individual* parent1, Individual* parent2, const Parameters &pars){
         Individual* parent[2] = {parent1, parent2};
-        const int NLOCI = parent[0]->genome[0].size();
+        const int NLOCI = parent[0]->genome.size();
         genome.resize(NLOCI);
 
         // Recombination & Mutation
@@ -34,7 +55,7 @@ class Individual{
         genome = temp2 & temp1.flip();
     }
 
-    inline bool rescue(const Parameters &pars){ return genome[pars.index[0]] ? true : false;} 
+    inline bool rescue(const Parameters &pars){if(genome[pars.index[0]]==1){return true;} else{false;} ;}
 
     bool Genotype(const int &locus) {return genome[locus]; }
 
@@ -43,7 +64,7 @@ class Individual{
     private:
     void Make_localbit(boost::dynamic_bitset<> &local, const boost::dynamic_bitset<> &global)
     {
-        const int NLOCI = genome[0].size();
+        const int NLOCI = genome.size();
         const int global_size = global.size();
 
         assert(local.size() == NLOCI);
@@ -56,7 +77,7 @@ class Individual{
         }
     };
 
-    boost::dynamic_bitset<> genome; // haploids
+    boost::dynamic_bitset<> genome; 
 };
 
 void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pars, DataBlock* &SimData){
@@ -92,37 +113,40 @@ void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pa
 
 bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &pars){ 
     std::vector<Individual*>::iterator it;
-
+    
     // Birth
     const int nparents = population.size();
     const double popgrowthrate = 1.0 + pars.BIRTHRATE * (1.0 - ((double)nparents / (double)pars.K));
     assert(popgrowthrate >= 0.0);
     const int noffspring = rnd::poisson((double)nparents * popgrowthrate);
     std::vector<Individual*> offspring(noffspring);
+    std::vector<Individual*> offspring2;
 
     // Random mating 
     for(it = offspring.begin(); it != offspring.end(); ++it){
-        *it = new Individual(population[population[rnd::integer(nparents)]],population[rnd::integer(nparents)],pars);
+        *it = new Individual(population[rnd::integer(nparents)],population[rnd::integer(nparents)],pars);
     }
 
     // Death (selection)
+    bool rescue = false;
     for(it = offspring.begin(); it != offspring.end(); ++it){
-        it->Genotype(0,)
+        if((*it)->rescue(pars)) {
+            rescue = true;
+            if(rnd::uniform() < pars.DEATHRATEA){
+                offspring2.push_back(*it);
+            }
+        }
+        else{
+            if(rnd::uniform() < pars.DEATHRATEa){
+                offspring2.push_back(*it);
+            }
+        }
     }
-
-    for(Individual* ind : offspring)
-        ind->Genotype(0,pars.index[0]);
 
     // Cleanup
     for(Individual* ind : population) delete ind;
-
     population.clear();
-    population = offspring;
-
-    // Calculate if rescue?
-    if(rescue == false){
-            if((*it)->rescue(pars)==true) {rescue = true;}
-        }
+    population = offspring2;
 
     return rescue;
 }
@@ -186,27 +210,28 @@ Parameters::Parameters(int argc, char *argv[]){
         DEATHRATEA = std::atof(argv[2]);
         DEATHRATEa = std::atof(argv[3]);
         NLOCI = std::atoi(argv[4]);
-        NPLOIDY = std::atoi(argv[5]);
-        NINIT[0] = std::atoi(argv[6]);
-        NINIT[1] = std::atoi(argv[7]);
-        NGEN = std::atoi(argv[8]);
-        NREP = std::atoi(argv[9]);
-        RECOMBINATIONRATE = std::atof(argv[10]);
-        K = std::atoi(argv[11]);
+        NINIT[0] = std::atoi(argv[5]);
+        NINIT[1] = std::atoi(argv[6]);
+        NGEN = std::atoi(argv[7]);
+        NREP = std::atoi(argv[8]);
+        RECOMBINATIONRATE = std::atof(argv[9]);
+        K = std::atoi(argv[10]);
 
         Initialize();
 }
 
 void Parameters::Initialize(){
-    boost::dynamic_bitset<>> INIT_GENOME0(NLOCI));
-    boost::dynamic_bitset<> INIT_GENOME1(NLOCI).set();
-    INIT_GENOME[0] = INIT_GENOME0;
-    INIT_GENOME[1] = INIT_GENOME1;
-
+    
     //Genetic architecture of selection
     index.clear();
     index.resize(NLOCI);
     index[0] = std::floor((double)NLOCI/2.0);
+
+    std::vector<int> index;
+    boost::dynamic_bitset<> INITGENOME0(NLOCI,false);
+    boost::dynamic_bitset<> INITGENOME1(NLOCI,true);
+    INIT_GENOME[0] = INITGENOME0;
+    INIT_GENOME[1] = INITGENOME1;
 
     //Recombination and mutation
     const int GLOBALMAX = 100000;

@@ -7,8 +7,8 @@ pkgIntrogression can be installed on unix-flavored systems, and requires the fol
 * C++11
 * Open MP support
 * boost libaries
-* shiny library
-* plotly library
+* shiny package
+* plotly package
 
 ## Installation
 The easiest way to install pkgIntrogression is using devtools::install_github() from R:

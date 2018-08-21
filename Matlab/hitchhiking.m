@@ -3,10 +3,22 @@ function hitchhiking()
     
     WA = 1.1;
     Wa = 0.9;
-    r = 0;
-    size = 5;
+    r = 0.5;
+    size = 10;
     
-    birthdeathmat = birthdeathv3(size,WA,Wa,r);
+    birthdeathmat = birthdeath(size,WA,Wa,r);
+    
+    intvec = initialvec(1,2,size,1,size);
+    
+    [E,V] = data(20,intvec,birthdeathmat,size);
+    
+    data = [E(:,1)+E(:,2), E(:,3)+E(:,4)]
+    
+    save('growth.mat', 'data');
+
+end
+
+function absorbtionmatrix()
     %spy(birthdeathmat)
     %get probability of absorbption
     [V,D,W] = eig(full(birthdeathmat));
@@ -17,13 +29,11 @@ function hitchhiking()
             absorbmatrix(elem,:) = W(:,i)*(1/W(elem,i));
         end
     end
-    
-    absorbmatrix(:,mat2elem(1,3,3,1,5))
-    
+        
     save('absorbmat.mat', 'absorbmatrix');
 end
 
-function absorbtionmatrix()
+function projectionFAfrommatrix()
     for n = 2:size
         %get rescue / hitchhiking but conditioned on fixation.
         vec = absorbmatrix(:,mat2elem(1,n,size,1,size));
@@ -84,52 +94,23 @@ function FA = projectFAfromMatrix(size,mat)
 
 end
 
-function [E, V, MA, Ma] = data(t,initvec,powermat,size)
-    resol = 100;
-    
+function [E, V] = data(t,initvec,powermat,size)
     temppower = eye(size^4);
     E = zeros(t,4);
     V = zeros(t,4);
-    MA = zeros(t,resol);
-    Ma = zeros(t,resol);
     
     for tt = 1:t
         vec = temppower*initvec;
-        for i = 1: size^4
+        for i = 2: size^4
             [k,l,m,n] = elem2mat(i,size);
-            E(tt,1) = E(tt,1) + (k-1)*vec(i);
-            E(tt,2) = E(tt,2) + (l-1)*vec(i);
-            E(tt,3) = E(tt,3) + (m-1)*vec(i);
-            E(tt,4) = E(tt,4) + (n-1)*vec(i);
-            V(tt,1) = V(tt,1) + (k-1)*(k-1)*vec(i);
-            V(tt,2) = V(tt,2) + (l-1)*(l-1)*vec(i);
-            V(tt,3) = V(tt,3) + (m-1)*(m-1)*vec(i);
-            V(tt,4) = V(tt,4) + (n-1)*(n-1)*vec(i);
-            
-            %full prob dist for F
-            if((k-1)+(l-1) ~= 0)
-                %fixation of A occurred
-                if(k-1 == 0)
-                    MA(tt,1) = MA(tt,1) + vec(i);
-                else
-                    MA(tt,ceil(((k-1)/((k-1)+(l-1)))*resol)) =  MA(tt,ceil(((k-1)/((k-1)+(l-1)))*resol)) + vec(i);
-                end
-            else
-                %no fixation of A occurred
-                MA(tt,1) = MA(tt,1) + vec(i);
-            end
-
-            if((m-1)+(n-1) ~= 0)
-                %fixation of A occurred
-                if(m-1 == 0)
-                    Ma(tt,1) = Ma(tt,1) + vec(i);
-                else
-                    Ma(tt,ceil(((m-1)/((m-1)+(n-1)))*resol)) =  Ma(tt,ceil(((m-1)/((m-1)+(n-1)))*resol)) + vec(i);
-                end
-            else
-                %no fixation of A occurred
-                Ma(tt,1) = Ma(tt,1) + vec(i);
-            end
+            E(tt,1) = E(tt,1) + (k-1)*(vec(i)/(1-vec(1)));
+            E(tt,2) = E(tt,2) + (l-1)*(vec(i)/(1-vec(1)));
+            E(tt,3) = E(tt,3) + (m-1)*(vec(i)/(1-vec(1)));
+            E(tt,4) = E(tt,4) + (n-1)*(vec(i)/(1-vec(1)));
+            V(tt,1) = V(tt,1) + (k-1)*(k-1)*(vec(i)/(1-vec(1)));
+            V(tt,2) = V(tt,2) + (l-1)*(l-1)*(vec(i)/(1-vec(1)));
+            V(tt,3) = V(tt,3) + (m-1)*(m-1)*(vec(i)/(1-vec(1)));
+            V(tt,4) = V(tt,4) + (n-1)*(n-1)*(vec(i)/(1-vec(1)));
         end
         
         V(tt,1) = V(tt,1) - (E(tt,1)*E(tt,1));
@@ -146,97 +127,7 @@ vec = zeros(size^4,1);
 vec(mat2elem(AB,Ab,aB,ab,size)) = 1;
 end
 
-function matrix = birthdeathv2(size, WA, Wa, r)
-    matrix = sparse(size^4,size^4);
-    for AB = 1:size
-        for Ab = 1:size
-            for aB = 1:size
-                for ab = 1:size
-                    if(AB~=size && Ab~= size) %process ends if AB || Ab == size
-                        sum=AB+Ab+aB+ab-4;
-                        temp = 0;
-                        if(sum~=0)
-                            fAB=(AB-1)/sum;
-                            fAb=(Ab-1)/sum;
-                            faB=(aB-1)/sum;
-                            fab=(ab-1)/sum;
-                            D=(fAB*fab-fAb*faB);
-                            dAB=fAB-r*D;
-                            dAb=fAb+r*D;
-                            daB=faB+r*D;
-                            dab=fab-r*D;
-                            %Calculate temp
-                            if(AB ~= 1)
-                            temp = temp + (AB-1)*WA*0.1;
-                            end
-                            if(Ab ~= 1)
-                            temp = temp + (Ab-1)*WA*0.1;
-                            end
-                            if(aB ~= 1)
-                            temp = temp + (aB-1)*Wa*0.1;
-                            end
-                            if(ab ~= 1)
-                            temp = temp + (ab-1)*Wa*0.1;
-                            end
-                            if(AB ~= size)
-                            temp = temp + (fAB-r*(fAB*fab-fAb*faB));
-                            end
-                            if(Ab ~= size)
-                            temp = temp + (fAb+r*(fAB*fab-fAb*faB));
-                            end
-                            if(aB ~= size)
-                            temp = temp + (faB+r*(fAB*fab-fAb*faB));
-                            end
-                            if(ab ~= size)
-                            temp = temp + (fab-r*(fAB*fab-fAb*faB));
-                            end
-
-                            %actual probabilities conditioned on either birth
-                            %or death happening.
-                            if(temp ~= 0)                           
-                                if(AB ~= 1)
-                                matrix(mat2elem(AB-1,Ab,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = fAB ; 
-                                end
-                                if(Ab ~= 1)
-                                matrix(mat2elem(AB,Ab-1,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = (Ab-1)*WA*0.1/temp; 
-                                end
-                                if(aB ~= 1)
-                                matrix(mat2elem(AB,Ab,aB-1,ab,size),mat2elem(AB,Ab,aB,ab,size)) = (aB-1)*Wa*0.1/temp; 
-                                end
-                                if(ab ~= 1)
-                                matrix(mat2elem(AB,Ab,aB,ab-1,size),mat2elem(AB,Ab,aB,ab,size)) = (ab-1)*Wa*0.1/temp;
-                                end
-
-                                if(AB ~= size)
-                                matrix(mat2elem(AB+1,Ab,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = ((fAB-r*(fAB*fab-fAb*faB))/temp); 
-                                end
-                                if(Ab ~= size)
-                                matrix(mat2elem(AB,Ab+1,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = ((fAb+r*(fAB*fab-fAb*faB))/temp); 
-                                end
-                                if(aB ~= size)
-                                matrix(mat2elem(AB,Ab,aB+1,ab,size),mat2elem(AB,Ab,aB,ab,size)) = ((faB+r*(fAB*fab-fAb*faB))/temp); 
-                                end
-                                if(ab ~= size)
-                                matrix(mat2elem(AB,Ab,aB,ab+1,size),mat2elem(AB,Ab,aB,ab,size)) = ((fab-r*(fAB*fab-fAb*faB))/temp); 
-                                end
-                            else
-                                matrix(mat2elem(AB,Ab,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = 1;
-                            end
-                        end
-                    else
-                    %if AB == size || Ab == size
-                    matrix(mat2elem(AB,Ab,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = 1;
-                    end                    
-                end
-            end
-        end
-    end
-    
-    matrix(1,1) = 1;
-    
-end
-
-function matrix = birthdeathv3(size, WA, Wa, r)
+function matrix = birthdeath(size, WA, Wa, r)
     matrix = sparse(size^4,size^4);
     for AB = 1:size
         for Ab = 1:size
@@ -334,6 +225,97 @@ function [FA] = projectF(AB,Ab,aB,ab,s,r,t)
 end
 
 % CODE GRAVEYARD
+
+
+function matrix = birthdeathv2(size, WA, Wa, r)
+    matrix = sparse(size^4,size^4);
+    for AB = 1:size
+        for Ab = 1:size
+            for aB = 1:size
+                for ab = 1:size
+                    if(AB~=size && Ab~= size) %process ends if AB || Ab == size
+                        sum=AB+Ab+aB+ab-4;
+                        temp = 0;
+                        if(sum~=0)
+                            fAB=(AB-1)/sum;
+                            fAb=(Ab-1)/sum;
+                            faB=(aB-1)/sum;
+                            fab=(ab-1)/sum;
+                            D=(fAB*fab-fAb*faB);
+                            dAB=fAB-r*D;
+                            dAb=fAb+r*D;
+                            daB=faB+r*D;
+                            dab=fab-r*D;
+                            %Calculate temp
+                            if(AB ~= 1)
+                            temp = temp + (AB-1)*WA*0.1;
+                            end
+                            if(Ab ~= 1)
+                            temp = temp + (Ab-1)*WA*0.1;
+                            end
+                            if(aB ~= 1)
+                            temp = temp + (aB-1)*Wa*0.1;
+                            end
+                            if(ab ~= 1)
+                            temp = temp + (ab-1)*Wa*0.1;
+                            end
+                            if(AB ~= size)
+                            temp = temp + (fAB-r*(fAB*fab-fAb*faB));
+                            end
+                            if(Ab ~= size)
+                            temp = temp + (fAb+r*(fAB*fab-fAb*faB));
+                            end
+                            if(aB ~= size)
+                            temp = temp + (faB+r*(fAB*fab-fAb*faB));
+                            end
+                            if(ab ~= size)
+                            temp = temp + (fab-r*(fAB*fab-fAb*faB));
+                            end
+
+                            %actual probabilities conditioned on either birth
+                            %or death happening.
+                            if(temp ~= 0)                           
+                                if(AB ~= 1)
+                                matrix(mat2elem(AB-1,Ab,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = fAB ; 
+                                end
+                                if(Ab ~= 1)
+                                matrix(mat2elem(AB,Ab-1,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = (Ab-1)*WA*0.1/temp; 
+                                end
+                                if(aB ~= 1)
+                                matrix(mat2elem(AB,Ab,aB-1,ab,size),mat2elem(AB,Ab,aB,ab,size)) = (aB-1)*Wa*0.1/temp; 
+                                end
+                                if(ab ~= 1)
+                                matrix(mat2elem(AB,Ab,aB,ab-1,size),mat2elem(AB,Ab,aB,ab,size)) = (ab-1)*Wa*0.1/temp;
+                                end
+
+                                if(AB ~= size)
+                                matrix(mat2elem(AB+1,Ab,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = ((fAB-r*(fAB*fab-fAb*faB))/temp); 
+                                end
+                                if(Ab ~= size)
+                                matrix(mat2elem(AB,Ab+1,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = ((fAb+r*(fAB*fab-fAb*faB))/temp); 
+                                end
+                                if(aB ~= size)
+                                matrix(mat2elem(AB,Ab,aB+1,ab,size),mat2elem(AB,Ab,aB,ab,size)) = ((faB+r*(fAB*fab-fAb*faB))/temp); 
+                                end
+                                if(ab ~= size)
+                                matrix(mat2elem(AB,Ab,aB,ab+1,size),mat2elem(AB,Ab,aB,ab,size)) = ((fab-r*(fAB*fab-fAb*faB))/temp); 
+                                end
+                            else
+                                matrix(mat2elem(AB,Ab,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = 1;
+                            end
+                        end
+                    else
+                    %if AB == size || Ab == size
+                    matrix(mat2elem(AB,Ab,aB,ab,size),mat2elem(AB,Ab,aB,ab,size)) = 1;
+                    end                    
+                end
+            end
+        end
+    end
+    
+    matrix(1,1) = 1;
+    
+end
 
 function [i,j,k,l] = multinomial(AB,Ab,aB,ab,ABn,Abn,aBn,abn,wA,wa,r)
     sum = AB+Ab+aB+ab;

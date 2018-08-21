@@ -88,6 +88,7 @@
 \usetikzlibrary{arrows.meta, bending}
 \usepackage[percent]{overpic}
 \usepackage{pdfpages}
+\usepackage{transparent}
 
 \graphicspath{{./Figures/}}
 
@@ -123,6 +124,44 @@ We look at \textcolor{red}{genetic rescue} conditioned on evolutionary rescue.
 
 \begin{frame}{Overview}
     Introduce the different techniques to get at the question: analytical approach, markov approach, simulations. Prep the minds. Mention that all model outcome of genetic rescue condition on fixation.
+\end{frame}
+
+\begin{frame}{Overview}
+\begin{columns}[t]
+\column{.5\textwidth}
+\centering
+\begin{overpic}[width=5cm,height=4cm]{NumericalSolution.eps}
+ \put (15,15) {\rotatebox{38}{\Large Deterministic model \normalsize}}
+\end{overpic} \\
+ \begin{overpic}[width=5cm,height=4cm]{Matlab/Figures/Realization2.eps}
+ \put (15,15) {\rotatebox{38}{\Large Individual based model \normalsize}}
+\end{overpic} 
+\column{.5\textwidth}
+\centering
+\begin{overpic}[width=5cm,height=4cm]{Matlab/Figures/Projection3DPlotr050.eps}
+ \put (15,15) {\rotatebox{38}{\Large Stochastic model \normalsize}}
+\end{overpic}\\
+
+\end{columns}
+\end{frame}
+
+\begin{frame}{Overview}
+\begin{columns}[t]
+\column{.5\textwidth}
+\centering
+\begin{overpic}[width=5cm,height=4cm]{NumericalSolution.eps}
+ \put (15,15) {\rotatebox{38}{\Large Deterministic model \normalsize}}
+\end{overpic} \\
+{\transparent{0.2} \begin{overpic}[width=5cm,height=4cm]{Matlab/Figures/Realization2.eps}
+ \put (15,15) {\rotatebox{38}{\Large Individual based model \normalsize}}
+\end{overpic} }
+\column{.5\textwidth}
+\centering
+ {\transparent{0.2} \begin{overpic}[width=5cm,height=4cm]{Matlab/Figures/Projection3DPlotr050.eps}
+ \put (15,15) {\rotatebox{38}{\Large Stochastic model \normalsize}}
+\end{overpic}}\\
+{\transparent{0.2} }
+\end{columns}
 \end{frame}
 
 \begin{frame}{The 2 locus model}
@@ -175,6 +214,25 @@ Assumptions: \\
 \begin{equation*}
     \color{red} F_b[t] = \sum_{i=1}^t 2^{-t} (1-p_t)
 \end{equation*}
+\end{frame}
+
+\begin{frame}{Overview}
+\begin{columns}[t]
+\column{.5\textwidth}
+\centering
+{\transparent{0.2}\begin{overpic}[width=5cm,height=4cm]{NumericalSolution.eps}
+ \put (15,15) {\rotatebox{38}{\Large Deterministic model \normalsize}}
+\end{overpic}} \\
+{\transparent{0.2} \begin{overpic}[width=5cm,height=4cm]{Matlab/Figures/Realization2.eps}
+ \put (15,15) {\rotatebox{38}{\Large Individual based model \normalsize}}
+\end{overpic} }
+\column{.5\textwidth}
+\centering
+\begin{overpic}[width=5cm,height=4cm]{Matlab/Figures/Projection3DPlotr050.eps}
+ \put (15,15) {\rotatebox{38}{\Large Stochastic model \normalsize}}
+\end{overpic}\\
+{\transparent{0.2} }
+\end{columns}
 \end{frame}
 
 \begin{frame}{Discrete markov birth-death model}
@@ -269,33 +327,29 @@ Each type has a birth- and death-rate $b_i$ and $d_i$ respectively. Selection is
     \includegraphics[width=0.75\textwidth]{Matlab/Figures/Projection3DPlotr050.eps}
 \end{frame}
 
-\begin{frame}{Comparing model outcomes}
-
-\begin{tabular}{l | l | lll | lll}  
-&  & \multicolumn{6}{c}{$W_A=1.1$ and $W_a = 0.9$}
-&  & \multicolumn{3}{c}{$r=0.5$} & \multicolumn{3}{c}{$r=0.05$} \\
-\midrule
-$Ab$& $aB$ & Det & Stoch & Sim & Det & Stoch & Sim \\
-\midrule
-1 & 1 & 0.404 & 0.184 &          & 0.113 & 0.033 & \\
-     & 5 & 0.767 & 0.495 &          & 0.256 & 0.103 &  \\
-     & 9 & 0.854 & 0.583 &          & 0.302 & 0.126 &  \\
-     \midrule
-5 & 1 & 0.121 & 0.092 &          & 0.031 & 0.021 &  \\
-     & 5 & 0.404 & 0.328 &          & 0.113 & 0.081 &  \\
-     & 9 & 0.547 & 0.425 &           & 0.162 & 0.106 & \\
-     \midrule
-9 & 1 & 0.071 & 0.071 &          & 0.018 & 0.018 &  \\
-     & 5 & 0.275 & 0.275 &          & 0.073 & 0.073 &  \\
-     & 9 & 0.404 & 0.404 &           & 0.113 & 0.113 & \\
-\end{tabular}
+\begin{frame}{Overview}
+\begin{columns}[t]
+\column{.5\textwidth}
+\centering
+{\transparent{0.2} \begin{overpic}[width=5cm,height=4cm]{NumericalSolution.eps}
+ \put (15,15) {\rotatebox{38}{\Large Deterministic model \normalsize}}
+\end{overpic}} \\
+\begin{overpic}[width=5cm,height=4cm]{Matlab/Figures/Realization2.eps}
+ \put (15,15) {\rotatebox{38}{\Large Individual based model \normalsize}}
+\end{overpic} 
+\column{.5\textwidth}
+\centering
+ {\transparent{0.2} \begin{overpic}[width=5cm,height=4cm]{Matlab/Figures/Projection3DPlotr050.eps}
+ \put (15,15) {\rotatebox{38}{\Large Stochastic model \normalsize}}
+\end{overpic}}\\
+{\transparent{0.2} }
+\end{columns}
 \end{frame}
-
 
 
 \begin{frame}{Individual based simulations}
     
-    An individual contains a genome with multiple loci. Simulations are conditioned on fixation.
+    An individual contains a genome with multiple loci. Simulations are conditioned on fixation. The more loci we look at, the more the results look like $r=0.5$.
     
     \vfill
 
@@ -326,7 +380,7 @@ $Ab$& $aB$ & Det & Stoch & Sim & Det & Stoch & Sim \\
 \end{frame}
 
 
-\begin{frame}{Comparing model outcomes}
+\begin{frame}{Comparing genetic rescues}
 
 \begin{tabular}{l | l | lll | lll}
 &  & \multicolumn{6}{c}{$W_A=1.1$ and $W_a = 0.9$}
@@ -334,18 +388,22 @@ $Ab$& $aB$ & Det & Stoch & Sim & Det & Stoch & Sim \\
 \midrule
 Ab& aB & Det & Stoch & Sim & Det & Stoch & Sim \\
 \midrule
-1 & 1 & 0.404 & 0.184 & 0.35         & 0.113 & 0.033 & 0.302 \\
-     & 5 & 0.767 & 0.495 & 0.699           & 0.256 & 0.103 & 0.629  \\
-     & 9 & 0.854 & 0.583 & 0.803         & 0.302 & 0.126 &  0.726\\
+1 & 1 & \textbf{0.404} &\textit{0.184}& 0.350         & 0.113 & \textit{0.033} & \textbf{0.302} \\
+     & 5 & \textbf{0.767} & \textit{0.495} & 0.699   & 0.256 & \textit{0.103} & \textbf{0.629}  \\
+     & 9 & \textbf{0.854} & \textit{0.583} & 0.803   & 0.302 & \textit{0.126} &  \textbf{0.726}\\
      \midrule
-5 & 1 & 0.121 & 0.092 &  0.137         & 0.031 & 0.021 & 0.189 \\
-     & 5 & 0.404 & 0.328 & 0.429          & 0.113 & 0.081 & 0.402\\
-     & 9 & 0.547 & 0.425 & 0.565          & 0.162 & 0.106 & 0.531 \\
+5 & 1 & 0.121 & \textit{0.092} &  \textbf{0.137}         & 0.031 & \textit{0.021} & \textbf{0.189} \\
+     & 5 & 0.404 & \textit{0.328} & \textbf{0.429}       & 0.113 & \textit{0.081} & \textbf{0.402}\\
+     & 9 & 0.547 & \textit{0.425} & \textbf{0.565}    & 0.162 & \textit{0.106} & \textbf{0.531} \\
      \midrule
-9 & 1 & 0.071 & 0.071 & 0.092         & 0.018 & 0.018 & 0.073\\
-     & 5 & 0.275 & 0.275 & 0.309          & 0.073 & 0.073 &  \\
-     & 9 & 0.404 & 0.404 & 0.440           & 0.113 & 0.113 & \\
+9 & 1 & 0.071 & 0.071 & \textbf{0.092}         & 0.018 & 0.018 & \textbf{0.073}\\
+     & 5 & 0.275 & 0.275 & \textbf{0.309}  & 0.073 & 0.073 & \textbf{0.270}  \\
+     & 9 & 0.404 & 0.404 & \textbf{0.440}   & 0.113 & 0.113 & \textbf{0.401} \\
 \end{tabular}
+\end{frame}
+
+\begin{frame}{Comparing fixation probabilities}
+    
 \end{frame}
 
 \begin{frame}{Expand simulations to loci with local adaptation and non-random mating}
@@ -370,9 +428,6 @@ Ab& aB & Det & Stoch & Sim & Det & Stoch & Sim \\
 \end{equation*}
 
 $F_A$ represents the proportion of $B$ alleles that have been rescued because they have recombined to a $A$ rescue allele.
-
-
-
 \end{frame}
 
 \end{document}

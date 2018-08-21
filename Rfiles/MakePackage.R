@@ -2,7 +2,7 @@ library(Rcpp)
 paste(getwd(),"/Cppfiles", sep="")
 # Make R package
 Rcpp.package.skeleton(
-    name = "pkgIntrogressionv2", 
+    name = "pkgIntrogression", 
     code_files = c("Rfiles/ShinyExport.R", "Rfiles/ShinyApp/server.r", "Rfiles/ShinyApp/ui.r"),
     cpp_files = c("CppFiles/IntrogressionSimulations.cpp",
     "CppFiles/IntrogressionSimulations.h",

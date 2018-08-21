@@ -3,7 +3,7 @@ testpars <- list(
     b=1.1,
     dA=1,
     da=0.8,
-    r=0.5,
+    r=0.0005,
     nloci=100,
     ninit0=20,
     ninit1=2,
@@ -17,6 +17,7 @@ ShinyRunSimulation()
 ShinyWriteOutputandCleanup()
 
 testdata <- RcppIntrogressionSimulation(testpars,0)
+tail(testdata$data$Introgressed1_avg,n=1)
 
 plot(testdata$data$Major0_avg)
 plot(testdata$data$Major1_avg)

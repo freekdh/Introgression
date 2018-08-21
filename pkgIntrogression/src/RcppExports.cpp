@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // RcppIntrogressionSimulation
 Rcpp::List RcppIntrogressionSimulation(Rcpp::List parslist, int setthreads, bool progressbar);
-RcppExport SEXP _pkgIntrogressionv2_RcppIntrogressionSimulation(SEXP parslistSEXP, SEXP setthreadsSEXP, SEXP progressbarSEXP) {
+RcppExport SEXP _pkgIntrogression_RcppIntrogressionSimulation(SEXP parslistSEXP, SEXP setthreadsSEXP, SEXP progressbarSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,7 +20,7 @@ END_RCPP
 }
 // ShinyInitializeSimulation
 void ShinyInitializeSimulation(const Rcpp::List& parslist);
-RcppExport SEXP _pkgIntrogressionv2_ShinyInitializeSimulation(SEXP parslistSEXP) {
+RcppExport SEXP _pkgIntrogression_ShinyInitializeSimulation(SEXP parslistSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::List& >::type parslist(parslistSEXP);
@@ -30,7 +30,7 @@ END_RCPP
 }
 // ShinyRunSimulation
 void ShinyRunSimulation();
-RcppExport SEXP _pkgIntrogressionv2_ShinyRunSimulation() {
+RcppExport SEXP _pkgIntrogression_ShinyRunSimulation() {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     ShinyRunSimulation();
@@ -39,7 +39,7 @@ END_RCPP
 }
 // ShinyWriteOutputandCleanup
 Rcpp::List ShinyWriteOutputandCleanup();
-RcppExport SEXP _pkgIntrogressionv2_ShinyWriteOutputandCleanup() {
+RcppExport SEXP _pkgIntrogression_ShinyWriteOutputandCleanup() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -49,14 +49,14 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_pkgIntrogressionv2_RcppIntrogressionSimulation", (DL_FUNC) &_pkgIntrogressionv2_RcppIntrogressionSimulation, 3},
-    {"_pkgIntrogressionv2_ShinyInitializeSimulation", (DL_FUNC) &_pkgIntrogressionv2_ShinyInitializeSimulation, 1},
-    {"_pkgIntrogressionv2_ShinyRunSimulation", (DL_FUNC) &_pkgIntrogressionv2_ShinyRunSimulation, 0},
-    {"_pkgIntrogressionv2_ShinyWriteOutputandCleanup", (DL_FUNC) &_pkgIntrogressionv2_ShinyWriteOutputandCleanup, 0},
+    {"_pkgIntrogression_RcppIntrogressionSimulation", (DL_FUNC) &_pkgIntrogression_RcppIntrogressionSimulation, 3},
+    {"_pkgIntrogression_ShinyInitializeSimulation", (DL_FUNC) &_pkgIntrogression_ShinyInitializeSimulation, 1},
+    {"_pkgIntrogression_ShinyRunSimulation", (DL_FUNC) &_pkgIntrogression_ShinyRunSimulation, 0},
+    {"_pkgIntrogression_ShinyWriteOutputandCleanup", (DL_FUNC) &_pkgIntrogression_ShinyWriteOutputandCleanup, 0},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_pkgIntrogressionv2(DllInfo *dll) {
+RcppExport void R_init_pkgIntrogression(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

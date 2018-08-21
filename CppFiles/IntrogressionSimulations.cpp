@@ -165,6 +165,13 @@ bool RunSimulation(const Parameters &SimPars, SimData &SimulationData){
         population[i] = new Individual(SimPars.INIT_GENOME[1]);
     }
 
+    Individual* a1 = new Individual(SimPars.INIT_GENOME[0]);
+    Individual* a2 = new Individual(SimPars.INIT_GENOME[1]);
+    Individual* a = new Individual(a1,a2, SimPars);
+    std::cout << "count a1: " << a1->GenotypeCount();
+    std::cout << "count a2: " << a2->GenotypeCount();
+    std::cout << "count a: " << a->GenotypeCount();
+
     // Run simulation
     WriteToDataBlock(population, SimPars, SimData);
 

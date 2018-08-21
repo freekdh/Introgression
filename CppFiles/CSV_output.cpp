@@ -153,7 +153,6 @@ std::string CreateOutputStreams(std::ofstream arrayofstream[4]){
 int main(int argc, char *argv[]){
     // Initialize simulation
     rnd::set_seed();
-    
     const Parameters GlobalPars(argc, argv);
 
     SimData SimulationData;

@@ -123,10 +123,6 @@ We look at \textcolor{red}{genetic rescue} conditioned on evolutionary rescue.
 \end{frame}
 
 \begin{frame}{Overview}
-    Introduce the different techniques to get at the question: analytical approach, markov approach, simulations. Prep the minds. Mention that all model outcome of genetic rescue condition on fixation.
-\end{frame}
-
-\begin{frame}{Overview}
 \begin{columns}[t]
 \column{.5\textwidth}
 \centering
@@ -209,7 +205,7 @@ When $Q_0 = 0$, $R_0 = 1$ and $r=0.5$, a recursion equation for $Q_n$ is derived
 Assumptions: \\
 1) Infinite population size \\
 2) Infinite \# of loci \\
-3) Free recombining loci ($r = 0.5$) 
+3) $r = 0.5$ between all loci 
     
 \begin{equation*}
     \color{red} F_b[t] = \sum_{i=1}^t 2^{-t} (1-p_t)
@@ -322,9 +318,14 @@ Each type has a birth- and death-rate $b_i$ and $d_i$ respectively. Selection is
     where $\vec{F}_A$ is a vector containing the deterministic projections for each absorbing state. (*Need to specify we drop the {0,0,0,0} case*)
 \end{frame}
 
-\begin{frame}{Numerical simulation}
+\begin{frame}{Numerical simulation rescue}
     $r=0.5$,  $W_A=1.1$ and $W_a=0.9$.
     \includegraphics[width=0.75\textwidth]{Matlab/Figures/Projection3DPlotr050.eps}
+\end{frame}
+
+\begin{frame}{Effect of recombination}
+Make a similar plot but with deterministic and stochastic plot.
+\includegraphics[width=1\textwidth]{Figures/HitchhikingplotJMS.png}
 \end{frame}
 
 \begin{frame}{Overview}
@@ -400,6 +401,11 @@ Ab& aB & Det & Stoch & Sim & Det & Stoch & Sim \\
      & 5 & 0.275 & 0.275 & \textbf{0.309}  & 0.073 & 0.073 & \textbf{0.270}  \\
      & 9 & 0.404 & 0.404 & \textbf{0.440}   & 0.113 & 0.113 & \textbf{0.401} \\
 \end{tabular}
+\end{frame}
+
+\begin{frame}{}
+    Why do the stochastic simulations worse than the deterministic simulations? \\
+    One of the reasons is because of conditioning on fixation, we get a biased growth of type A initially. Since the genetic rescue depends on the relative frequency of type A...
 \end{frame}
 
 \begin{frame}{Comparing fixation probabilities}

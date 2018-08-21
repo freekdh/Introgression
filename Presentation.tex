@@ -203,13 +203,32 @@ When $Q_0 = 0$, $R_0 = 1$ and $r=0.5$, a recursion equation for $Q_n$ is derived
 \end{equation}
 
 Assumptions: \\
-1) Infinite population size \\
+1) Deterministic population dynamicss \\
 2) Infinite \# of loci \\
 3) $r = 0.5$ between all loci 
     
 \begin{equation*}
     \color{red} F_b[t] = \sum_{i=1}^t 2^{-t} (1-p_t)
 \end{equation*}
+\end{frame}
+
+\begin{frame}{Conclusion}
+
+\begin{equation*}
+    \color{red} F_b[t] = \sum_{i=1}^t 2^{-t} (1-p_t)
+\end{equation*}
+
+Rescue is maximized for small $p_t$ in the first 5-10 generations.
+
+\begin{equation*}
+    p_t = \frac{p_0}{(p_0+(1-p_0) (s+1)^t)}
+\end{equation*}
+
+\begin{itemize}
+  \item $p_0$   {the least \# of rescue types }
+  \item $s$     {the smallest selection gradient}
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Overview}
@@ -403,6 +422,10 @@ Ab& aB & Det & Stoch & Sim & Det & Stoch & Sim \\
 \end{tabular}
 \end{frame}
 
+\begin{frame}{Over-sampling efect}
+\includegraphics[width=1\textwidth]{Rfiles/figures/PlotSimGrowth.eps}
+\end{frame}
+
 \begin{frame}{}
     Why do the stochastic simulations worse than the deterministic simulations? \\
     One of the reasons is because of conditioning on fixation, we get a biased growth of type A initially. Since the genetic rescue depends on the relative frequency of type A...
@@ -413,6 +436,10 @@ Ab& aB & Det & Stoch & Sim & Det & Stoch & Sim \\
 \end{frame}
 
 \begin{frame}{Expand simulations to loci with local adaptation and non-random mating}
+    
+\end{frame}
+
+\begin{frame}{Expanding in shiny}
     
 \end{frame}
 

@@ -1,4 +1,4 @@
-function hitchhiking()
+function hitchhiking4D()
     %(1)AB, (2)Ab, (3)aB, (4)ab
     
     WA = 1.1;
@@ -145,10 +145,14 @@ function matrix = birthdeath(size, WA, Wa, r)
                             dAb=fAb+r*D;
                             daB=faB+r*D;
                             dab=fab-r*D;
-                            deathAB=2-WA;
-                            deathAb=2-WA;
-                            deathaB=2-Wa;
-                            deathab=2-Wa;
+                            birthAB=1;
+                            birthAb=1;
+                            birthaB=1;
+                            birthab=1;
+                            deathAB=birthAB+1-WA;
+                            deathAb=birthAb+1-WA;
+                            deathaB=birthaB+1-Wa;
+                            deathab=birthab+1-Wa;
                             weightedsumdeath = (fAB*deathAB+fAb*deathAb+faB*deathaB+fab*deathab);
                             Pbirth=1/(1+weightedsumdeath);
                             Pdeath=1-Pbirth;
@@ -188,8 +192,7 @@ function matrix = birthdeath(size, WA, Wa, r)
             end
         end
     end
-    matrix(1,1) = 1;
-    
+    matrix(1,1) = 1; 
 end
 
 function index = mat2elem(i,j,k,l,N)

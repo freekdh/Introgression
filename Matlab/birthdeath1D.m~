@@ -1,14 +1,14 @@
 function hitchhiking1D()
     
     WA = 1.1;
-    size = 2000;
+    size = 1000;
     
     mat = birthdeath(size,WA);
     
     initvec=initialvec(2,size);
     
-    E = data(3000,initvec,mat,size);
-    save('growth1D.mat', 'E');
+    E = data(1000,initvec,mat,size);
+    semilogy(E)
 end
 
 function vec = initialvec(AB,size)
@@ -20,7 +20,7 @@ function matrix = birthdeath(size, W)
     matrix = sparse(size,size);
     for AB = 1:size
         if(AB~=size) %process ends if AB || Ab == size
-            pcd = 0.3;
+            pcd = 0.1;
             birthrate = (AB-1)*((W-1)+pcd);
             deathrate = (AB-1)*pcd;
             if(AB ~= 1)

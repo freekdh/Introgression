@@ -1,13 +1,13 @@
 function hitchhiking1D()
     
-    WA = 1.1;
-    size = 2000;
+    WA = 1.01;
+    size = 1000;
     
     mat = birthdeath(size,WA);
     
     initvec=initialvec(2,size);
     
-    E = data(3000,initvec,mat,size);
+    E = data(200,initvec,mat,size);
     save('growth1D.mat', 'E');
 end
 

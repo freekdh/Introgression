@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[      7781,        214]
-NotebookOptionsPosition[      7248,        191]
-NotebookOutlinePosition[      7587,        206]
-CellTagsIndexPosition[      7544,        203]
+NotebookDataLength[      9307,        268]
+NotebookOptionsPosition[      8623,        240]
+NotebookOutlinePosition[      8962,        255]
+CellTagsIndexPosition[      8919,        252]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -187,6 +187,55 @@ eps\>\"", ",", "out"}], "]"}]], "Input",
 Cell[BoxData["\<\"/home/freek/Documents/temp2/Introgression/Rfiles/figures/\
 PlotSimGrowth.eps\"\>"], "Output",
  CellChangeTimes->{3.743862921958521*^9, 3.743862969107058*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"Clear", "[", "nA", "]"}]], "Input",
+ CellChangeTimes->{{3.74386454175998*^9, 3.743864543580853*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"RSolve", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"p", "[", 
+        RowBox[{"t", "+", "1"}], "]"}], "\[Equal]", 
+       RowBox[{
+        RowBox[{"p", "[", "t", "]"}], 
+        FractionBox["WA", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"p", "[", "t", "]"}], "WA"}], "+", 
+          RowBox[{
+           RowBox[{"(", 
+            RowBox[{"1", "-", 
+             RowBox[{"p", "[", "t", "]"}]}], ")"}], "Wa"}]}]]}]}], ",", 
+      RowBox[{
+       RowBox[{"p", "[", "0", "]"}], "\[Equal]", 
+       FractionBox["nA0", 
+        RowBox[{"nA0", "+", "na0"}]]}]}], "}"}], ",", 
+    RowBox[{"p", "[", "t", "]"}], ",", "t"}], "]"}], "//", 
+  "FullSimplify"}]], "Input",
+ CellChangeTimes->{{3.743864383527132*^9, 3.743864605767539*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"p", "[", "t", "]"}], "\[Rule]", 
+    FractionBox["nA0", 
+     RowBox[{"nA0", "+", 
+      RowBox[{"na0", " ", 
+       SuperscriptBox[
+        RowBox[{"(", 
+         FractionBox["Wa", "WA"], ")"}], "t"]}]}]]}], "}"}], "}"}]], "Output",\
+
+ CellChangeTimes->{
+  3.743864522785944*^9, {3.743864560549292*^9, 3.743864606634153*^9}}]
 }, Open  ]]
 },
 WindowSize->{960, 1016},
@@ -215,6 +264,11 @@ Cell[3656, 110, 3097, 63, 228, "Output"]
 Cell[CellGroupData[{
 Cell[6790, 178, 264, 6, 32, "Input"],
 Cell[7057, 186, 175, 2, 32, "Output"]
+}, Open  ]],
+Cell[7247, 191, 124, 2, 32, "Input"],
+Cell[CellGroupData[{
+Cell[7396, 197, 812, 25, 68, "Input"],
+Cell[8211, 224, 396, 13, 121, "Output"]
 }, Open  ]]
 }
 ]

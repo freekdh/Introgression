@@ -49,3 +49,33 @@ testdata$data$Major1_avg
 plot(log(testdata$data$Major1_avg))
 
 write.table(log(testdata$data$Major1_avg),"./Rfiles/data/loggrowthA.csv",row.names=FALSE,col.names=FALSE,sep=",")
+
+
+### Fixation probabilities data
+
+testpars <- list(
+    b=1.1,
+    dA=1,
+    da=0.8,
+    nloci=100,
+    ninit0=50,
+    ninit1=1,
+    ngen=50,
+    nrep=1000,
+    rec=0.5,
+    k=500
+)
+
+out <- matrix(0,nrow = 20, ncol = 2)
+index = 1
+for(i in 1:20){
+    testpars$ninit0 <- 20
+    testpars$ninit1 <- i
+    testpars$b <- 1.01
+    testdata <- RcppIntrogressionSimulation(testpars,0)
+    out[index,1]<-i
+    out[index,2]<-testdata$fixation
+    index = index+1
+}
+out
+write.table(out,"./Rfiles/data/fixationsimulations.csv",row.names=FALSE,col.names=FALSE,sep=",")

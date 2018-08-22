@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     52854,       1195]
+NotebookDataLength[     52867,       1195]
 NotebookOptionsPosition[     51908,       1157]
-NotebookOutlinePosition[     52231,       1172]
-CellTagsIndexPosition[     52188,       1169]
+NotebookOutlinePosition[     52244,       1172]
+CellTagsIndexPosition[     52201,       1169]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -1156,7 +1156,7 @@ gridplot.eps\"\>"], "Output",
 }, Open  ]]
 },
 WindowSize->{1409, 1002},
-WindowMargins->{{360, 151}, {5, 46}},
+WindowMargins->{{Automatic, 151}, {0, Automatic}},
 FrontEndVersion->"11.0 for Linux x86 (64-bit) (July 28, 2016)",
 StyleDefinitions->"Default.nb"
 ]
@@ -1186,7 +1186,7 @@ Cell[9156, 235, 4877, 103, 249, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[14070, 343, 1534, 42, 92, "Input"],
-Cell[15607, 387, 4894, 103, 282, "Output"]
+Cell[15607, 387, 4894, 103, 249, "Output"]
 }, Open  ]],
 Cell[20516, 493, 748, 21, 32, "Input"],
 Cell[CellGroupData[{

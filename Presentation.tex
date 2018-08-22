@@ -108,18 +108,18 @@
 \titlepage % Print the title page as the first slide
 \end{frame}
 
-\begin{frame}{Orr and Unckles 2014}
+\begin{frame}{Evolutionary rescue}
 
 Evolutionary rescue is characterized by a U-shaped curve of population size.
 
-\includegraphics[width=0.5\columnwidth]{Ushape_ER.png}
+\includegraphics[width=0.8\columnwidth]{Rfiles/figures/WhatisRescue.eps}
 
 We look at \textcolor{red}{genetic rescue} conditioned on evolutionary rescue.
 
 \end{frame}
 
 \begin{frame}{Genetic rescue}
-    What is \textcolor{red}{genetic rescue}? Some general explanation what we understand by genetic rescue. use recombination
+    What is \textcolor{red}{genetic rescue}? Some general explanation what we understand by genetic rescue. involve recombination
 \end{frame}
 
 \begin{frame}{Overview}
@@ -221,7 +221,7 @@ Assumptions: \\
 Rescue is maximized for small $p_t$ in the first 5-10 generations.
 
 \begin{equation*}
-    p_t = \frac{p_0}{(p_0+(1-p_0) (s+1)^t)}
+    p_t = \frac{p_0}{(p_0+(1-p_0) (1+s)^t)}
 \end{equation*}
 
 \begin{itemize}
@@ -310,15 +310,13 @@ Each type has a birth- and death-rate $b_i$ and $d_i$ respectively. Selection is
     \end{equation*} 
 
     
- \normalsize
-    
+\normalsize
+ 
 \end{frame}
 
 \begin{frame}{Example of absorbing states}
     \includegraphics[width=1.0\textwidth]{Matlab/Figures/gridplot.eps}
 \end{frame}
-
-
 
 \begin{frame}{$F_A$ from process $\bold{X}(t)$.}
     
@@ -345,6 +343,10 @@ Each type has a birth- and death-rate $b_i$ and $d_i$ respectively. Selection is
 \begin{frame}{Effect of recombination}
 Make a similar plot but with deterministic and stochastic plot.
 \includegraphics[width=1\textwidth]{Figures/HitchhikingplotJMS.png}
+\end{frame}
+
+\begin{frame}{Effect of fitness}
+Make a slide showing how fitness of the rescue type decreases rescue.
 \end{frame}
 
 \begin{frame}{Overview}
@@ -406,7 +408,7 @@ Make a similar plot but with deterministic and stochastic plot.
 &  & \multicolumn{6}{c}{$W_A=1.1$ and $W_a = 0.9$}
 &  & \multicolumn{3}{c}{r=0.5} & \multicolumn{3}{c}{r=0.05} \\
 \midrule
-Ab& aB & Det & Stoch & Sim & Det & Stoch & Sim \\
+Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
 \midrule
 1 & 1 & \textbf{0.404} &\textit{0.184}& 0.350         & 0.113 & \textit{0.033} & \textbf{0.302} \\
      & 5 & \textbf{0.767} & \textit{0.495} & 0.699   & 0.256 & \textit{0.103} & \textbf{0.629}  \\
@@ -423,15 +425,34 @@ Ab& aB & Det & Stoch & Sim & Det & Stoch & Sim \\
 \end{frame}
 
 \begin{frame}{Over-sampling efect}
-\includegraphics[width=1\textwidth]{Rfiles/figures/PlotSimGrowth.eps}
+    Why do the stochastic simulations worse than the deterministic simulations?
+    \vfill
+
+\includegraphics[width=0.7\textwidth]{Rfiles/figures/PlotSimGrowth.eps}
+
+\begin{equation*}
+    Equation from Otto and Barton.
+\end{equation*}
+    
 \end{frame}
 
-\begin{frame}{}
-    Why do the stochastic simulations worse than the deterministic simulations? \\
-    One of the reasons is because of conditioning on fixation, we get a biased growth of type A initially. Since the genetic rescue depends on the relative frequency of type A...
+\begin{frame}{Upper and lower deterministic bounds}
+    
+    Show the effect of upper and lower bounds from deterministic against the stochastic simulations. 
+    
 \end{frame}
+
 
 \begin{frame}{Comparing fixation probabilities}
+    \begin{equation*}
+    \begin{array}{l}
+    1-P_k[t]=\sum_{j=0}^{\infty} e^{-(1+s_b)}\frac{(1+s_b)^j}{j!}(1-P_1[t+1])^j\\
+    1-P_k[t]=e^{-(1+s_b)P_1[t+1]}\\
+    P_k[t]\approx 2 k s
+    \end{array}
+    \end{equation*}
+    
+    \includegraphics[width=0.8\textwidth]{Rfiles/figures/FixationProb.eps}
     
 \end{frame}
 
@@ -440,7 +461,7 @@ Ab& aB & Det & Stoch & Sim & Det & Stoch & Sim \\
 \end{frame}
 
 \begin{frame}{Expanding in shiny}
-    
+    We made a shiny application
 \end{frame}
 
 \begin{frame}{Slide Graveyard}
@@ -461,6 +482,15 @@ Ab& aB & Det & Stoch & Sim & Det & Stoch & Sim \\
 \end{equation*}
 
 $F_A$ represents the proportion of $B$ alleles that have been rescued because they have recombined to a $A$ rescue allele.
+\end{frame}
+
+\begin{frame}{Question for Sally}
+\begin{itemize}
+    \item Make IBS more similar to birth-death by samping individual 
+    \item Not observing the over-sampling effect in birth-death model
+    \item The deterministic solution should always be the maximum absorbtion, something is wrong between IBS and deterministic solution. 
+\end{itemize}
+    
 \end{frame}
 
 \end{document}

@@ -119,7 +119,15 @@ We look at \textcolor{red}{genetic rescue} conditioned on evolutionary rescue.
 \end{frame}
 
 \begin{frame}{Genetic rescue}
-    What is \textcolor{red}{genetic rescue}? Some general explanation what we understand by genetic rescue. involve recombination
+    What is \textcolor{red}{genetic rescue}? Some general explanation what we understand by genetic rescue. involve recombination. \\
+    
+    Expand on what question we like to answer:
+    
+    \begin{itemize}
+        \item What is the optimal number of individuals to introduce
+        \item Bla bla
+        \item more bla bla
+    \end{itemize}
 \end{frame}
 
 \begin{frame}{Overview}
@@ -228,6 +236,8 @@ Rescue is maximized for small $p_t$ in the first 5-10 generations.
   \item {a small \# of rescue types }
   \item {a small selection gradient}
 \end{itemize}
+
+Although our model includes absolute \# of individuals, we find that only the relative frequencies matter.
 
 \end{frame}
 
@@ -371,7 +381,7 @@ Make a slide showing how fitness of the rescue type decreases rescue.
 
 \begin{frame}{Individual based simulations}
     
-    An individual contains a genome with multiple loci. Simulations are conditioned on fixation. The more loci we look at, the more the results look like $r=0.5$.
+    An individual contains a genome with multiple loci. Simulations are conditioned on fixation. The more loci we look at, the more the results look like $r=0.5$, no mather the value of $r$.
     
     \vfill
 
@@ -424,7 +434,7 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
 \end{tabular}
 \end{frame}
 
-\begin{frame}{Over-sampling efect}
+\begin{frame}{Over-sampling effect}
     Why do the stochastic simulations worse than the deterministic simulations?
     \vfill
 
@@ -446,7 +456,7 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
 \begin{frame}{Comparing fixation probabilities}
     \begin{equation*}
     \begin{array}{l}
-    1-P_k[t]=\sum_{j=0}^{\infty} \text{PoissonPDF}[1+s_b]\times (1-P_1[t+1])^j\\
+    1-P_k[t]=\sum_{j=0}^{\infty} \text{Poisson}[1+s_b]\times (1-P_1[t+1])^j\\
     1-P_k[t]=e^{-(1+s_b)P_1[t+1]}\\
     P_k[t]\approx 2 k s
     \end{array}
@@ -456,39 +466,37 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
     
 \end{frame}
 
-\begin{frame}{Expand simulations to loci with local adaptation and non-random mating}
+\begin{frame}{Introducing a locally adapted locus}
     
 \end{frame}
 
 \begin{frame}{Deterministic 3 locus model}
+    \footnotesize
+    \begin{center}
+    \begin{tabular}{ c | c c c c | c c c c}
+     Genotype & ABC & AbC & aBC & abC & ABc & Abc & aBc & abc\\ 
+      \hline
+     Fitness & 1+s_A-s_C & 1+s_A-s_C & 1-s_C & 1-s_C & 1+s_A & 1+s_A & 1 & 1
+    \end{tabular}
+    \end{center}
+     \normalsize
+
+    Initially they are linked, only type $ABC$ and $abc$. $a$ and $C$ will disappear from the population. \\
     
-\end{frame}
-
-
-\begin{frame}{Expanding in shiny}
-    We made a shiny application
-    
-    \includegraphics[width=0.2\textwidth]{Figures/shiny-hex.png}
-\end{frame}
-
-\begin{frame}{Slide Graveyard}
-
-
     \begin{equation*}
-    \begin{aligned}
-        f_{AB}(t+1)= &(f_{AB}(t)^2(1+s)^2+f_{AB}f_{aB}(1+s)+f_{AB}f_{Ab}(1+s)^2+ \\
-        &f_{AB}f_{ab}(1+s)(1-r)+f_{aB}f_{Ab}(1+s)r)/(\bar{W}^2) \\
-        f_{Ab}(t+1)=    \\
-        f_{aB}(t+1)=    \\
-        f_{ab}(t+1)=
-        \end{aligned}
+        \text{\color{red} Genetic rescue} = \frac{ABc+ABC}{ABc+ABC+Abc+AbC}
     \end{equation*}
     
-\begin{equation*}
-    F_A(t)= \frac{f_{AB}(t)}{f_{AB}(t)+f_{Ab}(t)}
-\end{equation*}
+    \includegraphics[width = 0.5\textwidth]{/}
+\end{frame}
 
-$F_A$ represents the proportion of $B$ alleles that have been rescued because they have recombined to a $A$ rescue allele.
+\begin{frame}{Comparing 2 and 3 locus model}
+    the interplay between $s_d$ and $r_d$ will be interesting to look at. Numerical can be compared to simulations. don't think markov model is possible here.
+\end{frame}
+
+\begin{frame}{Expanding in R with shiny}
+    multithreading! 
+    \includegraphics[width=0.2\textwidth]{Figures/shiny-hex.png}
 \end{frame}
 
 \begin{frame}{Question for Sally}
@@ -496,6 +504,10 @@ $F_A$ represents the proportion of $B$ alleles that have been rescued because th
     \item Make IBS more similar to birth-death by samping individual 
     \item Not observing the over-sampling effect in birth-death model
     \item The deterministic solution should always be the maximum absorbtion, something is wrong between IBS and deterministic solution. 
+    \item Are these sets of parameters (basically birth = 1.1 rate) nice for plots?
+    \item in the BD-model, for $r\neq 0$, the probability of fixation depends also slightly on the \# of $a$ types. Why?
+    \item Can we go over the $1/s$ approximation to correct for over-sampling when conditioning on fixation?
+    \item Simulations will always look like $r=0.5$ if we have many loci.
 \end{itemize}
     
 \end{frame}

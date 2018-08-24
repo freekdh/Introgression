@@ -3,9 +3,19 @@ function threelocusmodel ()
     p0 = 0.1;
     initvec = [p0,p0,p0,p0*(1-p0),p0*(1-p0),p0*(1-p0),p0-3*p0^2+2*p0^3];
     
-    out = project(50, initvec,0.2,-0.1,0.5,0.5,0.5);
+    % All dynamics:
+    %out = projectall(50, initvec,0.2,-0.1,0.5,0.5,0.5);
     
-    projectFA(out)
+    nsk=-(1:10)/100;
+    nsi=(1:10)/10;
+    outmat = zeros(1,10);
+    for sk=1:100
+        out = projectend(50, initvec,0.2,-sk/1000,0.5,0.5,0.5);
+        outmat(1,sk) = projectFAend(out);
+    end
+    
+    save("outmat.mat")
+
 end
 
 function [outlist] = itterate(inlist,si,sk,rij,rjk,rik)
@@ -47,7 +57,7 @@ function [outlist] = itterate(inlist,si,sk,rij,rjk,rik)
     
 end
 
-function [outlist] = project(t, initlist, si, sk, rij, rjk, rik)
+function [outlist] = projectall(t, initlist, si, sk, rij, rjk, rik)
     
     outlist = zeros(t,8);
     templist = initlist;
@@ -56,9 +66,16 @@ function [outlist] = project(t, initlist, si, sk, rij, rjk, rik)
         templist = itterate(templist,si,sk,rij,rjk,rik);
         outlist(i,:) = genotypes(templist);
     end
-    
-    
-    
+end
+
+function [outlist] = projectend(t, initlist, si, sk ,rij, rjk, rik)
+ 
+    outlist = zeros(1,8);
+    templist = initlist;
+    for i = 2:t
+        templist = itterate(templist,si,sk,rij,rjk,rik);
+    end
+    outlist(1,:) = genotypes(templist);
 end
 
 function [outlist] = genotypes(inlist)
@@ -89,7 +106,7 @@ function [FA,Faa] = calcFA(inlist)
     Faa = (inlist(1)+inlist(2)) / (inlist(1)+inlist(2)+inlist(3)+inlist(4));    
 end
 
-function [outlist] = projectFA(genotypesoutput)
+function [outlist] = projectFAall(genotypesoutput)
     m = size(genotypesoutput);
     outlist = zeros(m(1),2);
     for t = 1:m(1)
@@ -97,5 +114,10 @@ function [outlist] = projectFA(genotypesoutput)
         outlist(t,1) = a;
         outlist(t,2) = b;
     end
+end
+
+function [outlist] = projectFAend(genotypesoutput)
+    [a,b]=calcFA(genotypesoutput);
+    outlist = a;
 end
 

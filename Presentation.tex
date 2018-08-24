@@ -108,7 +108,7 @@
 \titlepage % Print the title page as the first slide
 \end{frame}
 
-\begin{frame}{Orr and Unckles 2014}
+\begin{frame}{Evolutionary rescue}
 
 Evolutionary rescue is characterized by a U-shaped curve of population size.
 
@@ -173,12 +173,12 @@ We look at \textcolor{red}{genetic rescue} conditioned on evolutionary rescue.
 
 Assume a wildtype population of $aB$ haplotypes and a few introduced $Ab$ rescue haplotypes. 
 
-\textcolor{red}{Genetic rescue} is defined:
+
 \begin{equation*}
-    \lim_{n\to\infty} \frac{AB_n}{AB_n+Ab_n} = \lim_{n\to\infty} \frac{p_nQ_n}{p_nQ_n+p_n(1-Q_n)} = \lim_{n\to\infty} Q_n
+    \text{\textcolor{red}{Genetic rescue}}= \lim_{n\to\infty} \frac{AB_n}{AB_n+Ab_n} = \lim_{n\to\infty} \frac{p_nQ_n}{p_nQ_n+p_n(1-Q_n)} = \lim_{n\to\infty} Q_n
 \end{equation*}
 
-When $Q_0 = 0$, $R_0 = 1$ and $r=0.5$, a recursion equation for $Q_n$ is derived: 
+For $Q_0 = 0$, $R_0 = 1$ and $r=0.5$, a recursion equation for $Q_n$ is derived: 
 
 \begin{equation*}
     \color{red} Q_n = \sum_{i=1}^n 2^{-i} (1-p_i)
@@ -225,8 +225,8 @@ Rescue is maximized for small $p_t$ in the first 5-10 generations.
 \end{equation*}
 
 \begin{itemize}
-  \item $p_0$   {the least \# of rescue types }
-  \item $s$     {the smallest selection gradient}
+  \item {a small \# of rescue types }
+  \item {a small selection gradient}
 \end{itemize}
 
 \end{frame}
@@ -345,6 +345,10 @@ Make a similar plot but with deterministic and stochastic plot.
 \includegraphics[width=1\textwidth]{Figures/HitchhikingplotJMS.png}
 \end{frame}
 
+\begin{frame}{Effect of fitness}
+Make a slide showing how fitness of the rescue type decreases rescue.
+\end{frame}
+
 \begin{frame}{Overview}
 \begin{columns}[t]
 \column{.5\textwidth}
@@ -421,28 +425,34 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
 \end{frame}
 
 \begin{frame}{Over-sampling efect}
-\includegraphics[width=0.8\textwidth]{Rfiles/figures/PlotSimGrowth.eps}
+    Why do the stochastic simulations worse than the deterministic simulations?
+    \vfill
+
+\includegraphics[width=0.7\textwidth]{Rfiles/figures/PlotSimGrowth.eps}
 
 \begin{equation*}
-    Why is this the case?
+    Equation from Otto and Barton.
 \end{equation*}
     
 \end{frame}
 
-\begin{frame}{}
-    Why do the stochastic simulations worse than the deterministic simulations? \\
-    One of the reasons is because of conditioning on fixation, we get a biased growth of type A initially. Since the genetic rescue depends on the relative frequency of type A...
+\begin{frame}{Upper and lower deterministic bounds}
+    
+    Show the effect of upper and lower bounds from deterministic against the stochastic simulations. 
+    
 \end{frame}
 
+
 \begin{frame}{Comparing fixation probabilities}
-    \begin{equation}
+    \begin{equation*}
     \begin{array}{l}
-    1-P_k[t]=\sum_{j=0}^{\infty} e^{-(1+s_b)}\frac{(1+s_b)^j}{j!}(1-P_1[t+1])^j\\
+    1-P_k[t]=\sum_{j=0}^{\infty} \text{PoissonPDF}[1+s_b]\times (1-P_1[t+1])^j\\
     1-P_k[t]=e^{-(1+s_b)P_1[t+1]}\\
     P_k[t]\approx 2 k s
     \end{array}
-    \end{equation}
+    \end{equation*}
     
+    \includegraphics[width=0.8\textwidth]{Rfiles/figures/FixationProb.eps}
     
 \end{frame}
 
@@ -450,8 +460,15 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
     
 \end{frame}
 
-\begin{frame}{Expanding in shiny}
+\begin{frame}{Deterministic 3 locus model}
     
+\end{frame}
+
+
+\begin{frame}{Expanding in shiny}
+    We made a shiny application
+    
+    \includegraphics[width=0.2\textwidth]{Figures/shiny-hex.png}
 \end{frame}
 
 \begin{frame}{Slide Graveyard}

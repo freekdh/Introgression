@@ -114,7 +114,7 @@ Evolutionary rescue is characterized by a U-shaped curve of population size.
 
 \includegraphics[width=0.8\columnwidth]{Rfiles/figures/WhatisRescue.eps}
 
-We look at \textcolor{red}{genetic rescue} conditioned on evolutionary rescue.
+We study \textcolor{red}{genetic rescue} conditioned on evolutionary rescue.
 
 \end{frame}
 
@@ -470,24 +470,33 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
     
 \end{frame}
 
-\begin{frame}{Deterministic 3 locus model}
+\begin{frame}{3 locus model\footnote{Kirkpatrick, Mark; Johnson, Toby; Barton, Nick}}
     \footnotesize
     \begin{center}
     \begin{tabular}{ c | c c c c | c c c c}
-     Genotype & ABC & AbC & aBC & abC & ABc & Abc & aBc & abc\\ 
+     Genotype & ABC & \textbf{AbC} & aBC & abC & ABc & Abc & \textbf{aBc} & abc\\ 
       \hline
      Fitness & 1+s_A-s_C & 1+s_A-s_C & 1-s_C & 1-s_C & 1+s_A & 1+s_A & 1 & 1
     \end{tabular}
     \end{center}
      \normalsize
 
-    Initially they are linked, only type $ABC$ and $abc$. $a$ and $C$ will disappear from the population. \\
-    
+    Where we assume that $s_A>s_C$
+
     \begin{equation*}
-        \text{\color{red} Genetic rescue} = \frac{ABc+ABC}{ABc+ABC+Abc+AbC}
+        \text{\color{red} Genetic rescue} = \frac{\begingroup\color{red}AB\endgroup C+\begingroup\color{red}AB\endgroup c}{ABC+ABc+Abc+AbC}
     \end{equation*}
     
-    \includegraphics[width = 0.5\textwidth]{/}
+    
+    
+    
+\end{frame}
+
+\begin{frame}{3rd locus effect}
+ 
+ Parameters: $s_A = 0.2$, $r=0.5$, $p0 = 0.1$.
+ \includegraphics[width = 1.0\textwidth]{Matlab/Figures/3locuseffect.eps}
+     
 \end{frame}
 
 \begin{frame}{Comparing 2 and 3 locus model}
@@ -508,6 +517,7 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
     \item in the BD-model, for $r\neq 0$, the probability of fixation depends also slightly on the \# of $a$ types. Why?
     \item Can we go over the $1/s$ approximation to correct for over-sampling when conditioning on fixation?
     \item Simulations will always look like $r=0.5$ if we have many loci.
+    \item Can i mathematically justify that the average of infinite loci case is equivalent to the 2 locus model. Also for the BD-model
 \end{itemize}
     
 \end{frame}

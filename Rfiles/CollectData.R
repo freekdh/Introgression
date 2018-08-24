@@ -71,7 +71,7 @@ index = 1
 for(i in 1:20){
     testpars$ninit0 <- 20
     testpars$ninit1 <- i
-    testpars$b <- 1.01
+    testpars$b <- 1.1
     testdata <- RcppIntrogressionSimulation(testpars,0)
     out[index,1]<-i
     out[index,2]<-testdata$fixation

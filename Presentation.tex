@@ -305,7 +305,7 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
 \begin{frame}{Probabilites of birth-death model}
 
 \footnotesize
-Each type has a birth- and death-rate $b_i$ and $d_i$ respectively. Selection is implemented in the death rates. All types have the same birthrate $b_{AB}=b_{Ab}=b_{aB}=b_{ab} =1$  
+Each type has a birth- and death-rate $b_i$ and $d_i$ respectively. $b_{AB}=b_{Ab}=b_{aB}=b_{ab} =1$. Selection is implemented in the death rates: $d_{AB} = 1+b_{AB}-W_A$, \dots,  $d_{ab} = 1+b_{ab}-W_a$
 
     \begin{equation*}
     \begin{aligned}
@@ -501,6 +501,9 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
  
  Parameters: $s_A = 0.2$, $r=0.5$, $p0 = 0.1$.
  \textbf{Add simulation data}
+ 
+ \vfill
+ 
  \includegraphics[width = 1.0\textwidth]{Matlab/Figures/3locuseffect.eps}
      
 \end{frame}

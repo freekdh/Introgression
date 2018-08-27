@@ -114,11 +114,14 @@ Evolutionary rescue is characterized by a U-shaped curve of population size.
 
 \includegraphics[width=0.8\columnwidth]{Rfiles/figures/WhatisRescue.eps}
 
-We study \textcolor{red}{genetic rescue} conditioned on evolutionary rescue.
+A race between two processes, one demographic, another evolutionary \footnote{Maynard Smith 1989}
 
 \end{frame}
 
 \begin{frame}{Genetic rescue}
+
+    We study \textcolor{red}{genetic rescue} conditioned on evolutionary rescue.
+
     What is \textcolor{red}{genetic rescue}? Some general explanation what we understand by genetic rescue. involve recombination. \\
     
     Expand on what question we like to answer:
@@ -237,8 +240,12 @@ Rescue is maximized for small $p_t$ in the first 5-10 generations.
   \item {a small selection gradient}
 \end{itemize}
 
-Although our model includes absolute \# of individuals, we find that only the relative frequencies matter.
+Although we model absolute \# of individuals, we find that only the relative frequencies matter.
 
+\end{frame}
+
+\begin{frame}{Why only for $r=0.5$}
+    
 \end{frame}
 
 \begin{frame}{Overview}
@@ -441,7 +448,7 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
 \includegraphics[width=0.7\textwidth]{Rfiles/figures/PlotSimGrowth.eps}
 
 \begin{equation*}
-    Equation from Otto and Barton.
+   \text{ Equation from Otto and Barton.} N_0 = 1/s ?
 \end{equation*}
     
 \end{frame}
@@ -456,21 +463,22 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
 \begin{frame}{Comparing fixation probabilities}
     \begin{equation*}
     \begin{array}{l}
-    1-P_k[t]=\sum_{j=0}^{\infty} \text{Poisson}[1+s_b]\times (1-P_1[t+1])^j\\
-    1-P_k[t]=e^{-(1+s_b)P_1[t+1]}\\
-    P_k[t]\approx 2 k s
+    1-P_k[t]=\sum_{j=0}^{\infty} \text{Poisson}[1+s_b]\times (1-P_1[t+1])^j
     \end{array}
     \end{equation*}
+    
+    Parameters: $s = 0.1, b_A = 1, d_A = 0.9$
     
     \includegraphics[width=0.8\textwidth]{Rfiles/figures/FixationProb.eps}
     
 \end{frame}
 
-\begin{frame}{Introducing a locally adapted locus}
+\begin{frame}{Overview}
     
+    A third locally adapted locus
 \end{frame}
 
-\begin{frame}{3 locus model\footnote{Kirkpatrick, Mark; Johnson, Toby; Barton, Nick}}
+\begin{frame}{3 locus model\footnote{Kirkpatrick; Johnson; Barton (2002)}}
     \footnotesize
     \begin{center}
     \begin{tabular}{ c | c c c c | c c c c}
@@ -481,20 +489,18 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
     \end{center}
      \normalsize
 
-    Where we assume that $s_A>s_C$
+    Where we assume that $s_A>s_C$ so that $A$ always rescues.
 
     \begin{equation*}
         \text{\color{red} Genetic rescue} = \frac{\begingroup\color{red}AB\endgroup C+\begingroup\color{red}AB\endgroup c}{ABC+ABc+Abc+AbC}
     \end{equation*}
-    
-    
-    
-    
+
 \end{frame}
 
-\begin{frame}{3rd locus effect}
+\begin{frame}{Numerical results from 3 locus model}
  
  Parameters: $s_A = 0.2$, $r=0.5$, $p0 = 0.1$.
+ \textbf{Add simulation data}
  \includegraphics[width = 1.0\textwidth]{Matlab/Figures/3locuseffect.eps}
      
 \end{frame}
@@ -518,6 +524,8 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
     \item Can we go over the $1/s$ approximation to correct for over-sampling when conditioning on fixation?
     \item Simulations will always look like $r=0.5$ if we have many loci.
     \item Can i mathematically justify that the average of infinite loci case is equivalent to the 2 locus model. Also for the BD-model
+    \item Solution to simulation problem: \textit{proportion} of loci is beneficial, proportion is deleterious, rest is neutral
+    \item Evolutionary rescue / especially genetic rescue is more relevant in large scale organisms like mammals. Wouldn't it be better to explore a quantitative genetics model?
 \end{itemize}
     
 \end{frame}

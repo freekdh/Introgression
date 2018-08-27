@@ -8,14 +8,14 @@ function threelocusmodel ()
     
     nsk=-(1:10)/100;
     nsi=(1:10)/10;
-    outmat = zeros(1,10);
+    outmat = zeros(10,2);
     for sk=1:100
         out = projectend(50, initvec,0.2,-sk/1000,0.5,0.5,0.5);
-        outmat(1,sk) = projectFAend(out);
+        outmat(sk,1) = -sk/1000;
+        outmat(sk,2) = projectFAend(out);
     end
     
     save("outmat.mat")
-
 end
 
 function [outlist] = itterate(inlist,si,sk,rij,rjk,rik)

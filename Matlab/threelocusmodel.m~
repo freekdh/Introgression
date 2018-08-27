@@ -6,12 +6,21 @@ function threelocusmodel ()
     % All dynamics:
     %out = projectall(50, initvec,0.2,-0.1,0.5,0.5,0.5);
     
-    sk=-(1:10/100;
-    si=(1:10)/10
-    outmat = zeros(10,10);
-    out = projectend(50, initvec,0.2,-0.1,0.5,0.5,0.5);
-    projectFA(out)
+    nsk=-(1:10)/100;
+    nsi=(1:10)/10;
+    outmat = zeros(10,2);
+    index = 1;
+    for si = 1:5
+    for sk=1:100
+        out = projectend(50, initvec,0.2,-sk/1000,0.5,0.5,0.5);
+        outmat(sk,1) = -sk/1000;
+        outmat(sk,2) = s
+        outmat(sk,3) = projectFAend(out);
+    end
+    end
     
+    save("outmat.mat")
+
 end
 
 function [outlist] = itterate(inlist,si,sk,rij,rjk,rik)
@@ -102,7 +111,7 @@ function [FA,Faa] = calcFA(inlist)
     Faa = (inlist(1)+inlist(2)) / (inlist(1)+inlist(2)+inlist(3)+inlist(4));    
 end
 
-function [outlist] = projectFA(genotypesoutput)
+function [outlist] = projectFAall(genotypesoutput)
     m = size(genotypesoutput);
     outlist = zeros(m(1),2);
     for t = 1:m(1)
@@ -110,5 +119,10 @@ function [outlist] = projectFA(genotypesoutput)
         outlist(t,1) = a;
         outlist(t,2) = b;
     end
+end
+
+function [outlist] = projectFAend(genotypesoutput)
+    [a,b]=calcFA(genotypesoutput);
+    outlist = a;
 end
 

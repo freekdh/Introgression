@@ -1,2 +1,26 @@
+Experimental papers:
 -   Graham Bell and Andres Gonzalez (2009)              Evolutionary rescue can prevent extinction following environmental change
-    
+    Experimentally show the U-shaped curve of evolutionary rescue and 
+    that population size of yeast increases the probability of rescue and
+    sufficiently large population could contain enough useful variation to recover by natual selection
+-   Lenski and Bennett (1992)
+
+
+Theory papers:
+
+-   Maynard Smith 1989                                  ??
+    It's a race: adaptation must occur before the population becomes extinct.
+
+-   Gomulkiewicz and Holt (1995)                        When does evolution by NS prevent extinction ?
+    Quantitative trait with explicit population density model gets rescued depending on
+    Initial population size vs. degree of maladaptaion (variance of phenotypic trait and fitness + distance of means)
+-   Lynch and Lande 1993 
+-   Lynch 1996 for review
+-   Orr and Unckless (2008)                             Population Extinction and the genetics of adaptation
+    Calculate the probabilities of rescue when the population is declining using branching processes
+    Do this for standing genetic variation and new mutations.
+    The point is: agree with Gomulkiewicz and Holt: unless populations are very large or suffer modest decrease, adaptation can be difficult
+
+
+
+

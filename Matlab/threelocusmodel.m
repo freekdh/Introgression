@@ -15,7 +15,7 @@ function threelocusmodel ()
         outmat(sk,2) = projectFAend(out);
     end
     
-    save("outmat.mat")
+    outmat
 end
 
 function [outlist] = itterate(inlist,si,sk,rij,rjk,rik)

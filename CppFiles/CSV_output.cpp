@@ -111,7 +111,7 @@ void CSV_WriteOutput(std::ofstream arrayofstream[4], const Parameters &pars, Sim
 std::string CreateOutputStreams(std::ofstream arrayofstream[4]){
     
     std::string CurrentWorkingDirectory = boost::filesystem::current_path().c_str();
-    CurrentWorkingDirectory.append("/CppFiles/Data");
+    CurrentWorkingDirectory.append("/data");
 
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);

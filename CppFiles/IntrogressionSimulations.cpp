@@ -111,7 +111,7 @@ void WriteToDataBlock(std::vector<Individual*> &population, const Parameters &pa
     SimData->introgressed1.push_back((double)temp1/(double)((pars.NLOCI-1)*ind1));
 }
 
-bool ItteratePopulation(std::vector<Individual*> &population, const Parameters &pars){ 
+bool IteratePopulation(std::vector<Individual*> &population, const Parameters &pars){ 
     std::vector<Individual*>::iterator it;
     
     // Birth
@@ -173,7 +173,7 @@ bool RunSimulation(const Parameters &SimPars, SimData &SimulationData){
     WriteToDataBlock(population, SimPars, SimData);
 
     for (int i = 0; i < SimPars.NGEN; ++i){
-        if(ItteratePopulation(population, SimPars)==false){
+        if(IteratePopulation(population, SimPars)==false){
             for (Individual* i: population) delete i;
             delete SimData;
             ++SimulationData.nofixcounter;

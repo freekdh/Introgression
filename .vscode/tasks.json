@@ -42,6 +42,16 @@
                 "isDefault": true
             },
             "problemMatcher": []
-        }
+        },
+        {
+            "label": "build_BDmodel",
+            "type": "shell",
+            "command": "gcc ./CppFiles/BDSimulations.cpp ./CppFiles/random.h ./CppFiles/random.cpp ./CppFiles/utils.h ./CppFiles/utils.cpp",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }        
     ]
 }

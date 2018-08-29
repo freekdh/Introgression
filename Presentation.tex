@@ -140,27 +140,8 @@ A race between two processes, one demographic, another evolutionary \footnote{Ma
 \begin{overpic}[width=5cm,height=4cm]{NumericalSolution.eps}
  \put (15,15) {\rotatebox{38}{\Large Deterministic model \normalsize}}
 \end{overpic} \\
- \begin{overpic}[width=5cm,height=4cm]{Matlab/Figures/Realization2.eps}
- \put (15,15) {\rotatebox{38}{\Large Individual based model \normalsize}}
-\end{overpic} 
-\column{.5\textwidth}
-\centering
-\begin{overpic}[width=5cm,height=4cm]{Matlab/Figures/Projection3DPlotr050.eps}
- \put (15,15) {\rotatebox{38}{\Large Stochastic model \normalsize}}
-\end{overpic}\\
-
-\end{columns}
-\end{frame}
-
-\begin{frame}{Overview}
-\begin{columns}[t]
-\column{.5\textwidth}
-\centering
-\begin{overpic}[width=5cm,height=4cm]{NumericalSolution.eps}
- \put (15,15) {\rotatebox{38}{\Large Deterministic model \normalsize}}
-\end{overpic} \\
 {\transparent{0.2} \begin{overpic}[width=5cm,height=4cm]{Matlab/Figures/Realization2.eps}
- \put (15,15) {\rotatebox{38}{\Large Individual based model \normalsize}}
+ \put (15,15) {\rotatebox{38}{\Large Simulations \normalsize}}
 \end{overpic} }
 \column{.5\textwidth}
 \centering
@@ -202,16 +183,29 @@ For $Q_0 = 0$, $R_0 = 1$ and $r=0.5$, a recursion equation for $Q_n$ is derived:
 
 \end{frame}
 
-\begin{frame}{The infinite loci model}
+\begin{frame}{The $n$ loci model}
+\footnotesize
+\begin{equation}
+    \begin{array}{l}
+	\mathbb{E}[F_w(t+1)] = \overbrace{\frac{1}{2} (\mathbb{E}[F_w(t)]+\mathbb{E}[F_b(t)]) p_b(t+1)}^\text{$w$ x $b$}  + \overbrace{\mathbb{E}[F_w(t)] (1-p_b(t+1))}^\text{$w$ x $w$}
+	 \\ \\
+	\mathbb{E}[F_b(t+1)]  = \overbrace{\frac{1}{2} (\mathbb{E}[F_w(t)]+\mathbb{E}[F_b(t)]) (1-p_b(t+1))}^\text{$b$ x $w$} 
+	+ \overbrace{\mathbb{E}[F_b(t)] p_b(t+1)}^\text{$b$ x $b$}
+	\end{array}
+\end{equation}
 
 \begin{equation}
     \begin{array}{l}
-	F_w[t+1] = \overbrace{\frac{1}{2} (F_w[t]+F_b[t]) p_b[t+1]}^\text{$w$ x $b$}  + \overbrace{F_w[t] (1-p_b[t+1])}^\text{$w$ x $w$}
-	 \\ \\
-	F_b[t+1]  = \overbrace{\frac{1}{2} (F_w[t]+F_b[t]) (1-p_b[t+1])}^\text{$b$ x $w$} 
-	+ \overbrace{F_b[t] p_b[t+1]}^\text{$b$ x $b$}
+	\mathbb{V} = \sum_{i=1}^{n} p_i(i-\mathbb{E})
 	\end{array}
 \end{equation}
+\normalsize
+\end{frame}
+
+\begin{frame}{The $n$ loci model}
+
+When $n \to \infty$ \dots, show that $\mathbb{V} \to 0$
+\vfill
 
 Assumptions: \\
 1) Deterministic population dynamicss \\
@@ -240,12 +234,8 @@ Rescue is maximized for small $p_t$ in the first 5-10 generations.
   \item {a small selection gradient}
 \end{itemize}
 
-Although we model absolute \# of individuals, we find that only the relative frequencies matter.
+%Although we model absolute \# of individuals, we find that only the relative frequencies matter.
 
-\end{frame}
-
-\begin{frame}{Why only for $r=0.5$}
-    
 \end{frame}
 
 \begin{frame}{Overview}
@@ -304,8 +294,7 @@ Probability of going from $\bold{X}$ to $\bold{Y}$
 
 \begin{frame}{Probabilites of birth-death model}
 
-\footnotesize
-Each type has a birth- and death-rate $b_i$ and $d_i$ respectively. $b_{AB}=b_{Ab}=b_{aB}=b_{ab} =1$. Selection is implemented in the death rates: $d_{AB} = 1+b_{AB}-W_A$, \dots,  $d_{ab} = 1+b_{ab}-W_a$
+Each type has a birth- and death-rate $b_i$ and $d_i$ respectively. 
 
     \begin{equation*}
     \begin{aligned}
@@ -328,6 +317,9 @@ Each type has a birth- and death-rate $b_i$ and $d_i$ respectively. $b_{AB}=b_{A
 
     
 \normalsize
+
+$b_{AB}=b_{Ab}=b_{aB}=b_{ab} =1$ \\
+$d_{AB} = 1+b_{AB}-W_A$, \dots,  $d_{ab} = 1+b_{ab}-W_a$
  
 \end{frame}
 
@@ -511,13 +503,28 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
     the interplay between $s_d$ and $r_d$ will be interesting to look at. Numerical can be compared to simulations. don't think markov model is possible here.
 \end{frame}
 
-\begin{frame}{Expanding in R with shiny}
-    multithreading! 
+\begin{frame}{Shiny app}
+\begin{center}
     \includegraphics[width=0.2\textwidth]{Figures/shiny-hex.png}
+\end{center}
 \end{frame}
 
-\begin{frame}{Question for Sally}
+
+\begin{frame}{Questions for Sally}
 \begin{itemize}
+\footnotesize
+    \item Barton and otto 2005 (Evolution of recombination due to random drift.
+    \normalsize
+\end{itemize}
+    
+\end{frame}
+
+
+\iffalse
+
+\begin{frame}{Questions for Sally August 28th.}
+\begin{itemize}
+\footnotesize
     \item Make IBS more similar to birth-death by samping individual 
     \item Not observing the over-sampling effect in birth-death model
     \item The deterministic solution should always be the maximum absorbtion, something is wrong between IBS and deterministic solution. 
@@ -528,8 +535,11 @@ Ab& aB & Det & Stoch & IBS & Det & Stoch & IBS \\
     \item Can i mathematically justify that the average of infinite loci case is equivalent to the 2 locus model. Also for the BD-model
     \item Solution to simulation problem: \textit{proportion} of loci is beneficial, proportion is deleterious, rest is neutral
     \item Evolutionary rescue / especially genetic rescue is more relevant in large scale organisms like mammals. Wouldn't it be better to explore a quantitative genetics model?
+    \item Estimate from the simulations the probability distribution \dots. Did not understand this point maybe
+    \normalsize
 \end{itemize}
     
 \end{frame}
 
+\fi
 \end{document}

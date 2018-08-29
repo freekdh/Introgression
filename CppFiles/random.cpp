@@ -30,9 +30,6 @@ namespace rnd {
 
     void set_seed(const unsigned &seed)
     {
-        std::ostringstream oss;
-        oss << "random seed set to " << seed;
-        echo(oss.str());
         rng.seed(seed);
     }
     
